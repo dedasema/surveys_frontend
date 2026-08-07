@@ -82,6 +82,7 @@ const Destinatarios = () => {
     formData.append("file", file)
 
     try {
+      const token = localStorage.getItem("token")
       const API_BASE_URL = process.env.REACT_APP_API_URL
       const response = await fetch(`${API_BASE_URL}/destinatarios/upload-excel`, {
         method: "POST",
