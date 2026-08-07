@@ -1,6 +1,6 @@
 // src/services/api-admin.js
 
-const API_BASE_URL = "https://surveysbackend-production.up.railway.app"
+const API_BASE_URL = process.env.REACT_APP_API_URL
 
 const authFetch = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token")
