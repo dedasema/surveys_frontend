@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { listPlanes, iniciarStripeCheckout, getMe } from "../../services/api";
 import { CheckCircle } from "lucide-react";
 import DashboardSuscriptorLayout from "./layout";
+import LoadingScreen from "../LoadingScreen";
 
 const Planes = () => {
   const [planes, setPlanes] = useState([]);
@@ -48,7 +49,7 @@ const Planes = () => {
     }
   };
 
-  if (loading) return <div className="p-4">Cargando planes…</div>;
+  if (loading) return <LoadingScreen message="Cargando planes de suscripción..." />;
   if (error)   return <div className="p-4 text-red-600">{error}</div>;
 
   return (

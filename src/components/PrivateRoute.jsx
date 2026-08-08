@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { checkRouteAccess } from "../services/auth";
+import LoadingScreen from "./LoadingScreen";
 
 const PrivateRoute = ({ children, requiredType }) => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const PrivateRoute = ({ children, requiredType }) => {
     });
   }, [navigate, requiredType]);
 
-  if (authorized === null) return <div>Cargando...</div>;
+  if (authorized === null) return <LoadingScreen message="Verificando acceso..." />;
   return children;
 };
 
