@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import DashboardSuscriptorLayout from "./layout"
+import { getMe } from "../../services/api"
 import { getCurrentUser } from "../../services/auth"
 import {
   Building,
@@ -23,6 +24,7 @@ export default function ConfiguracionPage() {
   const [activeTab, setActiveTab] = useState("perfil")
   const [loading, setLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
+  const [suscriptor, setSuscriptor] = useState(null)
   
   // Profile state
   const [profileData, setProfileData] = useState({
@@ -52,17 +54,25 @@ export default function ConfiguracionPage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const user = await getCurrentUser()
-        if (user) {
+        setLoading(true)
+        const meData = await getMe().catch(() => null)
+        if (meData) {
+          setSuscriptor(meData)
+        }
+        const user = await getCurrentUser().catch(() => null)
+        if (user || meData) {
+          const current = user || meData
           setProfileData((prev) => ({
             ...prev,
-            nombre: user.nombre || "",
-            email: user.email || "",
-            telefono: user.telefono || "",
+            nombre: current.nombre || "",
+            email: current.email || "",
+            telefono: current.telefono || "",
           }))
         }
       } catch (error) {
         console.error("Error al cargar los datos del usuario:", error)
+      } finally {
+        setLoading(false)
       }
     }
     fetchUserData()
@@ -73,7 +83,6 @@ export default function ConfiguracionPage() {
     setLoading(true)
     setSuccessMessage("")
 
-    // Simular guardado de perfil
     setTimeout(() => {
       setLoading(false)
       setSuccessMessage("Perfil de la empresa actualizado correctamente.")
@@ -136,7 +145,7 @@ export default function ConfiguracionPage() {
           </div>
           <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
             <Shield className="h-4 w-4" />
-            Cuenta Verificada
+            Estado: {suscriptor?.estado || "Activo"}
           </div>
         </div>
 
@@ -411,7 +420,10 @@ export default function ConfiguracionPage() {
                       <h4 className="text-2xl font-bold mt-2">Plan Professional</h4>
                       <p className="text-blue-100 text-sm mt-1">$49.00 USD / mes (Renovación automática)</p>
                     </div>
-                    <button className="bg-white text-blue-700 hover:bg-blue-50 px-5 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm self-start md:self-auto flex items-center gap-2">
+                    <button 
+                      onClick={() => (window.location.href = "/dashboard-suscriptor/planes")}
+                      className="bg-white text-blue-700 hover:bg-blue-50 px-5 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm self-start md:self-auto flex items-center gap-2"
+                    >
                       <Zap className="h-4 w-4 text-amber-500" />
                       Mejorar Plan
                     </button>

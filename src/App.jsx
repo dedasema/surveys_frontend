@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import OfflineIndicator from './components/OfflineIndicator';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -13,23 +14,45 @@ import TiposPregunta from './components/dashboard/tipos-pregunta';
 import MetodoPago from './components/dashboard/metodos-pago';
 import EstadosCampaña from './components/dashboard/estados-campana';
 import Planes from './components/dashboard/planes';
+import PerfilAdmin from './components/dashboard/perfil-admin';
+import PerfilSuscriptor from './components/dashboard-suscriptor/perfil-suscriptor';
 import PlantillasPage from './components/dashboard-suscriptor/plantillas';
 import CampanasPage from './components/dashboard-suscriptor/campanas';
 import DestinatariosPage from './components/dashboard-suscriptor/destinatarios';
-import EncuestaPage from './pages/EncuestaPage';
 import EntregasPage from './components/dashboard-suscriptor/entregas';
 import RespuestasPage from './components/dashboard-suscriptor/respuestas';
 import ConfiguracionPage from './components/dashboard-suscriptor/configuracion';
+import PlanesSuscriptorPage from './components/dashboard-suscriptor/planes';
+import EncuestaPage from './pages/EncuestaPage';
+import EmailSentPage from './pages/EmailSentPage';
+import VerifyRegistrationPage from './pages/VerifyRegistrationPage';
+import CancelPage from './components/dashboard-suscriptor/cancel';
+import SuccessPage from './components/dashboard-suscriptor/success';
 import PrivateRoute from './components/PrivateRoute';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import Operadores from './components/dashboard-suscriptor/Operadores';
+import DashboardPage from './components/dashboard-suscriptor/dashboard';
+import PlantillasOperadorPage from './components/dashboard-operador/plantillas';
+import DestinatariosOperadorPage from './components/dashboard-operador/destinatarios';
+import EntregasOperadorPage from './components/dashboard-operador/entregas';
+
 function App() {
   return (
     <Router>
+      <OfflineIndicator />
       <Routes>
         {/* Rutas públicas */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/encuestas/:token" element={<EncuestaPage />} />
+        <Route path="/email-sent" element={<EmailSentPage />} />
+        <Route path="/verify-registration" element={<VerifyRegistrationPage />} />
+
+        {/* Ruta pública para cancelación y éxito */}
+        <Route path="/dashboard-suscriptor/planes/cancel" element={<CancelPage />} />
+        <Route path="/dashboard-suscriptor/planes/success" element={<SuccessPage />} />
 
         {/* Rutas protegidas - admin */}
         <Route path="/dashboard/roles" element={
@@ -59,6 +82,9 @@ function App() {
         <Route path="/dashboard/planes" element={
           <PrivateRoute requiredType="admin"><Planes /></PrivateRoute>
         } />
+        <Route path="/dashboard/perfil-admin" element={
+          <PrivateRoute requiredType="admin"><PerfilAdmin /></PrivateRoute>
+        } />
 
         {/* Rutas protegidas - suscriptor */}
         <Route path="/dashboard-suscriptor/plantillas" element={
@@ -79,6 +105,33 @@ function App() {
         <Route path="/dashboard-suscriptor/configuracion" element={
           <PrivateRoute requiredType="suscriptor"><ConfiguracionPage /></PrivateRoute>
         } />
+        <Route path="/dashboard-suscriptor/planes" element={
+          <PrivateRoute requiredType="suscriptor"><PlanesSuscriptorPage /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/perfil-suscriptor" element={
+          <PrivateRoute requiredType="suscriptor"><PerfilSuscriptor /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/operadores" element={
+          <PrivateRoute requiredType="suscriptor"><Operadores /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/dashboard" element={
+          <PrivateRoute requiredType="suscriptor"><DashboardPage /></PrivateRoute>
+        } />
+
+        {/* Rutas protegidas - operador */}
+        <Route path="/dashboard-operador/plantillas" element={
+          <PrivateRoute requiredType="operator"><PlantillasOperadorPage /></PrivateRoute>
+        } />
+        <Route path="/dashboard-operador/destinatarios" element={
+          <PrivateRoute requiredType="operator"><DestinatariosOperadorPage /></PrivateRoute>
+        } />
+        <Route path="/dashboard-operador/entregas" element={
+          <PrivateRoute requiredType="operator"><EntregasOperadorPage /></PrivateRoute>
+        } />
+
+        {/* Rutas de autenticación */}
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
