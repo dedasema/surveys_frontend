@@ -19,6 +19,7 @@ import DestinatariosPage from './components/dashboard-suscriptor/destinatarios';
 import EncuestaPage from './pages/EncuestaPage';
 import EntregasPage from './components/dashboard-suscriptor/entregas';
 import RespuestasPage from './components/dashboard-suscriptor/respuestas';
+import ConfiguracionPage from './components/dashboard-suscriptor/configuracion';
 import PrivateRoute from './components/PrivateRoute';
 function App() {
   return (
@@ -74,6 +75,9 @@ function App() {
         } />
         <Route path="/dashboard-suscriptor/respuestas" element={
           <PrivateRoute requiredType="suscriptor"><RespuestasPage /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/configuracion" element={
+          <PrivateRoute requiredType="suscriptor"><ConfiguracionPage /></PrivateRoute>
         } />
 
         <Route path="*" element={<Navigate to="/" replace />} />
