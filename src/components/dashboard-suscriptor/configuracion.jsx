@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import DashboardSuscriptorLayout from "./layout"
-import { getMe } from "../../services/api"
+import { getMe, getMiSuscripcion } from "../../services/api"
 import { getCurrentUser } from "../../services/auth"
 import {
   Building,
@@ -25,7 +25,8 @@ export default function ConfiguracionPage() {
   const [loading, setLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
   const [suscriptor, setSuscriptor] = useState(null)
-  
+  const [suscripcionActual, setSuscripcionActual] = useState(null)
+
   // Profile state
   const [profileData, setProfileData] = useState({
     nombre: "",
@@ -58,6 +59,10 @@ export default function ConfiguracionPage() {
         const meData = await getMe().catch(() => null)
         if (meData) {
           setSuscriptor(meData)
+        }
+        const subData = await getMiSuscripcion().catch(() => null)
+        if (subData) {
+          setSuscripcionActual(subData)
         }
         const user = await getCurrentUser().catch(() => null)
         if (user || meData) {
@@ -417,8 +422,15 @@ export default function ConfiguracionPage() {
                       <span className="bg-white/20 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">
                         Plan Actual
                       </span>
-                      <h4 className="text-2xl font-bold mt-2">Plan Professional</h4>
-                      <p className="text-blue-100 text-sm mt-1">$49.00 USD / mes (Renovación automática)</p>
+                      <h4 className="text-2xl font-bold mt-2">
+                        {suscripcionActual?.plan?.nombre ? `Plan ${suscripcionActual.plan.nombre}` : "Plan Gratuito"}
+                      </h4>
+                      <p className="text-blue-100 text-sm mt-1">
+                        {suscripcionActual?.plan?.precio_mensual === 0 || !suscripcionActual?.plan
+                          ? "Gratis ($0.00 USD / mes)"
+                          : `$${suscripcionActual.plan.precio_mensual} USD / mes`}
+                        {" • Status: "}{suscripcionActual?.estado || "activo"}
+                      </p>
                     </div>
                     <button 
                       onClick={() => (window.location.href = "/dashboard-suscriptor/planes")}

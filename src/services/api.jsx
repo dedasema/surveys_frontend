@@ -219,6 +219,8 @@ export const deletePlan = (id) =>
   authFetch(`/subscription/planes/${id}`, { method: "DELETE" });
 
 // Suscripciones
+export const getMiSuscripcion = () => authFetch("/subscription/actual");
+
 export const iniciarStripeCheckout = (suscriptorId, planId) =>
   authFetch(`/subscription/stripe-checkout?suscriptor_id=${suscriptorId}&plan_id=${planId}`, {
     method: "POST",
