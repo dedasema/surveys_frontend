@@ -38,8 +38,48 @@ import {
 /* ───────── Utilidades ───────── */
 const getToken = () => localStorage.getItem("token")
 
+const RenderChatMessage = ({ text, sender }) => {
+  if (!text) return null
+  const currentOrigin = window.location.origin
+
+  // Normalizar URLs que apunten a localhost o dominios de frontend antiguos hacia el origin actual de Vercel
+  const normalizedText = text.replace(
+    /https?:\/\/(localhost|127\.0\.0\.1|[a-zA-Z0-9-]+\.vercel\.app)(:\d+)?/gi,
+    currentOrigin
+  )
+
+  const urlRegex = /(https?:\/\/[^\s]+|\/dashboard-suscriptor[^\s]*|\/dashboard[^\s]*)/g
+  const parts = normalizedText.split(urlRegex)
+
+  return (
+    <span>
+      {parts.map((part, index) => {
+        if (part.match(urlRegex)) {
+          let href = part
+          if (part.startsWith("/")) {
+            href = `${currentOrigin}${part}`
+          }
+          return (
+            <a
+              key={index}
+              href={href}
+              className={`underline font-semibold break-all ${
+                sender === "user" ? "text-blue-100 hover:text-white" : "text-blue-600 hover:text-blue-800"
+              }`}
+            >
+              {part}
+            </a>
+          )
+        }
+        return part
+      })}
+    </span>
+  )
+}
+
 const askBot = async (message, section) => {
-  const res = await fetch("https://surveysbackend-production.up.railway.app/chat", {
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveysbackend-production.up.railway.app"
+  const res = await fetch(`${API_BASE_URL}/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -50,6 +90,7 @@ const askBot = async (message, section) => {
       context: {
         route: window.location.pathname,
         section,
+        origin: window.location.origin,
       },
     }),
   })
@@ -294,7 +335,7 @@ const DashboardSuscriptorLayout = ({ children }) => {
                           : "bg-gray-100 text-gray-800 rounded-bl-none"
                       }`}
                     >
-                      {text}
+                      <RenderChatMessage text={text} sender={sender} />
                     </div>
                   </div>
                 ))}
