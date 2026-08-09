@@ -34,7 +34,8 @@ const Dashboard = () => {
       setLoading(true)
       const token = localStorage.getItem("token") // Asumiendo que el token se guarda en localStorage
 
-      const response = await fetch("https://surveysbackend-production.up.railway.app/analytics/dashboard", {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveys-backend-83d9.onrender.com"
+      const response = await fetch(`${API_BASE_URL}/analytics/dashboard`, {
         method: "GET",
         headers: {
           accept: "application/json",
@@ -61,8 +62,9 @@ const Dashboard = () => {
     try {
       setLoadingAnalysis(true)
       const token = localStorage.getItem("token")
+      const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveys-backend-83d9.onrender.com"
       const response = await fetch(
-        `https://surveysbackend-production.up.railway.app/dashboard/campaigns/${campaignId}/analysis`,
+        `${API_BASE_URL}/dashboard/campaigns/${campaignId}/analysis`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

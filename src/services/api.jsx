@@ -1,6 +1,6 @@
 import { addToOfflineQueue, isOnline, registerSync } from './offlineSync'
 
-const API_BASE_URL = process.env.REACT_APP_API_URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveys-backend-83d9.onrender.com"
 
 // Función para hacer requests autenticados
 const authFetch = async (endpoint, options = {}) => {

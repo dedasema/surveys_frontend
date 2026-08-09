@@ -1,5 +1,5 @@
 // src/services/api-admin.js
-const API_BASE_URL = process.env.REACT_APP_API_URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveys-backend-83d9.onrender.com"
 const authFetch = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token")
   if (!token) throw new Error("No hay token de autenticación")

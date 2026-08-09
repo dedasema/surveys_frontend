@@ -174,7 +174,8 @@ export const syncData = async () => {
             return false;
           }
           
-          const response = await fetch(`https://surveysbackend-production.up.railway.app${request.endpoint}`, {
+          const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveys-backend-83d9.onrender.com";
+          const response = await fetch(`${API_BASE_URL}${request.endpoint}`, {
             method: request.method,
             headers: {
               'Content-Type': 'application/json',

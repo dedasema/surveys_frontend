@@ -78,7 +78,7 @@ const RenderChatMessage = ({ text, sender }) => {
 }
 
 const askBot = async (message, section) => {
-  const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveysbackend-production.up.railway.app"
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveys-backend-83d9.onrender.com"
   const res = await fetch(`${API_BASE_URL}/chat`, {
     method: "POST",
     headers: {

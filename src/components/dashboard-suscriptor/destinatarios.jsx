@@ -83,7 +83,7 @@ const Destinatarios = () => {
 
     try {
       const token = localStorage.getItem("token")
-      const API_BASE_URL = process.env.REACT_APP_API_URL
+      const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveys-backend-83d9.onrender.com"
       const response = await fetch(`${API_BASE_URL}/destinatarios/upload-excel`, {
         method: "POST",
         headers: {
