@@ -201,14 +201,14 @@ const DashboardOperadorLayout = ({ children, activeSection = "plantillas" }) => 
 
             {/* User */}
             <div className="flex items-center gap-2 sm:gap-4">
-              <div className="flex items-center gap-2 cursor-pointer hover:opacity-80">
+              <a href="/dashboard-operador/perfil-operador" className="flex items-center gap-2 cursor-pointer hover:opacity-80">
                 <div className="w-8 h-8 grid place-items-center rounded-full bg-blue-600">
                   <User className="w-4 h-4 text-white" />
                 </div>
                 <span className="text-sm font-medium text-gray-700 hidden sm:block">
                   {user.name}
                 </span>
-              </div>
+              </a>
             </div>
           </div>
         </header>

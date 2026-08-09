@@ -284,6 +284,31 @@ export async function updateSuscriptor(data) {
   }
 }
 
+// Funciones para el perfil del operador
+export async function updateOperator(data) {
+  const token = localStorage.getItem("token")
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/update/operator`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.detail || "Error al actualizar el perfil del operador")
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error("Error al actualizar operador:", error)
+    throw error
+  }
+}
+
 
 // Entregas por Audio (Bulk)
 export const createBulkAudioEntregas = (campanaId, cantidad) =>

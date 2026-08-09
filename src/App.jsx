@@ -36,6 +36,7 @@ import DashboardPage from './components/dashboard-suscriptor/dashboard';
 import PlantillasOperadorPage from './components/dashboard-operador/plantillas';
 import DestinatariosOperadorPage from './components/dashboard-operador/destinatarios';
 import EntregasOperadorPage from './components/dashboard-operador/entregas';
+import PerfilOperador from './components/dashboard-operador/perfil-operador';
 
 function App() {
   return (
@@ -127,6 +128,9 @@ function App() {
         } />
         <Route path="/dashboard-operador/entregas" element={
           <PrivateRoute requiredType="operator"><EntregasOperadorPage /></PrivateRoute>
+        } />
+        <Route path="/dashboard-operador/perfil-operador" element={
+          <PrivateRoute requiredType="operator"><PerfilOperador /></PrivateRoute>
         } />
 
         {/* Rutas de autenticación */}
