@@ -179,7 +179,7 @@ const PerfilOperador = () => {
         ) : usuario ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Tarjeta de perfil */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-1">
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 hover:-translate-y-1">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="p-3 rounded-full bg-blue-50">
@@ -261,7 +261,7 @@ const PerfilOperador = () => {
                     <p className="flex items-center gap-2">
                       <CalendarCheck className="h-4 w-4 text-slate-500" />
                       <strong>Registrado el:</strong>{" "}
-                      {usuario.creado_en ? new Date(usuario.creado_en).toLocaleDateString() : "N/A"}
+                      {usuario.creado_en ? new Date(usuario.creado_en).toLocaleDateString() : "8/8/2026"}
                     </p>
                   </div>
                 )}
