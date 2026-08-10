@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import DashboardSuscriptorLayout from "./layout"
-import { getMe, getMiSuscripcion } from "../../services/api"
+import { getMe, getMiSuscripcion, getDashboardData } from "../../services/api"
 import { getCurrentUser } from "../../services/auth"
 import {
   Building,
@@ -26,6 +26,7 @@ export default function ConfiguracionPage() {
   const [successMessage, setSuccessMessage] = useState("")
   const [suscriptor, setSuscriptor] = useState(null)
   const [suscripcionActual, setSuscripcionActual] = useState(null)
+  const [dashboardMetrics, setDashboardMetrics] = useState(null)
 
   // Profile state
   const [profileData, setProfileData] = useState({
@@ -63,6 +64,10 @@ export default function ConfiguracionPage() {
         const subData = await getMiSuscripcion().catch(() => null)
         if (subData) {
           setSuscripcionActual(subData)
+        }
+        const dashData = await getDashboardData().catch(() => null)
+        if (dashData) {
+          setDashboardMetrics(dashData)
         }
         const user = await getCurrentUser().catch(() => null)
         if (user || meData) {
@@ -446,25 +451,46 @@ export default function ConfiguracionPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl">
                     <p className="text-xs text-gray-500 font-medium">Plantillas Creadas</p>
-                    <p className="text-xl font-bold text-gray-900 mt-1">12 / 50</p>
+                    <p className="text-xl font-bold text-gray-900 mt-1">
+                      {dashboardMetrics?.resumen_general?.total_plantillas ?? 0} / 50
+                    </p>
                     <div className="w-full bg-gray-200 h-2 rounded-full mt-2 overflow-hidden">
-                      <div className="bg-blue-600 h-full w-[24%]"></div>
+                      <div
+                        className="bg-blue-600 h-full transition-all duration-500"
+                        style={{
+                          width: `${Math.min(100, (((dashboardMetrics?.resumen_general?.total_plantillas || 0) / 50) * 100))}%`
+                        }}
+                      ></div>
                     </div>
                   </div>
 
                   <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl">
                     <p className="text-xs text-gray-500 font-medium">Envíos de Encuestas</p>
-                    <p className="text-xl font-bold text-gray-900 mt-1">3,420 / 10,000</p>
+                    <p className="text-xl font-bold text-gray-900 mt-1">
+                      {dashboardMetrics?.resumen_general?.total_entregas ?? 0} / 10,000
+                    </p>
                     <div className="w-full bg-gray-200 h-2 rounded-full mt-2 overflow-hidden">
-                      <div className="bg-indigo-600 h-full w-[34%]"></div>
+                      <div
+                        className="bg-indigo-600 h-full transition-all duration-500"
+                        style={{
+                          width: `${Math.min(100, (((dashboardMetrics?.resumen_general?.total_entregas || 0) / 10000) * 100))}%`
+                        }}
+                      ></div>
                     </div>
                   </div>
 
                   <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl">
                     <p className="text-xs text-gray-500 font-medium">Contactos Almacenados</p>
-                    <p className="text-xl font-bold text-gray-900 mt-1">1,150 / 5,000</p>
+                    <p className="text-xl font-bold text-gray-900 mt-1">
+                      {dashboardMetrics?.resumen_general?.total_destinatarios ?? 0} / 5,000
+                    </p>
                     <div className="w-full bg-gray-200 h-2 rounded-full mt-2 overflow-hidden">
-                      <div className="bg-emerald-600 h-full w-[23%]"></div>
+                      <div
+                        className="bg-emerald-600 h-full transition-all duration-500"
+                        style={{
+                          width: `${Math.min(100, (((dashboardMetrics?.resumen_general?.total_destinatarios || 0) / 5000) * 100))}%`
+                        }}
+                      ></div>
                     </div>
                   </div>
                 </div>
