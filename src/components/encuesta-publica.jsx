@@ -616,6 +616,8 @@ export default function EncuestaPublica({ token }) {
     } catch (err) {
       alert("Error al descargar el PDF: " + err.message)
     }
+  }
+
   const progress = showProgress ? getProgress() : 0
 
   return (
