@@ -241,23 +241,42 @@ export const downloadFormularioPdf = async (campanaId) => {
     throw new Error("No hay token de autenticación")
   }
 
-  const response = await fetch(`${API_BASE_URL}/entregas/campanas/${campanaId}/formularios.pdf`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      accept: "application/json",
-    },
-  })
+  const endpoints = [
+    `${API_BASE_URL}/entregas/campanas/${campanaId}/formularios.pdf`,
+    `${API_BASE_URL}/campanas/${campanaId}/formularios.pdf`,
+    `${API_BASE_URL}/campanas/${campanaId}/pdf`,
+  ]
 
-  if (!response.ok) {
-    if (response.status === 401) {
-      localStorage.removeItem("token")
-      window.location.href = "/login"
-      throw new Error("Sesión expirada")
+  let lastError = null
+
+  for (const url of endpoints) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          accept: "application/pdf, application/json",
+        },
+      })
+
+      if (response.ok) {
+        return await response.blob()
+      }
+
+      if (response.status === 401) {
+        localStorage.removeItem("token")
+        window.location.href = "/login"
+        throw new Error("Sesión expirada")
+      }
+
+      lastError = `Error ${response.status}: ${response.statusText}`
+    } catch (err) {
+      lastError = err.message
     }
-    throw new Error(`Error ${response.status}: ${response.statusText}`)
   }
 
-  return response.blob()
+  throw new Error(
+    lastError || "No se encontró el endpoint del PDF en el backend (404). Asegurate de que el endpoint esté activo en el servidor."
+  )
 }
 
 // Funciones para el perfil del suscriptor

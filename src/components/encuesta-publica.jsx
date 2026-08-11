@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react"
-import { Volume2, Mic, MicOff, Sparkles, Loader2 } from "lucide-react"
+import { Volume2, Mic, MicOff, Sparkles, Loader2, FileText, Download, PhoneCall } from "lucide-react"
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveys-backend-83d9.onrender.com"
 
@@ -616,7 +616,7 @@ export default function EncuestaPublica({ token }) {
     } catch (err) {
       alert("Error al descargar el PDF: " + err.message)
     }
-  }
+  const progress = showProgress ? getProgress() : 0
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">

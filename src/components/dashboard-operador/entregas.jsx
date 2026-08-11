@@ -2045,34 +2045,6 @@ export default function Entregas() {
           </div>
         )}
 
-                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 mt-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </div>
-                    <div>
-                      <h5 className="text-sm font-semibold text-emerald-800 mb-1">
-                        Información sobre Entregas por Audio
-                      </h5>
-                      <p className="text-xs text-emerald-700">
-                        Las entregas por audio se crean automáticamente con <strong>Canal 5 (Audio)</strong>. No
-                        requieren destinatarios específicos ya que son para llamadas automáticas.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Modal Gestión de Impresión (Simplificado) */}
         {showPrintModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 animate-fade-in">
