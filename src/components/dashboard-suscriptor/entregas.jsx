@@ -863,6 +863,25 @@ export default function Entregas() {
 
                             {/* Acciones */}
                             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                              {entrega.estado_id !== 3 && (
+                                <button
+                                  onClick={() => window.open(`/encuestas/${entrega.id}`, "_blank")}
+                                  className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2.5 py-1.5 rounded-lg transition-all text-xs font-medium flex items-center gap-1 border border-emerald-200 shadow-sm transform hover:scale-105"
+                                  title="Ingresar o digitar las respuestas de esta encuesta"
+                                >
+                                  <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                    />
+                                  </svg>
+                                  <span className="hidden sm:inline">Ingresar Respuestas</span>
+                                  <span className="sm:hidden font-bold">Digitar</span>
+                                </button>
+                              )}
+
                               <button
                                 onClick={() => openDetail(entrega, group.campana)}
                                 className="bg-blue-50 text-blue-600 p-2 rounded-lg hover:bg-blue-100 transition-all text-xs transform hover:scale-105"
