@@ -1924,7 +1924,7 @@ export default function Entregas() {
                   </div>
                   Crear Entregas por Audio
                 </h3>
-                <p className="text-sm text-gray-600 mt-2">Genera entregas por audio para llamadas automáticas o asistidas</p>
+                <p className="text-sm text-gray-600 mt-2">Genera entregas por audio para asistencia por voz interactiva con Inteligencia Artificial</p>
               </div>
 
               <div className="p-6">

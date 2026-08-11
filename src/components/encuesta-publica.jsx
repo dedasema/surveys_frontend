@@ -662,7 +662,7 @@ export default function EncuestaPublica({ token }) {
                     {isPapel
                       ? "📝 Digitación de Encuesta Física en Papel"
                       : isAudio
-                        ? "🎙️ Encuesta Telefónica / Asistida por Voz"
+                        ? "🎙️ Encuesta Asistida por Voz"
                         : "Formulario de encuesta interactivo"}
                   </p>
                 </div>
@@ -694,7 +694,7 @@ export default function EncuestaPublica({ token }) {
                     {isPapel
                       ? "Modo Transcripción Física"
                       : isAudio
-                        ? "Asistente Telefónico e IA Activo"
+                        ? "Asistente por Voz e IA Activo"
                         : "Asistencia por Voz e IA Habilitada"}
                   </span>
                 </div>
