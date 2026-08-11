@@ -222,12 +222,12 @@ const LandingPage = () => {
               </div>
               <h3 className="text-xl font-semibold mb-4">Encuestas Multicanal</h3>
               <p className="text-gray-600 mb-4">
-                Distribuye encuestas por correo, WhatsApp, web o apps móviles. Datos centralizados en tiempo real.
+                Distribuye encuestas por correo, voz, papel o web. Datos centralizados en tiempo real.
               </p>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-center">
                   <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  Integración WhatsApp Business
+                  Asistente Inteligente por Voz e IA
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
@@ -601,7 +601,7 @@ const LandingPage = () => {
                 </div>
                 <div className="flex items-center">
                   <MessageSquare className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>WhatsApp: +34 600 123 456</span>
+                  <span>Soporte 24/7 en línea</span>
                 </div>
               </div>
 

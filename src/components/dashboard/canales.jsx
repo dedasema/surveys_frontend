@@ -72,14 +72,16 @@ const CanalesPage = () => {
                 </thead>
 
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {canales.map((canal) => (
-                    <tr key={canal.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 flex items-center gap-3 font-medium text-gray-900">
-                        <Send className="h-5 w-5 text-blue-600" />
-                        {canal.nombre}
-                      </td>
-                    </tr>
-                  ))}
+                  {canales
+                    .filter((canal) => canal.id !== 2 && !canal.nombre?.toLowerCase().includes("whatsapp"))
+                    .map((canal) => (
+                      <tr key={canal.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 flex items-center gap-3 font-medium text-gray-900">
+                          <Send className="h-5 w-5 text-blue-600" />
+                          {canal.nombre}
+                        </td>
+                      </tr>
+                    ))}
                   {canales.length === 0 && (
                     <tr>
                       <td className="px-6 py-8 text-center text-sm text-gray-500">

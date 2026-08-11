@@ -34,10 +34,8 @@ export default function Campanas() {
   // Catálogos hardcodeados según la API
   const canales = [
     { id: 1, nombre: "Email", color: "blue", icon: "mail" },
-    { id: 2, nombre: "WhatsApp", color: "green", icon: "message" },
-    { id: 5, nombre: "Audio", color: "emerald", icon: "phone" },
+    { id: 5, nombre: "Audio / Voz", color: "emerald", icon: "phone" },
     { id: 4, nombre: "Papel", color: "purple", icon: "globe" },
-
   ]
 
   const estados = [

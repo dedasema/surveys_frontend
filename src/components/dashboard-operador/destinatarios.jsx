@@ -190,7 +190,7 @@ const Destinatarios = () => {
                 <div className="min-w-0 flex-1">
                   <p className="text-slate-600 text-xs sm:text-sm font-medium mb-1 truncate">Con Teléfono</p>
                   <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.conTelefono}</p>
-                  <p className="text-slate-500 text-xs mt-1 truncate">Para WhatsApp/SMS</p>
+                  <p className="text-slate-500 text-xs mt-1 truncate">Para encuestas por Voz</p>
                 </div>
                 <div className="flex-shrink-0 ml-3">
                   <svg className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -460,7 +460,7 @@ const Destinatarios = () => {
                       placeholder="59171234567 o +59171234567"
                     />
                     <p className="text-xs text-slate-500 mt-1">
-                      Para WhatsApp (Meta Cloud API) y Voz. Formato internacional con código de país (ej: 59171234567).
+                      Para encuestas por Voz. Formato internacional con código de país (ej: 59171234567).
                     </p>
                   </div>
 

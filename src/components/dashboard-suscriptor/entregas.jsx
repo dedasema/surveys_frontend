@@ -59,15 +59,13 @@ export default function Entregas() {
   // Catálogos (sin papel para entregas normales)
   const canales = [
     { id: 1, nombre: "Email", color: "blue", icon: "mail" },
-    { id: 2, nombre: "WhatsApp", color: "green", icon: "message-circle" },
-    { id: 5, nombre: "Audio", color: "purple", icon: "phone" },
+    { id: 5, nombre: "Audio / Voz", color: "purple", icon: "phone" },
   ]
 
   // Catálogo completo para mostrar entregas existentes
   const canalesCompleto = [
     { id: 1, nombre: "Email", color: "blue", icon: "mail" },
-    { id: 2, nombre: "WhatsApp", color: "green", icon: "message-circle" },
-    { id: 5, nombre: "Audio", color: "purple", icon: "phone" },
+    { id: 5, nombre: "Audio / Voz", color: "purple", icon: "phone" },
     { id: 4, nombre: "Papel", color: "orange", icon: "file-text" },
   ]
 
