@@ -1,6 +1,8 @@
 
 
 import { useState, useEffect, useCallback } from "react"
+import { toast } from "sonner"
+import { Download, FileText, Printer, X, CheckCircle, Clock } from "lucide-react"
 import { getCampanas, getCampanaFullDetail } from "../../services/api"
 import DashboardSuscriptorLayout from "./layout"
 
@@ -11,6 +13,7 @@ export default function Respuestas() {
   const [error, setError] = useState("")
   const [selectedCampana, setSelectedCampana] = useState("")
   const [showDetailModal, setShowDetailModal] = useState(false)
+  const [showReportModal, setShowReportModal] = useState(false)
   const [selectedRespuesta, setSelectedRespuesta] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
 
@@ -199,6 +202,74 @@ useEffect(() => {
       respuesta.campana_nombre.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
+  const exportarCSV = () => {
+    const listToExport = filteredRespuestas.length > 0 ? filteredRespuestas : respuestas
+
+    if (!listToExport || listToExport.length === 0) {
+      toast.warning("No hay respuestas disponibles para exportar")
+      return
+    }
+
+    try {
+      const headers = [
+        "ID Respuesta",
+        "Campaña",
+        "Destinatario",
+        "Email",
+        "Teléfono",
+        "Estado",
+        "Fecha Envío",
+        "Fecha Respuesta",
+        "Detalle de Respuestas",
+      ]
+      const rows = listToExport.map((r) => {
+        const detalleStr = r.respuestas_detalle
+          ? r.respuestas_detalle.map((d) => `${d.pregunta_texto}: ${d.respuesta_valor}`).join(" | ")
+          : ""
+        return [
+          r.id,
+          `"${(r.campana_nombre || "").replace(/"/g, '""')}"`,
+          `"${(r.destinatario_nombre || "").replace(/"/g, '""')}"`,
+          `"${(r.destinatario_email || "").replace(/"/g, '""')}"`,
+          `"${(r.destinatario_telefono || "").replace(/"/g, '""')}"`,
+          r.completada ? "Completada" : "Pendiente",
+          r.enviado_en ? new Date(r.enviado_en).toLocaleString() : "",
+          r.fecha_respuesta ? new Date(r.fecha_respuesta).toLocaleString() : "",
+          `"${detalleStr.replace(/"/g, '""')}"`,
+        ].join(",")
+      })
+
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\n")
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.setAttribute("href", url)
+      const fileName = `reporte_respuestas_${new Date().toISOString().slice(0, 10)}.csv`
+      link.setAttribute("download", fileName)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success(`Exportadas ${listToExport.length} respuestas a CSV exitosamente`)
+    } catch (err) {
+      toast.error("Error al exportar respuestas: " + err.message)
+    }
+  }
+
+  const generarReporte = () => {
+    if (!respuestas || respuestas.length === 0) {
+      toast.warning("No hay datos suficientes para generar el reporte")
+      return
+    }
+    setShowReportModal(true)
+    toast.success("Reporte ejecutivo generado correctamente")
+  }
+
+  const imprimirReporte = () => {
+    window.print()
+  }
+
   if (loading) {
     return (
       <DashboardSuscriptorLayout activeSection="respuestas">
@@ -224,11 +295,19 @@ useEffect(() => {
                 <p className="text-gray-600">Administre y analice las respuestas de sus encuestas</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                  Exportar Datos
+                <button
+                  onClick={exportarCSV}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Exportar Datos (CSV)</span>
                 </button>
-                <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
-                  Generar Reporte
+                <button
+                  onClick={generarReporte}
+                  className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <FileText className="w-4 h-4 text-gray-600" />
+                  <span>Generar Reporte</span>
                 </button>
               </div>
             </div>
@@ -691,6 +770,127 @@ useEffect(() => {
                   >
                     Cerrar
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modal Reporte Ejecutivo */}
+          {showReportModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 animate-fade-in">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden animate-scale-in">
+                {/* Header del Modal */}
+                <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
+                      <FileText className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Reporte Ejecutivo de Respuestas</h3>
+                      <p className="text-blue-100 text-xs mt-0.5">
+                        Resumen estadístico y desglose consolidado ({new Date().toLocaleDateString("es-ES")})
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowReportModal(false)}
+                    className="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                {/* Cuerpo del Reporte */}
+                <div className="p-6 overflow-y-auto max-h-[calc(95vh-140px)] space-y-6">
+                  {/* Tarjetas resumen */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl">
+                      <p className="text-xs text-blue-700 font-semibold uppercase">Total Respuestas</p>
+                      <p className="text-3xl font-bold text-blue-900 mt-1">{filteredRespuestas.length}</p>
+                      <p className="text-xs text-blue-600 mt-1">Registros analizados</p>
+                    </div>
+                    <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+                      <p className="text-xs text-emerald-700 font-semibold uppercase">Completadas</p>
+                      <p className="text-3xl font-bold text-emerald-900 mt-1">
+                        {filteredRespuestas.filter((r) => r.completada).length}
+                      </p>
+                      <p className="text-xs text-emerald-600 mt-1">
+                        Tasa de finalización:{" "}
+                        {filteredRespuestas.length > 0
+                          ? ((filteredRespuestas.filter((r) => r.completada).length / filteredRespuestas.length) * 100).toFixed(1)
+                          : 0}
+                        %
+                      </p>
+                    </div>
+                    <div className="bg-purple-50 border border-purple-200 p-4 rounded-xl">
+                      <p className="text-xs text-purple-700 font-semibold uppercase">Campañas con Respuestas</p>
+                      <p className="text-3xl font-bold text-purple-900 mt-1">
+                        {new Set(filteredRespuestas.map((r) => r.campana_id)).size}
+                      </p>
+                      <p className="text-xs text-purple-600 mt-1">Campañas activas en filtro</p>
+                    </div>
+                  </div>
+
+                  {/* Tabla por Campañas */}
+                  <div className="border border-gray-200 rounded-xl overflow-hidden">
+                    <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                      <h4 className="font-semibold text-gray-800 text-sm">Rendimiento por Campaña</h4>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Campaña</th>
+                            <th className="px-4 py-3 text-center font-semibold text-gray-700">Total Respuestas</th>
+                            <th className="px-4 py-3 text-center font-semibold text-gray-700">Completadas</th>
+                            <th className="px-4 py-3 text-right font-semibold text-gray-700">% Efectividad</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 bg-white">
+                          {campanas.map((c) => {
+                            const respCampana = filteredRespuestas.filter((r) => r.campana_id === c.id)
+                            if (respCampana.length === 0) return null
+                            const completadas = respCampana.filter((r) => r.completada).length
+                            const pct = ((completadas / respCampana.length) * 100).toFixed(1)
+                            return (
+                              <tr key={c.id} className="hover:bg-gray-50">
+                                <td className="px-4 py-3 font-medium text-gray-900">{c.nombre}</td>
+                                <td className="px-4 py-3 text-center font-semibold text-gray-700">{respCampana.length}</td>
+                                <td className="px-4 py-3 text-center text-emerald-600 font-semibold">{completadas}</td>
+                                <td className="px-4 py-3 text-right font-bold text-blue-600">{pct}%</td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer con Acciones */}
+                <div className="p-4 bg-gray-50 border-t border-gray-200 flex flex-wrap items-center justify-between gap-3">
+                  <button
+                    onClick={exportarCSV}
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors text-sm font-medium flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Descargar CSV Completo</span>
+                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={imprimirReporte}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2"
+                    >
+                      <Printer className="w-4 h-4" />
+                      <span>Imprimir / PDF</span>
+                    </button>
+                    <button
+                      onClick={() => setShowReportModal(false)}
+                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors text-sm font-medium"
+                    >
+                      Cerrar
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
