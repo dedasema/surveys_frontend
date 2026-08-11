@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import './App.css';
 import OfflineIndicator from './components/OfflineIndicator';
 import LandingPage from './pages/LandingPage';

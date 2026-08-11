@@ -1,6 +1,7 @@
 
 
-import { useState, useEffect } from "react"  
+import { useState, useEffect } from "react"
+import { toast } from "sonner"  
 import DashboardSuscriptorLayout from "./layout"
 import { getDestinatarios, createDestinatario, updateDestinatario, deleteDestinatario } from "../../services/api"
 
@@ -96,15 +97,16 @@ const Destinatarios = () => {
         const stats = await response.json()
         setUploadStats(stats)
         await fetchDestinatarios()
+        toast.success("Archivo Excel procesado correctamente")
       } else {
         const errJson = await response.json().catch(() => ({}))
         const errorMessage = errJson.detail || errJson.message || `Error del servidor (${response.status})`
         console.error("Error uploading file:", errorMessage)
-        alert(`Error al subir el archivo: ${errorMessage}`)
+        toast.error(`Error al subir el archivo: ${errorMessage}`)
       }
     } catch (error) {
       console.error("Error uploading file:", error)
-      alert(`Error al subir el archivo: ${error.message}`)
+      toast.error(`Error al subir el archivo: ${error.message}`)
     }
   }
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { Volume2, Mic, MicOff, Sparkles, Loader2, FileText, Download, PhoneCall } from "lucide-react"
+import { toast } from "sonner"
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveys-backend-83d9.onrender.com"
 
@@ -106,7 +107,7 @@ export default function EncuestaPublica({ token }) {
   /* ────────── Voice Assistance (Speech-to-Text & Text-to-Speech) ────────── */
   const dictarPregunta = (pregunta) => {
     if (!("speechSynthesis" in window)) {
-      alert("Tu navegador no soporta la lectura por voz.")
+      toast.warning("Tu navegador no soporta la lectura por voz.")
       return
     }
 
@@ -167,7 +168,7 @@ export default function EncuestaPublica({ token }) {
   const iniciarReconocimientoVoz = (pregunta) => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
-      alert("Tu navegador no soporta el reconocimiento de voz. Te recomendamos usar Google Chrome o Microsoft Edge.")
+      toast.warning("Tu navegador no soporta el reconocimiento de voz. Te recomendamos usar Google Chrome o Microsoft Edge.")
       return
     }
 
@@ -614,7 +615,7 @@ export default function EncuestaPublica({ token }) {
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
     } catch (err) {
-      alert("Error al descargar el PDF: " + err.message)
+      toast.error("Error al descargar el PDF: " + err.message)
     }
   }
 

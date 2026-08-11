@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { listPlanes, iniciarStripeCheckout, getMe, getMiSuscripcion } from "../../services/api";
 import { CheckCircle, Check } from "lucide-react";
 import DashboardSuscriptorLayout from "./layout";
@@ -41,16 +42,16 @@ const Planes = () => {
 
   const handleSuscripcion = async (planId) => {
     if (!suscriptorId) {
-      alert("No se ha identificado al suscriptor. Inicia sesión nuevamente.");
+      toast.warning("No se ha identificado al suscriptor. Inicia sesión nuevamente.");
       return;
     }
     try {
       const { checkout_url } = await iniciarStripeCheckout(suscriptorId, planId);
       if (checkout_url) window.location.href = checkout_url;
-      else alert("No se pudo iniciar el checkout.");
+      else toast.error("No se pudo iniciar el checkout.");
     } catch (err) {
       console.error(err);
-      alert("Error iniciando el checkout.");
+      toast.error("Error iniciando el checkout.");
     }
   };
 

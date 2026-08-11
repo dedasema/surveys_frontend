@@ -1,6 +1,7 @@
 
 
 import { useState, useEffect } from "react"
+import { toast } from "sonner"
 import {
   getCampanas,
   getEntregasByCampana,
@@ -294,16 +295,17 @@ export default function Entregas() {
             canal_id: 4,
           })
         }
-        alert(`Se crearon ${paperFormData.destinatario_ids.length} entregas por papel asignadas a destinatarios exitosamente`)
+        toast.success(`Se crearon ${paperFormData.destinatario_ids.length} entregas por papel asignadas a destinatarios exitosamente`)
       } else {
         const result = await createBulkEntregas(paperFormData.campana_id, paperFormData.cantidad)
-        alert(`Se crearon ${result.length} entregas por papel masivas exitosamente`)
+        toast.success(`Se crearon ${result.length} entregas por papel masivas exitosamente`)
       }
       setShowPaperModal(false)
       setPaperFormData({ campana_id: "", cantidad: 1, modo: "destinatarios", destinatario_ids: [] })
       setError("")
       loadData()
     } catch (err) {
+      toast.error("Error al crear entregas por papel: " + err.message)
       setError("Error al crear entregas por papel: " + err.message)
     }
   }
@@ -319,16 +321,17 @@ export default function Entregas() {
             canal_id: 5,
           })
         }
-        alert(`Se crearon ${audioFormData.destinatario_ids.length} entregas por audio asignadas a destinatarios exitosamente`)
+        toast.success(`Se crearon ${audioFormData.destinatario_ids.length} entregas por audio asignadas a destinatarios exitosamente`)
       } else {
         const result = await createBulkAudioEntregas(audioFormData.campana_id, audioFormData.cantidad)
-        alert(`Se crearon ${result.length} entregas por audio masivas exitosamente`)
+        toast.success(`Se crearon ${result.length} entregas por audio masivas exitosamente`)
       }
       setShowAudioModal(false)
       setAudioFormData({ campana_id: "", cantidad: 1, modo: "destinatarios", destinatario_ids: [] })
       setError("")
       loadData()
     } catch (err) {
+      toast.error("Error al crear entregas por audio: " + err.message)
       setError("Error al crear entregas por audio: " + err.message)
     }
   }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { registerOperator, listOperadores } from "../../services/api";
 import DashboardSuscriptorLayout from "./layout";
 import { useAuth } from "../../context/AuthContext";
@@ -47,9 +48,10 @@ const Operadores = () => {
             setFormData({ nombre_completo: "", email: "" });
             setShowModal(false);
             await fetchOperadores(user.id);
+            toast.success("Operador registrado exitosamente");
         } catch (err) {
             console.error("Error al registrar operador", err);
-            alert("No se pudo registrar el operador");
+            toast.error("No se pudo registrar el operador");
         }
     };
 

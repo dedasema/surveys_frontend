@@ -1,5 +1,5 @@
-
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   Plus,
   Edit,
@@ -48,8 +48,9 @@ const PlanesPage = () => {
       try {
         await eliminarPlan(id);
         setPlanes(planes.filter((p) => p.id !== id));
+        toast.success("Plan eliminado correctamente");
       } catch (error) {
-        alert("Error al eliminar el plan");
+        toast.error("Error al eliminar el plan");
       }
     }
   };
@@ -58,14 +59,14 @@ const PlanesPage = () => {
     e.preventDefault();
     try {
       if (editingPlan) {
-        const updated = await await actualizarPlan(
+        const updated = await actualizarPlan(
           editingPlan.id,
           formData.nombre,
           parseFloat(formData.precio_mensual),
           formData.descripcion
-        )
-          ;
+        );
         setPlanes(planes.map((p) => (p.id === updated.id ? updated : p)));
+        toast.success("Plan actualizado exitosamente");
       } else {
         const nuevo = await crearPlan(
           formData.nombre,
@@ -73,12 +74,13 @@ const PlanesPage = () => {
           formData.descripcion
         );
         setPlanes([...planes, nuevo]);
+        toast.success("Plan creado exitosamente");
       }
       setShowModal(false);
       setEditingPlan(null);
       setFormData({ nombre: "", descripcion: "", precio_mensual: "" });
     } catch (error) {
-      alert("Error al guardar el plan");
+      toast.error("Error al guardar el plan");
     }
   };
 
