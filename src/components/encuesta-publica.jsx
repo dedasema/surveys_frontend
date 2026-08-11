@@ -1,5 +1,5 @@
-
 import { useState, useEffect, useCallback } from "react"
+import { Volume2, Mic, MicOff, Sparkles, Loader2 } from "lucide-react"
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveys-backend-83d9.onrender.com"
 
@@ -13,6 +13,20 @@ export default function EncuestaPublica({ token }) {
   const [validationErrors, setValidationErrors] = useState({})
   const [showProgress, setShowProgress] = useState(false)
 
+  // Voice Assistance States
+  const [listeningPreguntaId, setListeningPreguntaId] = useState(null)
+  const [isInterpretingPreguntaId, setIsInterpretingPreguntaId] = useState(null)
+  const [isSpeakingPreguntaId, setIsSpeakingPreguntaId] = useState(null)
+  const [speechSupported, setSpeechSupported] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setSpeechSupported(
+        "SpeechRecognition" in window || "webkitSpeechRecognition" in window
+      )
+    }
+  }, [])
+
   useEffect(() => {
     if (encuestaData) {
       setShowProgress(encuestaData.plantilla.preguntas.length > 3)
@@ -25,7 +39,7 @@ export default function EncuestaPublica({ token }) {
       const response = await fetch(`${API_BASE_URL}/encuestas/verificar/${token}`)
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.detail || "Error al verificar la encuesta")
       }
 
@@ -58,7 +72,6 @@ export default function EncuestaPublica({ token }) {
       [preguntaId]: valor,
     }))
 
-    // Limpiar error de validación si existe
     if (validationErrors[preguntaId]) {
       setValidationErrors((prev) => ({
         ...prev,
@@ -82,7 +95,6 @@ export default function EncuestaPublica({ token }) {
       }
     })
 
-    // Limpiar error de validación si existe
     if (validationErrors[preguntaId]) {
       setValidationErrors((prev) => ({
         ...prev,
@@ -91,6 +103,113 @@ export default function EncuestaPublica({ token }) {
     }
   }
 
+  /* ────────── Voice Assistance (Speech-to-Text & Text-to-Speech) ────────── */
+  const dictarPregunta = (pregunta) => {
+    if (!("speechSynthesis" in window)) {
+      alert("Tu navegador no soporta la lectura por voz.")
+      return
+    }
+
+    window.speechSynthesis.cancel()
+
+    if (isSpeakingPreguntaId === pregunta.id) {
+      setIsSpeakingPreguntaId(null)
+      return
+    }
+
+    let textoALeer = pregunta.texto
+    if (pregunta.opciones && pregunta.opciones.length > 0) {
+      textoALeer += ". Las opciones son: " + pregunta.opciones.map((o) => o.texto).join(", ")
+    }
+
+    const utterance = new SpeechSynthesisUtterance(textoALeer)
+    utterance.lang = "es-ES"
+    utterance.onstart = () => setIsSpeakingPreguntaId(pregunta.id)
+    utterance.onend = () => setIsSpeakingPreguntaId(null)
+    utterance.onerror = () => setIsSpeakingPreguntaId(null)
+
+    window.speechSynthesis.speak(utterance)
+  }
+
+  const interpretarConGemini = async (pregunta, transcripcion) => {
+    try {
+      setIsInterpretingPreguntaId(pregunta.id)
+      const response = await fetch(`${API_BASE_URL}/encuestas/interpretar-voz`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pregunta_id: pregunta.id,
+          transcripcion: transcripcion,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json() // { opcion_id, texto_limpio }
+        if (data.opcion_id) {
+          handleRespuestaChange(pregunta.id, data.opcion_id)
+        } else if (data.texto_limpio) {
+          handleRespuestaChange(pregunta.id, data.texto_limpio)
+        } else {
+          handleRespuestaChange(pregunta.id, transcripcion)
+        }
+      } else {
+        // Fallback al texto transcripto directo si el backend aún no implementó el endpoint
+        handleRespuestaChange(pregunta.id, transcripcion)
+      }
+    } catch (err) {
+      console.error("Error al interpretar voz con Gemini:", err)
+      handleRespuestaChange(pregunta.id, transcripcion)
+    } finally {
+      setIsInterpretingPreguntaId(null)
+    }
+  }
+
+  const iniciarReconocimientoVoz = (pregunta) => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      alert("Tu navegador no soporta el reconocimiento de voz. Te recomendamos usar Google Chrome o Microsoft Edge.")
+      return
+    }
+
+    if (listeningPreguntaId === pregunta.id) {
+      setListeningPreguntaId(null)
+      return
+    }
+
+    window.speechSynthesis?.cancel()
+    setIsSpeakingPreguntaId(null)
+
+    const recognition = new SpeechRecognition()
+    recognition.lang = "es-ES"
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+
+    recognition.onstart = () => {
+      setListeningPreguntaId(pregunta.id)
+    }
+
+    recognition.onresult = async (event) => {
+      const transcripcion = event.results[0][0].transcript
+      setListeningPreguntaId(null)
+
+      if (transcripcion && transcripcion.trim()) {
+        await interpretarConGemini(pregunta, transcripcion.trim())
+      }
+    }
+
+    recognition.onerror = (event) => {
+      console.error("Error en reconocimiento de voz:", event.error)
+      setListeningPreguntaId(null)
+    }
+
+    recognition.onend = () => {
+      setListeningPreguntaId(null)
+    }
+
+    recognition.start()
+  }
+
+  /* ────────── Validaciones y Envío ────────── */
   const validateQuestion = (pregunta) => {
     const valor = respuestas[pregunta.id]
 
@@ -100,7 +219,6 @@ export default function EncuestaPublica({ token }) {
       }
     }
 
-    // Validaciones específicas por tipo
     if (pregunta.tipo_pregunta_id === 2 && valor !== "") {
       const num = Number.parseFloat(valor)
       if (isNaN(num)) {
@@ -166,7 +284,6 @@ export default function EncuestaPublica({ token }) {
           respuesta.opciones_ids = valor
           break
         default:
-          // Opcional: podrías hacer log o manejar el caso
           console.warn(`Tipo de pregunta desconocido: ${pregunta.tipo_pregunta_id}`)
           break
       }
@@ -212,7 +329,7 @@ export default function EncuestaPublica({ token }) {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.detail || "Error al enviar las respuestas")
       }
 
@@ -241,7 +358,7 @@ export default function EncuestaPublica({ token }) {
             <textarea
               value={valor || ""}
               onChange={(e) => handleRespuestaChange(pregunta.id, e.target.value)}
-              placeholder="Escribe tu respuesta aquí..."
+              placeholder="Escribe tu respuesta aquí o usa el micrófono para dictar..."
               className={`${inputClasses} min-h-[120px] resize-none`}
               rows={4}
             />
@@ -289,7 +406,7 @@ export default function EncuestaPublica({ token }) {
       case 3: // Selección única
         return (
           <div className="space-y-3">
-            {pregunta.opciones.map((opcion, opcionIndex) => (
+            {pregunta.opciones.map((opcion) => (
               <label
                 key={opcion.id}
                 className={`flex items-center space-x-4 cursor-pointer p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-sm ${
@@ -343,7 +460,7 @@ export default function EncuestaPublica({ token }) {
       case 4: // Selección múltiple
         return (
           <div className="space-y-3">
-            {pregunta.opciones.map((opcion, opcionIndex) => (
+            {pregunta.opciones.map((opcion) => (
               <label
                 key={opcion.id}
                 className={`flex items-center space-x-4 cursor-pointer p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-sm ${
@@ -488,19 +605,27 @@ export default function EncuestaPublica({ token }) {
         <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
           {/* Header profesional */}
           <div className="bg-slate-800 text-white p-8">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fillRule="evenodd"
-                    d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold">{encuestaData.plantilla.nombre}</h1>
+                  <p className="text-slate-300 text-sm">Formulario de encuesta interactivo</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold">{encuestaData.plantilla.nombre}</h1>
-                <p className="text-slate-300 text-sm">Formulario de encuesta</p>
+
+              {/* Badge de asistencia por voz e IA */}
+              <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs px-3 py-1.5 rounded-full self-start sm:self-auto">
+                <Sparkles className="w-4 h-4 text-blue-300 animate-pulse" />
+                <span>Asistencia por Voz e IA Habilitada</span>
               </div>
             </div>
 
@@ -573,23 +698,96 @@ export default function EncuestaPublica({ token }) {
             )}
 
             <div className="space-y-8">
-              {encuestaData.plantilla.preguntas.map((pregunta, index) => (
-                <div key={pregunta.id} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                  <div className="flex items-start gap-4 mb-6">
-                    <div className="flex-shrink-0 w-8 h-8 bg-slate-700 text-white rounded-lg flex items-center justify-center text-sm font-bold">
-                      {index + 1}
+              {encuestaData.plantilla.preguntas.map((pregunta, index) => {
+                const isListening = listeningPreguntaId === pregunta.id
+                const isInterpreting = isInterpretingPreguntaId === pregunta.id
+                const isSpeaking = isSpeakingPreguntaId === pregunta.id
+
+                return (
+                  <div key={pregunta.id} className="bg-gray-50 rounded-xl p-6 border border-gray-200 relative">
+                    <div className="flex items-start justify-between gap-4 mb-6">
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 bg-slate-700 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 leading-relaxed">
+                            {pregunta.texto}
+                            {pregunta.obligatorio && <span className="text-red-500 ml-2">*</span>}
+                          </h3>
+                          {pregunta.obligatorio && <p className="text-sm text-gray-500 mt-1">Campo requerido</p>}
+                        </div>
+                      </div>
+
+                      {/* Controles de Voz por Pregunta */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {/* Botón Escuchar Lectura (Text-to-Speech) */}
+                        <button
+                          type="button"
+                          onClick={() => dictarPregunta(pregunta)}
+                          title="Escuchar pregunta"
+                          className={`p-2.5 rounded-xl border transition-all duration-200 ${
+                            isSpeaking
+                              ? "bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-300"
+                              : "bg-white text-slate-600 border-gray-200 hover:bg-blue-50 hover:text-blue-600"
+                          }`}
+                        >
+                          <Volume2 className={`w-4 h-4 ${isSpeaking ? "animate-pulse" : ""}`} />
+                        </button>
+
+                        {/* Botón Hablar / Grabar Micrófono (Speech-to-Text) */}
+                        {speechSupported && (
+                          <button
+                            type="button"
+                            onClick={() => iniciarReconocimientoVoz(pregunta)}
+                            disabled={isInterpreting}
+                            title={isListening ? "Detener grabación" : "Responder con voz"}
+                            className={`p-2.5 rounded-xl border transition-all duration-200 relative ${
+                              isListening
+                                ? "bg-red-600 text-white border-red-600 shadow-lg ring-4 ring-red-100"
+                                : "bg-white text-slate-600 border-gray-200 hover:bg-red-50 hover:text-red-600"
+                            }`}
+                          >
+                            {isListening ? (
+                              <>
+                                <MicOff className="w-4 h-4" />
+                                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                </span>
+                              </>
+                            ) : (
+                              <Mic className="w-4 h-4" />
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 leading-relaxed">
-                        {pregunta.texto}
-                        {pregunta.obligatorio && <span className="text-red-500 ml-2">*</span>}
-                      </h3>
-                      {pregunta.obligatorio && <p className="text-sm text-gray-500 mt-1">Campo requerido</p>}
-                    </div>
+
+                    {/* Estado de Interpretación por Voz de Gemini */}
+                    {isInterpreting && (
+                      <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg flex items-center gap-3 text-indigo-700 text-sm font-medium animate-pulse">
+                        <Sparkles className="w-4 h-4 text-indigo-600 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Gemini IA interpretando tu respuesta por voz...</span>
+                      </div>
+                    )}
+
+                    {/* Estado de Escucha de voz */}
+                    {isListening && (
+                      <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700 text-sm font-medium">
+                        <span className="relative flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                        </span>
+                        <span>Escuchando tu voz... Hablá claramente al micrófono</span>
+                      </div>
+                    )}
+
+                    {renderPregunta(pregunta, index)}
                   </div>
-                  {renderPregunta(pregunta, index)}
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             {/* Submit Button */}
