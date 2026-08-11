@@ -42,6 +42,7 @@ import PerfilOperador from './components/dashboard-operador/perfil-operador';
 function App() {
   return (
     <Router>
+      <Toaster position="top-right" richColors />
       <OfflineIndicator />
       <Routes>
         {/* Rutas públicas */}
