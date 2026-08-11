@@ -457,9 +457,11 @@ const Destinatarios = () => {
                       value={formData.telefono}
                       onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
                       className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200"
-                      placeholder="+1234567890"
+                      placeholder="59171234567 o +59171234567"
                     />
-                    <p className="text-xs text-slate-500 mt-1">Para campañas por WhatsApp o SMS</p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Para WhatsApp (Meta Cloud API) y Voz. Formato internacional con código de país (ej: 59171234567).
+                    </p>
                   </div>
 
                   <div className="flex gap-3 pt-4">
