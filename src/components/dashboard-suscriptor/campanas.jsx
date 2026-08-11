@@ -114,7 +114,12 @@ export default function Campanas() {
 
       // Solo agregar programada_en si se especifica
       if (formData.programada_en) {
-        dataToSend.programada_en = formData.programada_en
+        const localDate = new Date(formData.programada_en)
+        if (!isNaN(localDate.getTime())) {
+          dataToSend.programada_en = localDate.toISOString()
+        } else {
+          dataToSend.programada_en = formData.programada_en
+        }
       }
 
       if (editingCampana) {
@@ -141,13 +146,21 @@ export default function Campanas() {
     setEditingCampana(null)
   }
 
+  const formatForDateTimeInput = (dateString) => {
+    if (!dateString) return ""
+    const d = new Date(dateString)
+    if (isNaN(d.getTime())) return ""
+    const pad = (n) => (n < 10 ? "0" + n : n)
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  }
+
   const handleEdit = (campana) => {
     setEditingCampana(campana)
     setFormData({
       nombre: campana.nombre,
       plantilla_id: campana.plantilla_id || "",
       canal_id: campana.canal_id.toString(),
-      programada_en: campana.programada_en ? campana.programada_en.slice(0, 16) : "",
+      programada_en: formatForDateTimeInput(campana.programada_en),
     })
     setShowModal(true)
   }
