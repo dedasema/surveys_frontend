@@ -97,11 +97,14 @@ const Destinatarios = () => {
         setUploadStats(stats)
         await fetchDestinatarios()
       } else {
-        throw new Error("Error uploading file")
+        const errJson = await response.json().catch(() => ({}))
+        const errorMessage = errJson.detail || errJson.message || `Error del servidor (${response.status})`
+        console.error("Error uploading file:", errorMessage)
+        alert(`Error al subir el archivo: ${errorMessage}`)
       }
     } catch (error) {
       console.error("Error uploading file:", error)
-      alert("Error al subir el archivo")
+      alert(`Error al subir el archivo: ${error.message}`)
     }
   }
 
