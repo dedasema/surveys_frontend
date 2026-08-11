@@ -39,6 +39,8 @@ export default function Entregas() {
   const [paperFormData, setPaperFormData] = useState({
     campana_id: "",
     cantidad: 1,
+    modo: "destinatarios",
+    destinatario_ids: [],
   })
   const [printFormData, setPrintFormData] = useState({
     campana_id: "",
@@ -49,6 +51,8 @@ export default function Entregas() {
   const [audioFormData, setAudioFormData] = useState({
     campana_id: "",
     cantidad: 1,
+    modo: "destinatarios",
+    destinatario_ids: [],
   })
 
   // Catálogos (sin papel para entregas normales)
@@ -283,12 +287,22 @@ export default function Entregas() {
   const handlePaperSubmit = async (e) => {
     e.preventDefault()
     try {
-      const result = await createBulkEntregas(paperFormData.campana_id, paperFormData.cantidad)
+      if (paperFormData.modo === "destinatarios" && paperFormData.destinatario_ids.length > 0) {
+        for (const destId of paperFormData.destinatario_ids) {
+          await createEntrega(paperFormData.campana_id, {
+            destinatario_id: destId,
+            canal_id: 4,
+          })
+        }
+        alert(`Se crearon ${paperFormData.destinatario_ids.length} entregas por papel asignadas a destinatarios exitosamente`)
+      } else {
+        const result = await createBulkEntregas(paperFormData.campana_id, paperFormData.cantidad)
+        alert(`Se crearon ${result.length} entregas por papel masivas exitosamente`)
+      }
       setShowPaperModal(false)
-      setPaperFormData({ campana_id: "", cantidad: 1 })
+      setPaperFormData({ campana_id: "", cantidad: 1, modo: "destinatarios", destinatario_ids: [] })
       setError("")
       loadData()
-      alert(`Se crearon ${result.length} entregas por papel (Canal 4) exitosamente`)
     } catch (err) {
       setError("Error al crear entregas por papel: " + err.message)
     }
@@ -298,12 +312,22 @@ export default function Entregas() {
   const handleAudioSubmit = async (e) => {
     e.preventDefault()
     try {
-      const result = await createBulkAudioEntregas(audioFormData.campana_id, audioFormData.cantidad)
+      if (audioFormData.modo === "destinatarios" && audioFormData.destinatario_ids.length > 0) {
+        for (const destId of audioFormData.destinatario_ids) {
+          await createEntrega(audioFormData.campana_id, {
+            destinatario_id: destId,
+            canal_id: 5,
+          })
+        }
+        alert(`Se crearon ${audioFormData.destinatario_ids.length} entregas por audio asignadas a destinatarios exitosamente`)
+      } else {
+        const result = await createBulkAudioEntregas(audioFormData.campana_id, audioFormData.cantidad)
+        alert(`Se crearon ${result.length} entregas por audio masivas exitosamente`)
+      }
       setShowAudioModal(false)
-      setAudioFormData({ campana_id: "", cantidad: 1 })
+      setAudioFormData({ campana_id: "", cantidad: 1, modo: "destinatarios", destinatario_ids: [] })
       setError("")
       loadData()
-      alert(`Se crearon ${result.length} entregas por audio (Canal 5) exitosamente`)
     } catch (err) {
       setError("Error al crear entregas por audio: " + err.message)
     }
@@ -1723,6 +1747,35 @@ export default function Entregas() {
               <div className="p-6">
                 <form onSubmit={handlePaperSubmit}>
                   <div className="space-y-6">
+                    {/* Modo de asignación */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Modo de Creación</label>
+                      <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
+                        <button
+                          type="button"
+                          onClick={() => setPaperFormData({ ...paperFormData, modo: "destinatarios" })}
+                          className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+                            paperFormData.modo === "destinatarios"
+                              ? "bg-white text-orange-700 shadow-sm"
+                              : "text-gray-600 hover:text-gray-900"
+                          }`}
+                        >
+                          Asignar Destinatarios Específicos
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPaperFormData({ ...paperFormData, modo: "bulk" })}
+                          className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+                            paperFormData.modo === "bulk"
+                              ? "bg-white text-orange-700 shadow-sm"
+                              : "text-gray-600 hover:text-gray-900"
+                          }`}
+                        >
+                          Lote Masivo Anónimo
+                        </button>
+                      </div>
+                    </div>
+
                     {/* Selección de Campaña */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-3">
@@ -1734,7 +1787,7 @@ export default function Entregas() {
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white"
                         required
                       >
-                        <option value="">Seleccionar campaña</option>
+                        <option value="">Seleccionar campaña de papel</option>
                         {availableCampanasForPaper.map((campana) => (
                           <option key={campana.id} value={campana.id}>
                             {campana.nombre}
@@ -1743,24 +1796,62 @@ export default function Entregas() {
                       </select>
                     </div>
 
-                    {/* Cantidad */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-3">
-                        Cantidad de Entregas <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="1000"
-                        value={paperFormData.cantidad}
-                        onChange={(e) =>
-                          setPaperFormData({ ...paperFormData, cantidad: Number.parseInt(e.target.value) || 1 })
-                        }
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                        required
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Máximo 1000 entregas por lote</p>
-                    </div>
+                    {/* Contenido según modo */}
+                    {paperFormData.modo === "destinatarios" ? (
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Seleccionar Destinatarios ({paperFormData.destinatario_ids.length} seleccionados) <span className="text-red-500">*</span>
+                        </label>
+                        <div className="border border-gray-200 rounded-xl max-h-48 overflow-y-auto divide-y divide-gray-100 bg-white">
+                          {destinatarios.map((d) => {
+                            const isSelected = paperFormData.destinatario_ids.includes(d.id)
+                            return (
+                              <div
+                                key={d.id}
+                                onClick={() => {
+                                  const newIds = isSelected
+                                    ? paperFormData.destinatario_ids.filter((id) => id !== d.id)
+                                    : [...paperFormData.destinatario_ids, d.id]
+                                  setPaperFormData({ ...paperFormData, destinatario_ids: newIds })
+                                }}
+                                className={`p-3 flex items-center justify-between cursor-pointer transition-colors ${
+                                  isSelected ? "bg-orange-50/70" : "hover:bg-gray-50"
+                                }`}
+                              >
+                                <div>
+                                  <p className="font-semibold text-sm text-gray-900">{d.nombre}</p>
+                                  <p className="text-xs text-gray-500">{d.email || d.telefono || "Sin datos de contacto"}</p>
+                                </div>
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => {}}
+                                  className="w-4 h-4 rounded text-orange-600 focus:ring-orange-500"
+                                />
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-3">
+                          Cantidad de Entregas Anónimas <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="1000"
+                          value={paperFormData.cantidad}
+                          onChange={(e) =>
+                            setPaperFormData({ ...paperFormData, cantidad: Number.parseInt(e.target.value) || 1 })
+                          }
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                          required
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Máximo 1000 entregas físicas por lote</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-200">
@@ -1768,7 +1859,7 @@ export default function Entregas() {
                       type="button"
                       onClick={() => {
                         setShowPaperModal(false)
-                        setPaperFormData({ campana_id: "", cantidad: 1 })
+                        setPaperFormData({ campana_id: "", cantidad: 1, modo: "destinatarios", destinatario_ids: [] })
                       }}
                       className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
                     >
@@ -1776,37 +1867,18 @@ export default function Entregas() {
                     </button>
                     <button
                       type="submit"
-                      disabled={!paperFormData.campana_id || paperFormData.cantidad < 1}
+                      disabled={
+                        !paperFormData.campana_id ||
+                        (paperFormData.modo === "destinatarios" && paperFormData.destinatario_ids.length === 0)
+                      }
                       className="px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all shadow-lg font-medium transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
-                      Crear {paperFormData.cantidad} Entrega{paperFormData.cantidad > 1 ? "s" : ""}
+                      {paperFormData.modo === "destinatarios"
+                        ? `Crear ${paperFormData.destinatario_ids.length} Entrega(s) Asignada(s)`
+                        : `Crear ${paperFormData.cantidad} Entrega(s) Masiva(s)`}
                     </button>
                   </div>
                 </form>
-
-                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 mt-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </div>
-                    <div>
-                      <h5 className="text-sm font-semibold text-orange-800 mb-1">
-                        Información sobre Entregas por Papel
-                      </h5>
-                      <p className="text-xs text-orange-700">
-                        Las entregas por papel se crean automáticamente con <strong>Canal 4 (Papel)</strong>. No
-                        requieren destinatarios específicos ya que son para distribución física.
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -1830,12 +1902,41 @@ export default function Entregas() {
                   </div>
                   Crear Entregas por Audio
                 </h3>
-                <p className="text-sm text-gray-600 mt-2">Genera entregas por audio para llamadas automáticas</p>
+                <p className="text-sm text-gray-600 mt-2">Genera entregas por audio para llamadas automáticas o asistidas</p>
               </div>
 
               <div className="p-6">
                 <form onSubmit={handleAudioSubmit}>
                   <div className="space-y-6">
+                    {/* Modo de asignación */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Modo de Creación</label>
+                      <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
+                        <button
+                          type="button"
+                          onClick={() => setAudioFormData({ ...audioFormData, modo: "destinatarios" })}
+                          className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+                            audioFormData.modo === "destinatarios"
+                              ? "bg-white text-emerald-700 shadow-sm"
+                              : "text-gray-600 hover:text-gray-900"
+                          }`}
+                        >
+                          Asignar Destinatarios Específicos
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAudioFormData({ ...audioFormData, modo: "bulk" })}
+                          className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+                            audioFormData.modo === "bulk"
+                              ? "bg-white text-emerald-700 shadow-sm"
+                              : "text-gray-600 hover:text-gray-900"
+                          }`}
+                        >
+                          Lote Masivo Anónimo
+                        </button>
+                      </div>
+                    </div>
+
                     {/* Selección de Campaña */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-3">
@@ -1856,24 +1957,62 @@ export default function Entregas() {
                       </select>
                     </div>
 
-                    {/* Cantidad */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-3">
-                        Cantidad de Entregas <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="1000"
-                        value={audioFormData.cantidad}
-                        onChange={(e) =>
-                          setAudioFormData({ ...audioFormData, cantidad: Number.parseInt(e.target.value) || 1 })
-                        }
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                        required
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Máximo 1000 entregas por lote</p>
-                    </div>
+                    {/* Contenido según modo */}
+                    {audioFormData.modo === "destinatarios" ? (
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Seleccionar Destinatarios ({audioFormData.destinatario_ids.length} seleccionados) <span className="text-red-500">*</span>
+                        </label>
+                        <div className="border border-gray-200 rounded-xl max-h-48 overflow-y-auto divide-y divide-gray-100 bg-white">
+                          {destinatarios.map((d) => {
+                            const isSelected = audioFormData.destinatario_ids.includes(d.id)
+                            return (
+                              <div
+                                key={d.id}
+                                onClick={() => {
+                                  const newIds = isSelected
+                                    ? audioFormData.destinatario_ids.filter((id) => id !== d.id)
+                                    : [...audioFormData.destinatario_ids, d.id]
+                                  setAudioFormData({ ...audioFormData, destinatario_ids: newIds })
+                                }}
+                                className={`p-3 flex items-center justify-between cursor-pointer transition-colors ${
+                                  isSelected ? "bg-emerald-50/70" : "hover:bg-gray-50"
+                                }`}
+                              >
+                                <div>
+                                  <p className="font-semibold text-sm text-gray-900">{d.nombre}</p>
+                                  <p className="text-xs text-gray-500">{d.telefono || d.email || "Sin datos de contacto"}</p>
+                                </div>
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => {}}
+                                  className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
+                                />
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-3">
+                          Cantidad de Entregas Anónimas <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="1000"
+                          value={audioFormData.cantidad}
+                          onChange={(e) =>
+                            setAudioFormData({ ...audioFormData, cantidad: Number.parseInt(e.target.value) || 1 })
+                          }
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                          required
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Máximo 1000 entregas de audio por lote</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-200">
@@ -1881,7 +2020,7 @@ export default function Entregas() {
                       type="button"
                       onClick={() => {
                         setShowAudioModal(false)
-                        setAudioFormData({ campana_id: "", cantidad: 1 })
+                        setAudioFormData({ campana_id: "", cantidad: 1, modo: "destinatarios", destinatario_ids: [] })
                       }}
                       className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
                     >
@@ -1889,13 +2028,22 @@ export default function Entregas() {
                     </button>
                     <button
                       type="submit"
-                      disabled={!audioFormData.campana_id || audioFormData.cantidad < 1}
+                      disabled={
+                        !audioFormData.campana_id ||
+                        (audioFormData.modo === "destinatarios" && audioFormData.destinatario_ids.length === 0)
+                      }
                       className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-lg font-medium transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
-                      Crear {audioFormData.cantidad} Entrega{audioFormData.cantidad > 1 ? "s" : ""} por Audio
+                      {audioFormData.modo === "destinatarios"
+                        ? `Crear ${audioFormData.destinatario_ids.length} Entrega(s) Asignada(s)`
+                        : `Crear ${audioFormData.cantidad} Entrega(s) Masiva(s)`}
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+        )}
 
                 <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 mt-4">
                   <div className="flex items-start gap-3">
