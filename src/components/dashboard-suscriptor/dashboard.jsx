@@ -111,10 +111,27 @@ const Dashboard = () => {
   const entregasCanalData = useMemo(() => {
     if (!dashboardData || !dashboardData.entregas.por_canal) return []
 
-    return Object.entries(dashboardData.entregas.por_canal).map(([key, value]) => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),
-      entregas: value,
-      percentage: ((value / dashboardData.entregas.total) * 100).toFixed(1),
+    const mapCanalName = (rawKey) => {
+      const k = String(rawKey).toLowerCase().trim()
+      if (k.includes("vapi") || k.includes("voz") || k.includes("audio") || k === "5") return "Audio / Voz"
+      if (k.includes("whatsapp") || k.includes("wa") || k === "2") return "WhatsApp"
+      if (k.includes("papel") || k.includes("qr") || k.includes("fisico") || k === "4") return "Papel"
+      if (k.includes("email") || k.includes("correo") || k.includes("web") || k === "1") return "Email"
+      return rawKey.charAt(0).toUpperCase() + rawKey.slice(1)
+    }
+
+    const aggregated = {}
+    Object.entries(dashboardData.entregas.por_canal).forEach(([key, value]) => {
+      const cleanName = mapCanalName(key)
+      aggregated[cleanName] = (aggregated[cleanName] || 0) + Number(value)
+    })
+
+    const total = Object.values(aggregated).reduce((a, b) => a + b, 0) || 1
+
+    return Object.entries(aggregated).map(([name, entregas]) => ({
+      name,
+      entregas,
+      percentage: ((entregas / total) * 100).toFixed(1),
     }))
   }, [dashboardData])
 
