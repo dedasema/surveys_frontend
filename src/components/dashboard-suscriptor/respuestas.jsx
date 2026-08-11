@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
-import { Download, FileText, Printer, X, CheckCircle, Clock } from "lucide-react"
+import { Download, FileText, Printer, X } from "lucide-react"
 import { getCampanas, getCampanaFullDetail } from "../../services/api"
 import DashboardSuscriptorLayout from "./layout"
 
