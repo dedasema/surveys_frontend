@@ -5,7 +5,7 @@ import { toast } from "sonner"
 import DashboardSuscriptorLayout from "./layout"
 import { getDestinatarios, createDestinatario, updateDestinatario, deleteDestinatario } from "../../services/api"
 
-const Destinatarios = () => {
+const Destinatarios = ({ LayoutComponent = DashboardSuscriptorLayout }) => {
   const [destinatarios, setDestinatarios] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -135,7 +135,7 @@ const Destinatarios = () => {
   }
 
   return (
-    <DashboardSuscriptorLayout activeSection="destinatarios">
+    <LayoutComponent activeSection="destinatarios">
       <div className="p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         {/* Header con estadísticas */}
         <div className="mb-8">
@@ -608,7 +608,7 @@ const Destinatarios = () => {
           )}
         </div>
       </div>
-    </DashboardSuscriptorLayout>
+    </LayoutComponent>
   )
 }
 

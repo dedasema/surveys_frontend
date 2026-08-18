@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
-import { Download, FileText, Printer, X } from "lucide-react"
-import { getCampanas, getCampanaFullDetail } from "../../services/api"
+import { Download, FileText, FileSpreadsheet, Printer, X, Loader2 } from "lucide-react"
+import { getCampanas, getCampanaFullDetail, exportarRespuestasExcel } from "../../services/api"
 import DashboardSuscriptorLayout from "./layout"
 
 export default function Respuestas() {
@@ -257,6 +257,39 @@ useEffect(() => {
     }
   }
 
+  const [exportandoExcel, setExportandoExcel] = useState(false)
+
+  const handleExportarExcel = async () => {
+    let targetCampanaId = selectedCampana
+    let targetCampanaNombre = "todas_las_campanas"
+
+    if (!targetCampanaId) {
+      if (campanas && campanas.length > 0) {
+        targetCampanaId = campanas[0].id
+        targetCampanaNombre = campanas[0].nombre
+        toast.info(`Exportando la campaña activa: "${campanas[0].nombre}". Puedes usar el filtro para elegir otra.`)
+      } else {
+        toast.warning("No hay campañas disponibles para exportar")
+        return
+      }
+    } else {
+      const c = campanas.find(item => item.id === targetCampanaId)
+      if (c) targetCampanaNombre = c.nombre
+    }
+
+    try {
+      setExportandoExcel(true)
+      toast.loading("Generando archivo Excel con métricas y respuestas...", { id: "excel-toast" })
+      await exportarRespuestasExcel(targetCampanaId, targetCampanaNombre)
+      toast.success("Archivo Excel generado y descargado con éxito", { id: "excel-toast" })
+    } catch (err) {
+      console.error("Error al exportar Excel:", err)
+      toast.error("Error al generar el Excel: " + err.message, { id: "excel-toast" })
+    } finally {
+      setExportandoExcel(false)
+    }
+  }
+
   const generarReporte = () => {
     if (!respuestas || respuestas.length === 0) {
       toast.warning("No hay datos suficientes para generar el reporte")
@@ -296,11 +329,23 @@ useEffect(() => {
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
+                  onClick={handleExportarExcel}
+                  disabled={exportandoExcel}
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-medium flex items-center justify-center gap-2 shadow-sm"
+                >
+                  {exportandoExcel ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <FileSpreadsheet className="w-4 h-4" />
+                  )}
+                  <span>Exportar Excel (.xlsx)</span>
+                </button>
+                <button
                   onClick={exportarCSV}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Exportar Datos (CSV)</span>
+                  <span>Exportar CSV</span>
                 </button>
                 <button
                   onClick={generarReporte}

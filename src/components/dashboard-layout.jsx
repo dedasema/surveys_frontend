@@ -13,7 +13,8 @@ import {
   CreditCard,
   DollarSign,
   Crown,
-  User
+  User,
+  ShieldAlert
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import {
@@ -129,6 +130,17 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
           url: "/dashboard/metodos-pago",
           icon: DollarSign,
           isActive: activeSection === "metodos-pago",
+        },
+      ],
+    },
+    {
+      title: "Seguridad y Auditoría",
+      items: [
+        {
+          title: "Auditoría Global",
+          url: "/dashboard/auditoria",
+          icon: ShieldAlert,
+          isActive: activeSection === "auditoria",
         },
       ],
     },

@@ -16,6 +16,7 @@ import MetodoPago from './components/dashboard/metodos-pago';
 import EstadosCampaña from './components/dashboard/estados-campana';
 import Planes from './components/dashboard/planes';
 import PerfilAdmin from './components/dashboard/perfil-admin';
+import Auditoria from './components/dashboard/auditoria';
 import PerfilSuscriptor from './components/dashboard-suscriptor/perfil-suscriptor';
 import PlantillasPage from './components/dashboard-suscriptor/plantillas';
 import CampanasPage from './components/dashboard-suscriptor/campanas';
@@ -87,6 +88,9 @@ function App() {
         } />
         <Route path="/dashboard/perfil-admin" element={
           <PrivateRoute requiredType="admin"><PerfilAdmin /></PrivateRoute>
+        } />
+        <Route path="/dashboard/auditoria" element={
+          <PrivateRoute requiredType="admin"><Auditoria /></PrivateRoute>
         } />
 
         {/* Rutas protegidas - suscriptor */}

@@ -334,3 +334,30 @@ export async function updateOperator(data) {
 // Entregas por Audio (Bulk)
 export const createBulkAudioEntregas = (campanaId, cantidad) =>
   authFetch(`/campanas/${campanaId}/entregas/bulk-audio?cantidad=${cantidad}`, { method: "POST", body: "" })
+
+// Exportación a Excel de Respuestas
+export async function exportarRespuestasExcel(campanaId, nombreCampana = "campana") {
+  const token = localStorage.getItem("token")
+  if (!token) throw new Error("No hay token de autenticación")
+
+  const response = await fetch(`${API_BASE_URL}/campanas/${campanaId}/exportar-excel`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error(`Error al exportar a Excel (${response.status})`)
+  }
+
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = `respuestas_${nombreCampana.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.xlsx`
+  document.body.appendChild(a)
+  a.click()
+  window.URL.revokeObjectURL(url)
+  document.body.removeChild(a)
+  return true
+}

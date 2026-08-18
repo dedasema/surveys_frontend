@@ -16,7 +16,7 @@ import {
 } from "../../services/api"
 import DashboardSuscriptorLayout from "./layout"
 
-export default function Plantillas() {
+export default function Plantillas({ LayoutComponent = DashboardSuscriptorLayout }) {
   const [plantillas, setPlantillas] = useState([])
   const [filteredPlantillas, setFilteredPlantillas] = useState([])
   const [loading, setLoading] = useState(true)
@@ -448,19 +448,19 @@ export default function Plantillas() {
 
   if (loading) {
     return (
-      <DashboardSuscriptorLayout activeSection="plantillas">
+      <LayoutComponent activeSection="plantillas">
         <div className="flex justify-center items-center h-64">
           <div className="flex flex-col items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
             <p className="text-gray-600 animate-pulse">Cargando plantillas...</p>
           </div>
         </div>
-      </DashboardSuscriptorLayout>
+      </LayoutComponent>
     )
   }
 
   return (
-    <DashboardSuscriptorLayout activeSection="plantillas">
+    <LayoutComponent activeSection="plantillas">
       <div className="p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         {/* Header con estadísticas */}
         <div className="mb-8">
@@ -1296,6 +1296,6 @@ export default function Plantillas() {
           min-height: 4rem;
         }
       `}</style>
-    </DashboardSuscriptorLayout>
+    </LayoutComponent>
   )
 }

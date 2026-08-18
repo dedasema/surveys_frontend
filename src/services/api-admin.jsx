@@ -29,13 +29,17 @@ const authFetch = async (endpoint, options = {}) => {
   return response.json()
 }
 
-// Roles
+// Roles & Permisos
 export const listarRoles = () => authFetch("/catalogos/roles")
+export const listarRolesDetalle = () => authFetch("/catalogos/roles-detalle")
+export const listarPermisos = () => authFetch("/catalogos/permisos")
 export const obtenerRol = (id) => authFetch(`/catalogos/roles/${id}`)
-export const crearRol = (nombre) =>
-  authFetch("/catalogos/roles", { method: "POST", body: JSON.stringify({ nombre }) })
-export const actualizarRol = (id, nombre) =>
-  authFetch(`/catalogos/roles/${id}`, { method: "PUT", body: JSON.stringify({ nombre }) })
+export const crearRol = (payload) =>
+  authFetch("/catalogos/roles", { method: "POST", body: JSON.stringify(typeof payload === "string" ? { nombre: payload } : payload) })
+export const actualizarRol = (id, payload) =>
+  authFetch(`/catalogos/roles/${id}`, { method: "PUT", body: JSON.stringify(typeof payload === "string" ? { nombre: payload } : payload) })
+export const asignarPermisosARol = (id, permisos_ids) =>
+  authFetch(`/catalogos/roles/${id}/permisos`, { method: "POST", body: JSON.stringify({ permisos_ids }) })
 export const eliminarRol = (id) => authFetch(`/catalogos/roles/${id}`, { method: "DELETE" })
 
 // Estados Capaña
@@ -163,3 +167,16 @@ export const actualizarEstadoDocumento = (id, nombre) =>
 
 export const eliminarEstadoDocumento = (id) =>
   authFetch(`/catalogos/estados-documento/${id}`, { method: "DELETE" })
+
+// Auditoría Global
+export const listarAuditoria = (params = {}) => {
+  const query = new URLSearchParams()
+  if (params.modulo) query.append("modulo", params.modulo)
+  if (params.accion) query.append("accion", params.accion)
+  if (params.limit) query.append("limit", params.limit)
+  if (params.offset) query.append("offset", params.offset)
+  const qs = query.toString()
+  return authFetch(`/auditoria${qs ? `?${qs}` : ""}`)
+}
+
+export const obtenerFiltrosAuditoria = () => authFetch("/auditoria/filtros")

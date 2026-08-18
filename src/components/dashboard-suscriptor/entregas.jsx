@@ -16,7 +16,7 @@ import {
 } from "../../services/api"
 import DashboardSuscriptorLayout from "./layout"
 
-export default function Entregas() {
+export default function Entregas({ LayoutComponent = DashboardSuscriptorLayout }) {
   const [campanas, setCampanas] = useState([])
   const [entregas, setEntregas] = useState({}) // Agrupadas por campaña
   const [destinatarios, setDestinatarios] = useState([])
@@ -444,14 +444,14 @@ export default function Entregas() {
 
   if (loading) {
     return (
-      <DashboardSuscriptorLayout activeSection="entregas">
+      <LayoutComponent activeSection="entregas">
         <div className="flex justify-center items-center h-64">
           <div className="flex flex-col items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
             <p className="text-gray-600 animate-pulse">Cargando entregas...</p>
           </div>
         </div>
-      </DashboardSuscriptorLayout>
+      </LayoutComponent>
     )
   }
 
@@ -469,7 +469,7 @@ export default function Entregas() {
   const availableCampanasForPaper = campanas.filter((campana) => campana.canal_id === 4)
 
   return (
-    <DashboardSuscriptorLayout activeSection="entregas">
+    <LayoutComponent activeSection="entregas">
       <div className="p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
         {/* Header */}
         <div className="mb-6 lg:mb-8">
@@ -2328,6 +2328,6 @@ export default function Entregas() {
           overflow: hidden;
         }
       `}</style>
-    </DashboardSuscriptorLayout>
+    </LayoutComponent>
   )
 }
