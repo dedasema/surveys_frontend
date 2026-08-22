@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="brand-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#4f46e5" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Squircle Card -->
+  <rect width="512" height="512" rx="120" fill="url(#brand-grad)" />
+
+  <!-- BarChart3 Symbol in Crisp White -->
+  <!-- Axis L-frame -->
+  <path d="M120 120 v256 a 16 16 0 0 0 16 16 h 256" stroke="#ffffff" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Bar 1 (Short) -->
+  <path d="M196 376 V320" stroke="#ffffff" stroke-width="36" stroke-linecap="round" />
+  <!-- Bar 2 (Tall) -->
+  <path d="M276 376 V160" stroke="#ffffff" stroke-width="36" stroke-linecap="round" />
+  <!-- Bar 3 (Medium) -->
+  <path d="M356 376 V240" stroke="#ffffff" stroke-width="36" stroke-linecap="round" />
+</svg>

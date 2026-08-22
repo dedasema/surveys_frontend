@@ -1,5 +1,5 @@
 {
-  "short_name": "MiApp",
+  "short_name": "SurveySaaS",
   "name": "SurveySaaS",
   "icons": [
     {
@@ -21,7 +21,7 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "theme_color": "#0d6efd",
+  "theme_color": "#2563eb",
   "background_color": "#ffffff",
   "orientation": "portrait"
 }
