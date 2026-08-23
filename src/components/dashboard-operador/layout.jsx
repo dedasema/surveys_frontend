@@ -23,6 +23,7 @@ import {
   SidebarTrigger,
 } from "../sidebar"
 import ChatbotWidget from "../ChatbotWidget"
+import SystemAnnouncementsBanner from "../SystemAnnouncementsBanner"
 
 const DashboardOperadorLayout = ({ children, activeSection = "plantillas" }) => {
   /* ──────────────────────── Auth & user ─────────────────────── */
@@ -147,6 +148,7 @@ const DashboardOperadorLayout = ({ children, activeSection = "plantillas" }) => 
             </div>
           </div>
         </header>
+        <SystemAnnouncementsBanner />
 
         {/* Content */}
         <main className="flex-1 overflow-auto bg-gray-50">{children}</main>

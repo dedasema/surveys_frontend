@@ -4,7 +4,6 @@ import { Toaster } from 'sonner';
 import './App.css';
 import OfflineIndicator from './components/OfflineIndicator';
 import ImpersonationBanner from './components/ImpersonationBanner';
-import GlobalAnnouncementBanner from './components/GlobalAnnouncementBanner';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -53,7 +52,6 @@ function App() {
       <Toaster position="top-right" richColors />
       <OfflineIndicator />
       <ImpersonationBanner />
-      <GlobalAnnouncementBanner />
       <Routes>
         {/* Rutas públicas */}
         <Route path="/" element={<LandingPage />} />

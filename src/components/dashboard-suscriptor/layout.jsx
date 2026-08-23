@@ -34,6 +34,7 @@ import {
   SidebarTrigger,
 } from "../sidebar"
 import ChatbotWidget from "../ChatbotWidget"
+import SystemAnnouncementsBanner from "../SystemAnnouncementsBanner"
 
 /* ───────── Utilidades ───────── */
 
@@ -184,6 +185,7 @@ const DashboardSuscriptorLayout = ({ children }) => {
               </Link>
           </div>
         </header>
+        <SystemAnnouncementsBanner />
 
         {/* Contenido */}
         <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
