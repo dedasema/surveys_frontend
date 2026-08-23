@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { checkRouteAccess } from "../services/auth";
+import { checkRouteAccess, isAuthenticated } from "../services/auth";
 import LoadingScreen from "./LoadingScreen";
 
 const PrivateRoute = ({ children, requiredType }) => {
@@ -8,15 +8,25 @@ const PrivateRoute = ({ children, requiredType }) => {
   const [authorized, setAuthorized] = useState(null);
 
   useEffect(() => {
-    checkRouteAccess(requiredType).then((res) => {
-      if (!res.hasAccess) {
-        navigate(res.redirectTo);
-      } else {
-        setAuthorized(true);
-      }
-    });
+    if (!isAuthenticated()) {
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    checkRouteAccess(requiredType)
+      .then((res) => {
+        if (!res.hasAccess) {
+          navigate(res.redirectTo, { replace: true });
+        } else {
+          setAuthorized(true);
+        }
+      })
+      .catch(() => {
+        navigate("/login", { replace: true });
+      });
   }, [navigate, requiredType]);
 
+  if (!isAuthenticated()) return null;
   if (authorized === null) return <LoadingScreen message="Verificando acceso..." />;
   return children;
 };

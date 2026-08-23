@@ -35,7 +35,12 @@ const authFetch = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token")
 
   if (!token) {
-    throw new Error("No hay token de autenticación")
+    localStorage.removeItem("token")
+    localStorage.removeItem("user")
+    if (window.location.pathname !== "/login" && window.location.pathname !== "/") {
+      window.location.replace("/login")
+    }
+    throw new Error("Sesión expirada")
   }
 
   const config = {
@@ -84,9 +89,12 @@ const authFetch = async (endpoint, options = {}) => {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config)
 
     if (!response.ok) {
-      if (response.status === 401) {
+      if (response.status === 401 || response.status === 403 && (await response.clone().text()).toLowerCase().includes("token")) {
         localStorage.removeItem("token")
-        window.location.href = "/login"
+        localStorage.removeItem("user")
+        if (window.location.pathname !== "/login" && window.location.pathname !== "/") {
+          window.location.replace("/login")
+        }
         throw new Error("Sesión expirada")
       }
       const rawText = await response.text()

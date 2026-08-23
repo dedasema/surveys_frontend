@@ -58,14 +58,34 @@ export async function login(credentials) {
 }
 
 
-export async function getCurrentUser() {
+export function isTokenExpired(token) {
+  if (!token) return true;
   try {
-    const token = localStorage.getItem("token");
+    const parts = token.split(".");
+    if (parts.length !== 3) return true;
+    const payloadBase64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = JSON.parse(atob(payloadBase64));
+    if (!decoded.exp) return false;
+    // Si la fecha actual supera exp (con 5 segundos de margen) está expirado
+    return Date.now() >= (decoded.exp * 1000) - 5000;
+  } catch {
+    return true;
+  }
+}
 
-    if (!token) {
-      throw new Error("No hay token de autenticación");
+export async function getCurrentUser() {
+  const token = localStorage.getItem("token");
+
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    if (window.location.pathname !== "/login" && window.location.pathname !== "/") {
+      window.location.replace("/login");
     }
+    throw new Error("Sesión expirada");
+  }
 
+  try {
     const response = await fetch(`${API_URL}/auth/me`, {
       method: "GET",
       headers: {
@@ -74,18 +94,21 @@ export async function getCurrentUser() {
     });
 
     if (!response.ok) {
-      if (response.status === 401) {
+      if (response.status === 401 || response.status === 403) {
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        if (window.location.pathname !== "/login" && window.location.pathname !== "/") {
+          window.location.replace("/login");
+        }
         throw new Error("Sesión expirada");
       }
       throw new Error("Error al obtener información del usuario");
     }
 
     const userData = await response.json();
-
     const tipo = userData.rol === "empresa" ? "suscriptor" : userData.rol;
 
-    //  Actualiza la caché local
+    // Actualiza la caché local
     localStorage.setItem("user", JSON.stringify(userData));
 
     return {
@@ -93,18 +116,21 @@ export async function getCurrentUser() {
       tipo,
     };
   } catch (error) {
-    console.warn("Error al obtener usuario actual:", error);
+    if (error.message === "Sesión expirada") {
+      throw error;
+    }
 
-    // Intenta cargar desde localStorage si está offline
-    const cachedUser = localStorage.getItem("user");
-    if (cachedUser) {
-      const userData = JSON.parse(cachedUser);
-      const tipo = userData.rol === "empresa" ? "suscriptor" : userData.rol;
-
-      return {
-        ...userData,
-        tipo,
-      };
+    // Solo en caso de corte real de red (offline) se consulta la caché
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      const cachedUser = localStorage.getItem("user");
+      if (cachedUser) {
+        const userData = JSON.parse(cachedUser);
+        const tipo = userData.rol === "empresa" ? "suscriptor" : userData.rol;
+        return {
+          ...userData,
+          tipo,
+        };
+      }
     }
 
     throw error;
@@ -112,52 +138,66 @@ export async function getCurrentUser() {
 }
 
 export function isAuthenticated() {
-  return localStorage.getItem("token") !== null
+  const token = localStorage.getItem("token");
+  if (!token || isTokenExpired(token)) {
+    if (token) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
+    return false;
+  }
+  return true;
 }
 
 export function logout() {
-  localStorage.removeItem("token")
-  window.location.href = "/login"
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.location.replace("/login");
 }
 
 export function getAuthToken() {
-  return localStorage.getItem("token")
+  const token = localStorage.getItem("token");
+  if (!token || isTokenExpired(token)) {
+    return null;
+  }
+  return token;
 }
 
 export function redirectBasedOnRole(user) {
   if (user.rol === "admin") {
-    return "/dashboard/roles"
+    return "/dashboard/roles";
   } else if (user.tipo === "suscriptor") {
-    return "/dashboard-suscriptor/plantillas"
+    return "/dashboard-suscriptor/plantillas";
   } else if (user.tipo === "operator") {
-    return "/dashboard-operador/plantillas"
+    return "/dashboard-operador/plantillas";
   }
-  return "/login"
+  return "/login";
 }
 
 export async function checkRouteAccess(requiredType) {
   try {
     if (!isAuthenticated()) {
-      return { hasAccess: false, redirectTo: "/login" }
-    }    const user = await getCurrentUser()
-    let hasAccess = false
-    
+      return { hasAccess: false, redirectTo: "/login" };
+    }
+    const user = await getCurrentUser();
+    let hasAccess = false;
+
     if (requiredType === "admin" && user.rol === "admin") {
-      hasAccess = true
+      hasAccess = true;
     } else if (requiredType === "suscriptor" && user.tipo === "suscriptor") {
-      hasAccess = true
+      hasAccess = true;
     } else if (requiredType === "operator" && user.tipo === "operator") {
-      hasAccess = true
+      hasAccess = true;
     }
 
     if (!hasAccess) {
-      const correctRoute = redirectBasedOnRole(user)
-      return { hasAccess: false, redirectTo: correctRoute }
+      const correctRoute = redirectBasedOnRole(user);
+      return { hasAccess: false, redirectTo: correctRoute };
     }
 
-    return { hasAccess: true, user }
+    return { hasAccess: true, user };
   } catch (error) {
-    return { hasAccess: false, redirectTo: "/login" }
+    return { hasAccess: false, redirectTo: "/login" };
   }
 }
 

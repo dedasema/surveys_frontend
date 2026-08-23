@@ -72,6 +72,17 @@ const DashboardSuscriptorLayout = ({ children }) => {
 
   /* Sidebar */
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    return localStorage.getItem("sidebar_collapsed") === "true"
+  })
+
+  const toggleSidebarCollapse = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev
+      localStorage.setItem("sidebar_collapsed", next ? "true" : "false")
+      return next
+    })
+  }
 
   /* Menú lateral */
   const menu = [
@@ -105,16 +116,23 @@ const DashboardSuscriptorLayout = ({ children }) => {
   ]
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* ───────── Sidebar ───────── */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)}>
-        <SidebarHeader className="h-16 flex items-center px-4">
-          <div className="flex items-center space-x-3">
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={toggleSidebarCollapse}
+      >
+        <SidebarHeader className="h-16 flex items-center">
+          <div className="flex items-center space-x-3 overflow-hidden">
             <img src="/favicon.svg" alt="SurveySaaS Logo" className="w-10 h-10 rounded-xl shadow-sm object-contain flex-shrink-0" />
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">SurveySaaS</h2>
-              <p className="text-sm text-gray-500">Panel de Control</p>
-            </div>
+            {!isCollapsed && (
+              <div className="min-w-0 transition-opacity duration-300">
+                <h2 className="text-base font-bold text-gray-900 truncate">SurveySaaS</h2>
+                <p className="text-xs text-gray-500 truncate">Panel de Control</p>
+              </div>
+            )}
           </div>
         </SidebarHeader>
 
@@ -129,9 +147,10 @@ const DashboardSuscriptorLayout = ({ children }) => {
                       href={url}
                       isActive={location.pathname.startsWith(url)}
                       onClick={() => setSidebarOpen(false)}
+                      title={title}
                     >
-                      <Icon className="h-5 w-5 mr-3" />
-                      <span>{title}</span>
+                      <Icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? "" : "mr-3"}`} />
+                      {!isCollapsed && <span className="truncate">{title}</span>}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -143,10 +162,13 @@ const DashboardSuscriptorLayout = ({ children }) => {
         <SidebarFooter>
           <button
             onClick={logout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition"
+            title="Cerrar sesión"
+            className={`w-full flex items-center justify-center rounded-xl bg-red-50 text-red-700 hover:bg-red-100 transition py-2.5 ${
+              isCollapsed ? "px-0" : "px-4 gap-2"
+            }`}
           >
-            <LogOut className="w-4 h-4" />
-            <span className="text-sm font-semibold">Cerrar sesión</span>
+            <LogOut className="w-4 h-4 flex-shrink-0" />
+            {!isCollapsed && <span className="text-sm font-semibold truncate">Cerrar sesión</span>}
           </button>
         </SidebarFooter>
       </Sidebar>
@@ -155,7 +177,16 @@ const DashboardSuscriptorLayout = ({ children }) => {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="flex h-16 items-center gap-2 border-b border-gray-200 bg-white px-4 sm:px-6">
-          <SidebarTrigger onClick={() => setSidebarOpen(true)} className="md:hidden" />
+          <SidebarTrigger
+            onClick={() => {
+              if (window.innerWidth < 768) {
+                setSidebarOpen(true)
+              } else {
+                toggleSidebarCollapse()
+              }
+            }}
+            isCollapsed={isCollapsed}
+          />
 
           <div className="flex flex-1 items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-4">
