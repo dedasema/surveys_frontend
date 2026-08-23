@@ -12,6 +12,9 @@ import {
   User,
   UserCog,
   Send,
+  Crown,
+  Receipt,
+  Sparkles,
 } from "lucide-react"
 import { useLocation } from "react-router-dom"
 import { getCurrentUser } from "../../services/auth"
@@ -82,6 +85,14 @@ const DashboardSuscriptorLayout = ({ children }) => {
         { title: "Campañas", url: "/dashboard-suscriptor/campanas", icon: Target },
         { title: "Respuestas", url: "/dashboard-suscriptor/respuestas", icon: MessageSquare },
         { title: "Entregas", url: "/dashboard-suscriptor/entregas", icon: Send },
+      ],
+    },
+    {
+      title: "Facturación y Membresía",
+      items: [
+        { title: "Mi Suscripción", url: "/dashboard-suscriptor/mi-suscripcion", icon: Crown },
+        { title: "Historial de Pagos", url: "/dashboard-suscriptor/historial-pagos", icon: Receipt },
+        { title: "Planes Disponibles", url: "/dashboard-suscriptor/planes", icon: Sparkles },
       ],
     },
     {

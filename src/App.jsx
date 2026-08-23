@@ -25,6 +25,8 @@ import EntregasPage from './components/dashboard-suscriptor/entregas';
 import RespuestasPage from './components/dashboard-suscriptor/respuestas';
 import ConfiguracionPage from './components/dashboard-suscriptor/configuracion';
 import PlanesSuscriptorPage from './components/dashboard-suscriptor/planes';
+import MiSuscripcion from './components/dashboard-suscriptor/mi-suscripcion';
+import HistorialPagos from './components/dashboard-suscriptor/historial-pagos';
 import EncuestaPage from './pages/EncuestaPage';
 import EmailSentPage from './pages/EmailSentPage';
 import VerifyRegistrationPage from './pages/VerifyRegistrationPage';
@@ -114,6 +116,12 @@ function App() {
         } />
         <Route path="/dashboard-suscriptor/planes" element={
           <PrivateRoute requiredType="suscriptor"><PlanesSuscriptorPage /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/mi-suscripcion" element={
+          <PrivateRoute requiredType="suscriptor"><MiSuscripcion /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/historial-pagos" element={
+          <PrivateRoute requiredType="suscriptor"><HistorialPagos /></PrivateRoute>
         } />
         <Route path="/dashboard-suscriptor/perfil-suscriptor" element={
           <PrivateRoute requiredType="suscriptor"><PerfilSuscriptor /></PrivateRoute>
