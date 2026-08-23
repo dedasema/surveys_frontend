@@ -17,7 +17,7 @@ import {
   Sparkles,
 } from "lucide-react"
 import { useLocation } from "react-router-dom"
-import { getCurrentUser } from "../../services/auth"
+import { getCurrentUser, getAvatarUrl } from "../../services/auth"
 import { useAuth } from "../../context/AuthContext"
 import { Link } from "react-router-dom"
 
@@ -51,6 +51,7 @@ const DashboardSuscriptorLayout = ({ children }) => {
     email: "usuario@empresa.com",
     avatar: "/placeholder.svg?height=32&width=32",
     plan: "Professional",
+    foto_url: null,
   })
 
   useEffect(() => {
@@ -61,6 +62,7 @@ const DashboardSuscriptorLayout = ({ children }) => {
           ...prev,
           name: u?.nombre ?? prev.name,
           email: u?.email ?? prev.email,
+          foto_url: u?.foto_url ?? null,
         }))
       } catch (err) {
         console.error("Error loading user:", err)
@@ -173,10 +175,17 @@ const DashboardSuscriptorLayout = ({ children }) => {
                 to="/dashboard-suscriptor/perfil-suscriptor"
                 className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
               >
-                {/* Avatar sustituido por icono */}
-                <div className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-600">
-                  <User className="w-4 h-4 text-white" />
-                </div>
+                {user.foto_url ? (
+                  <img
+                    src={getAvatarUrl(user.foto_url)}
+                    alt={user.name}
+                    className="w-9 h-9 rounded-full object-cover border border-slate-200 shadow-xs"
+                  />
+                ) : (
+                  <div className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-600 text-white font-bold text-xs shadow-xs">
+                    {user.name ? user.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
+                  </div>
+                )}
 
                 {/* Nombre (solo en pantallas ≥ sm) */}
                 <span className="text-sm font-medium text-gray-700 hidden sm:block">

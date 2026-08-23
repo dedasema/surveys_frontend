@@ -266,3 +266,61 @@ export async function resetPassword(token, newPassword) {
     throw error;
   }
 }
+
+export const getAvatarUrl = (foto_url) => {
+  if (!foto_url) return null;
+  if (
+    foto_url.startsWith("http://") ||
+    foto_url.startsWith("https://") ||
+    foto_url.startsWith("blob:") ||
+    foto_url.startsWith("data:")
+  ) {
+    return foto_url;
+  }
+  const cleanPath = foto_url.startsWith("/") ? foto_url : `/${foto_url}`;
+  return `${API_URL}${cleanPath}`;
+};
+
+export async function subirFotoPerfil(file) {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No hay token de autenticación");
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`${API_URL}/auth/perfil/foto`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || errorData.message || "Error al subir la foto de perfil");
+    }
+
+    const data = await response.json();
+
+    // Actualizar usuario en localStorage
+    const cached = localStorage.getItem("user");
+    if (cached) {
+      try {
+        const u = JSON.parse(cached);
+        u.foto_url = data.foto_url;
+        localStorage.setItem("user", JSON.stringify(u));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error al subir foto de perfil:", error);
+    throw error;
+  }
+}

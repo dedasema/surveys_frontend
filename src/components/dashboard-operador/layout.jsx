@@ -7,7 +7,7 @@ import {
   User,
   Send,
 } from "lucide-react"
-import { getCurrentUser } from "../../services/auth"
+import { getCurrentUser, getAvatarUrl } from "../../services/auth"
 import { useAuth } from "../../context/AuthContext"
 
 import {
@@ -32,6 +32,7 @@ const DashboardOperadorLayout = ({ children, activeSection = "plantillas" }) => 
     name: "Usuario Operador",
     email: "operador@empresa.com",
     avatar: "/placeholder.svg?height=32&width=32",
+    foto_url: null,
   })
 
   useEffect(() => {
@@ -42,6 +43,7 @@ const DashboardOperadorLayout = ({ children, activeSection = "plantillas" }) => 
           ...prev,
           name: userData?.nombre_completo ?? prev.name,
           email: userData?.email ?? prev.email,
+          foto_url: userData?.foto_url ?? null,
         }))
       } catch (err) {
         console.error("Error loading user:", err)
@@ -138,9 +140,17 @@ const DashboardOperadorLayout = ({ children, activeSection = "plantillas" }) => 
             {/* User */}
             <div className="flex items-center gap-2 sm:gap-4">
               <a href="/dashboard-operador/perfil-operador" className="flex items-center gap-2 cursor-pointer hover:opacity-80">
-                <div className="w-8 h-8 grid place-items-center rounded-full bg-blue-600">
-                  <User className="w-4 h-4 text-white" />
-                </div>
+                {user.foto_url ? (
+                  <img
+                    src={getAvatarUrl(user.foto_url)}
+                    alt={user.name}
+                    className="w-9 h-9 rounded-full object-cover border border-slate-200 shadow-xs"
+                  />
+                ) : (
+                  <div className="w-9 h-9 grid place-items-center rounded-full bg-blue-600 text-white font-bold text-xs shadow-xs">
+                    {user.name ? user.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
+                  </div>
+                )}
                 <span className="text-sm font-medium text-gray-700 hidden sm:block">
                   {user.name}
                 </span>

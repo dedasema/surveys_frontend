@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react"
 import DashboardOperadorLayout from "./layout"
+import AvatarUpload from "../AvatarUpload"
 import { getCurrentUser, requestPasswordReset } from "../../services/auth"
 import { updateOperator } from "../../services/api"
 
@@ -181,10 +182,14 @@ const PerfilOperador = () => {
             {/* Tarjeta de perfil */}
             <div className="lg:col-span-1">
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 hover:-translate-y-1">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="p-3 rounded-full bg-blue-50">
-                    <User className="h-8 w-8 text-blue-600" />
-                  </div>
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-6 text-center sm:text-left">
+                  <AvatarUpload
+                    fotoUrl={usuario.foto_url}
+                    email={usuario.email}
+                    nombre={usuario.nombre_completo || usuario.nombre}
+                    onAvatarUpdated={(url) => setUsuario((prev) => ({ ...prev, foto_url: url }))}
+                    size="md"
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="text-lg font-semibold text-slate-900 truncate">
                       {isEditing

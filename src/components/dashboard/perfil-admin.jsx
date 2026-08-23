@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react"
 import DashboardLayout from "../dashboard-layout"
+import AvatarUpload from "../AvatarUpload"
 import { getCurrentUser, requestPasswordReset } from "../../services/auth"
 import { updateAdmin } from "../../services/api-admin"
 
@@ -180,10 +181,14 @@ const PerfilAdmin = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="md:col-span-1">
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 hover:-translate-y-1">
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="p-3 rounded-full bg-blue-50">
-                    <User className="h-8 w-8 text-blue-600" />
-                  </div>
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-6 text-center sm:text-left">
+                  <AvatarUpload
+                    fotoUrl={usuario.foto_url}
+                    email={usuario.email}
+                    nombre={usuario.nombre}
+                    onAvatarUpdated={(url) => setUsuario((prev) => ({ ...prev, foto_url: url }))}
+                    size="md"
+                  />
                   <div className="flex-1 min-w-0">
                     {isEditing ? (
                       <div>
