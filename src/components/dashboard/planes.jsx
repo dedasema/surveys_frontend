@@ -6,7 +6,6 @@ import {
   Trash2,
   Crown,
   CheckCircle,
-  XCircle,
   Layers,
   Send,
   Users,

@@ -12,10 +12,6 @@ import {
   Layers,
   Send,
   Users,
-  Mic,
-  FileText,
-  Brain,
-  Download,
   Sparkles,
 } from "lucide-react";
 import DashboardSuscriptorLayout from "./layout";
