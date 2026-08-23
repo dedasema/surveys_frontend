@@ -6,7 +6,8 @@ import {
   Search,
   Crown,
   User,
-  ShieldAlert
+  ShieldAlert,
+  Building2,
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import {
@@ -51,6 +52,17 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
   }, [])
 
   const menuItems = [
+    {
+      title: "Gestión de Empresas",
+      items: [
+        {
+          title: "Suscriptores",
+          url: "/dashboard/suscriptores",
+          icon: Building2,
+          isActive: activeSection === "suscriptores",
+        },
+      ],
+    },
     {
       title: "Gestión y Accesos",
       items: [

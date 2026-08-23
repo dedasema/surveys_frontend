@@ -190,3 +190,43 @@ export const listarAuditoria = (params = {}) => {
 }
 
 export const obtenerFiltrosAuditoria = () => authFetch("/auditoria/filtros")
+
+// Gestión de Suscriptores (Empresas) para SuperAdmin
+export const listarSuscriptoresAdmin = (params = {}) => {
+  const query = new URLSearchParams()
+  if (params.search) query.append("search", params.search)
+  if (params.estado) query.append("estado", params.estado)
+  if (params.plan_id) query.append("plan_id", params.plan_id)
+  const qs = query.toString()
+  return authFetch(`/admin/suscriptores${qs ? `?${qs}` : ""}`).catch(async () => {
+    // Fallback a ruta alternativa si el backend aún no migró
+    return authFetch("/auth/suscriptores").catch(() => [])
+  })
+}
+
+export const obtenerSuscriptorDetalleAdmin = (id) =>
+  authFetch(`/admin/suscriptores/${id}`).catch(async () => {
+    return authFetch(`/suscriptores/${id}`)
+  })
+
+export const obtenerPagosSuscriptorAdmin = (id) =>
+  authFetch(`/admin/suscriptores/${id}/pagos`).catch(async () => {
+    return authFetch(`/subscription/historial-pagos/${id}`).catch(() => [])
+  })
+
+export const obtenerOperadoresSuscriptorAdmin = (id) =>
+  authFetch(`/admin/suscriptores/${id}/operadores`).catch(async () => {
+    return authFetch(`/auth/operadores/${id}`).catch(() => [])
+  })
+
+export const actualizarEstadoSuscriptorAdmin = (id, estado) =>
+  authFetch(`/admin/suscriptores/${id}/estado`, {
+    method: "PUT",
+    body: JSON.stringify({ estado }),
+  })
+
+export const asignarPlanSuscriptorAdmin = (id, plan_id) =>
+  authFetch(`/admin/suscriptores/${id}/asignar-plan`, {
+    method: "PUT",
+    body: JSON.stringify({ plan_id }),
+  })
