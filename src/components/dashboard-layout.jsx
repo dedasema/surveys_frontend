@@ -3,7 +3,6 @@ import { useState, useEffect } from "react"
 import {
   Users,
   LogOut,
-  Search,
   Crown,
   User,
   ShieldAlert,
@@ -204,21 +203,7 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
             isCollapsed={isCollapsed}
           />
 
-          <div className="flex flex-1 items-center justify-between">
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <div className="relative hidden sm:block">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Buscar plantillas, campañas..."
-                  className="pl-10 pr-4 py-2 w-48 lg:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <button className="sm:hidden p-2 text-gray-400 hover:text-gray-600">
-                <Search className="h-5 w-5" />
-              </button>
-            </div>
-
+          <div className="flex flex-1 items-center justify-end">
             <div className="flex items-center space-x-2 sm:space-x-4">
               <Link
                 to="/dashboard/perfil-admin"
@@ -237,8 +222,6 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
                 )}
                 <span className="text-sm font-medium text-gray-700 hidden sm:block">{user.name}</span>
               </Link>
-
-
             </div>
           </div>
         </header>

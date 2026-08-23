@@ -8,7 +8,6 @@ import {
   Users,
   Settings,
   LogOut,
-  Search,
   User,
   UserCog,
   Send,
@@ -188,41 +187,28 @@ const DashboardSuscriptorLayout = ({ children }) => {
             isCollapsed={isCollapsed}
           />
 
-          <div className="flex flex-1 items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="relative hidden sm:block">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input
-                  placeholder="Buscar plantillas, campañas..."
-                  className="pl-10 pr-4 py-2 w-48 lg:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+          <div className="flex flex-1 items-center justify-end">
+            <Link
+              to="/dashboard-suscriptor/perfil-suscriptor"
+              className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+            >
+              {user.foto_url ? (
+                <img
+                  src={getAvatarUrl(user.foto_url)}
+                  alt={user.name}
+                  className="w-9 h-9 rounded-full object-cover border border-slate-200 shadow-xs"
                 />
-              </div>
-              <button className="sm:hidden p-2 text-gray-400 hover:text-gray-600">
-                <Search className="h-5 w-5" />
-              </button>
-            </div>
+              ) : (
+                <div className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-600 text-white font-bold text-xs shadow-xs">
+                  {user.name ? user.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
+                </div>
+              )}
 
-                <Link
-                to="/dashboard-suscriptor/perfil-suscriptor"
-                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
-              >
-                {user.foto_url ? (
-                  <img
-                    src={getAvatarUrl(user.foto_url)}
-                    alt={user.name}
-                    className="w-9 h-9 rounded-full object-cover border border-slate-200 shadow-xs"
-                  />
-                ) : (
-                  <div className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-600 text-white font-bold text-xs shadow-xs">
-                    {user.name ? user.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
-                  </div>
-                )}
-
-                {/* Nombre (solo en pantallas ≥ sm) */}
-                <span className="text-sm font-medium text-gray-700 hidden sm:block">
-                  {user.name}
-                </span>
-              </Link>
+              {/* Nombre (solo en pantallas ≥ sm) */}
+              <span className="text-sm font-medium text-gray-700 hidden sm:block">
+                {user.name}
+              </span>
+            </Link>
           </div>
         </header>
         <SystemAnnouncementsBanner />

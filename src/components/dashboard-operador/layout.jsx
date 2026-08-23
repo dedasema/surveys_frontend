@@ -3,7 +3,6 @@ import {
   FileText,
   Users,
   LogOut,
-  Search,
   User,
   Send,
 } from "lucide-react"
@@ -154,23 +153,8 @@ const DashboardOperadorLayout = ({ children, activeSection = "plantillas" }) => 
             isCollapsed={isCollapsed}
           />
 
-          {/* Search */}
-          <div className="flex flex-1 items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="relative hidden sm:block">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input
-                  placeholder="Buscar plantillas, destinatarios..."
-                  className="pl-10 pr-4 py-2 w-48 lg:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
-              </div>
-              <button className="sm:hidden p-2 text-gray-400 hover:text-gray-600">
-                <Search className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* User */}
-            <div className="flex items-center gap-2 sm:gap-4">
+          {/* User */}
+          <div className="flex flex-1 items-center justify-end">
               <a href="/dashboard-operador/perfil-operador" className="flex items-center gap-2 cursor-pointer hover:opacity-80">
                 {user.foto_url ? (
                   <img
