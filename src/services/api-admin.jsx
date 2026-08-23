@@ -1,5 +1,33 @@
 // src/services/api-admin.js
 const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveys-backend-83d9.onrender.com"
+const parseApiErrorMessage = (status, rawText) => {
+  if (!rawText) {
+    if (status === 400) return "Solicitud incorrecta o datos inválidos";
+    if (status === 401) return "Sesión expirada o credenciales inválidas";
+    if (status === 403) return "No tienes permisos para realizar esta acción";
+    if (status === 404) return "El recurso solicitado no fue encontrado";
+    if (status === 409) return "Conflicto: el registro ya existe";
+    if (status === 422) return "Error de validación en los datos enviados";
+    if (status >= 500) return "Error en el servidor. Por favor intenta más tarde";
+    return `Error HTTP ${status}`;
+  }
+
+  try {
+    const json = JSON.parse(rawText);
+    if (typeof json.detail === "string") return json.detail;
+    if (Array.isArray(json.detail)) {
+      return json.detail.map((d) => d.msg || d.message || JSON.stringify(d)).join(", ");
+    }
+    if (json.message) return json.message;
+    if (json.error) return json.error;
+  } catch {}
+
+  if (status === 403) return "No tienes permisos para realizar esta acción";
+  if (status === 404) return "El recurso solicitado no fue encontrado";
+  if (status >= 500) return "Error interno del servidor. Por favor intenta más tarde";
+  return rawText;
+};
+
 const authFetch = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token")
   if (!token) throw new Error("No hay token de autenticación")
@@ -21,8 +49,9 @@ const authFetch = async (endpoint, options = {}) => {
       window.location.href = "/login"
       throw new Error("Sesión expirada")
     }
-    const errorData = await response.text()
-    throw new Error(`Error ${response.status}: ${errorData}`)
+    const rawText = await response.text()
+    const friendlyMsg = parseApiErrorMessage(response.status, rawText)
+    throw new Error(friendlyMsg)
   }
 
   if (response.status === 204) return true

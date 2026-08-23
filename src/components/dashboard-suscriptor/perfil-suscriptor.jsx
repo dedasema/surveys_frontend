@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import DashboardSuscriptorLayout from "./layout";
 import AvatarUpload from "../AvatarUpload";
+import { toast } from "sonner";
 import { getCurrentUser, requestPasswordReset } from "../../services/auth";
 import { updateSuscriptor } from "../../services/api";
 
@@ -31,6 +32,7 @@ const PerfilSuscriptor = () => {
       });
     } catch (err) {
       console.error(err);
+      toast.error("Error al cargar el perfil");
       setNotification({ type: "error", message: "Error al cargar el perfil." });
     } finally {
       setLoading(false);
@@ -68,11 +70,13 @@ const PerfilSuscriptor = () => {
     setIsSaving(true);
     try {
       await updateSuscriptor(formData);
+      toast.success("Perfil actualizado con éxito");
       setNotification({ type: "success", message: "Perfil actualizado con éxito." });
       await cargarUsuario();
       setIsEditing(false);
     } catch (err) {
       console.error(err);
+      toast.error(err.message || "Error al actualizar");
       setNotification({ type: "error", message: err.message || "Error al actualizar." });
     } finally {
       setIsSaving(false);
@@ -83,12 +87,14 @@ const PerfilSuscriptor = () => {
   const handleRequestPasswordReset = async () => {
     try {
       await requestPasswordReset(usuario.email);
+      toast.success(`Enviamos un enlace para restablecer la contraseña a ${usuario.email}`);
       setNotification({
         type: "success",
         message: `Enviamos un enlace para restablecer la contraseña a ${usuario.email}.`
       });
     } catch (err) {
       console.error(err);
+      toast.error(err.message || "No se pudo enviar el enlace");
       setNotification({ type: "error", message: err.message || "No se pudo enviar el enlace." });
     } finally {
       setTimeout(() => setNotification({ type: "", message: "" }), 5000);

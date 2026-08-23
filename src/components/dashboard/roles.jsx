@@ -1,6 +1,6 @@
-// src/components/dashboard/roles.jsx
 import { useEffect, useState } from "react"
 import { Shield, Check, AlertCircle, Loader2, Plus, Edit2, Save, X, Layers } from "lucide-react"
+import { toast } from "sonner"
 import DashboardLayout from "../dashboard-layout"
 import { listarRolesDetalle, listarPermisos, asignarPermisosARol, crearRol, actualizarRol } from "../../services/api-admin"
 
@@ -80,11 +80,13 @@ const RolesPage = () => {
       setSaving(true)
       setStatusMessage(null)
       const updatedRol = await asignarPermisosARol(selectedRol.id, selectedPermisos)
+      toast.success(`Permisos actualizados con éxito para el rol '${selectedRol.nombre}'`)
       setStatusMessage({ type: "success", text: `Permisos actualizados con éxito para el rol '${selectedRol.nombre}'.` })
       setRoles(prev => prev.map(r => r.id === updatedRol.id ? updatedRol : r))
       setSelectedRol(updatedRol)
     } catch (err) {
       console.error("Error al guardar permisos:", err)
+      toast.error("Error al guardar permisos: " + err.message)
       setStatusMessage({ type: "error", text: "No se pudieron actualizar los permisos del rol." })
     } finally {
       setSaving(false)
@@ -111,14 +113,16 @@ const RolesPage = () => {
       setSaving(true)
       if (editingRol) {
         await actualizarRol(editingRol.id, rolFormData)
+        toast.success("Rol actualizado exitosamente")
       } else {
         await crearRol(rolFormData)
+        toast.success("Rol creado exitosamente")
       }
       setShowModal(false)
       await cargarDatos()
     } catch (err) {
       console.error("Error al guardar rol:", err)
-      alert("Error al guardar el rol. Verifica que no esté duplicado.")
+      toast.error(err.message || "Error al guardar el rol. Verifica que no esté duplicado.")
     } finally {
       setSaving(false)
     }

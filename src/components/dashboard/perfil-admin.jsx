@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 import DashboardLayout from "../dashboard-layout"
 import AvatarUpload from "../AvatarUpload"
+import { toast } from "sonner"
 import { getCurrentUser, requestPasswordReset } from "../../services/auth"
 import { updateAdmin } from "../../services/api-admin"
 
@@ -37,6 +38,7 @@ const PerfilAdmin = () => {
       setFormData({ email: data.email })
     } catch (error) {
       console.error("Error al obtener usuario:", error)
+      toast.error("Error al cargar el perfil")
       setNotification({ type: "error", message: "Error al cargar el perfil." })
     } finally {
       setLoading(false)
@@ -84,11 +86,13 @@ const PerfilAdmin = () => {
     setNotification({ type: "", message: "" })
     try {
       await updateAdmin({ email: formData.email })
+      toast.success("Perfil actualizado con éxito")
       setNotification({ type: "success", message: "Perfil actualizado con éxito." })
       await cargarUsuario() // Recargar datos
       setIsEditing(false)
     } catch (error) {
       console.error("Error al actualizar perfil:", error)
+      toast.error(error.message || "Error al actualizar el perfil")
       setNotification({ type: "error", message: error.message || "Error al actualizar." })
     } finally {
       setIsSaving(false)
@@ -100,12 +104,14 @@ const PerfilAdmin = () => {
     setNotification({ type: "", message: "" })
     try {
       await requestPasswordReset(usuario.email)
+      toast.success(`Se ha enviado un enlace para restablecer la contraseña a ${usuario.email}`)
       setNotification({
         type: "success",
         message: `Se ha enviado un enlace para restablecer la contraseña a ${usuario.email}. Revisa tu correo.`,
       })
     } catch (error) {
       console.error("Error al solicitar cambio de contraseña:", error)
+      toast.error(error.message || "No se pudo enviar el enlace. Inténtalo de nuevo.")
       setNotification({
         type: "error",
         message: error.message || "No se pudo enviar el enlace. Inténtalo de nuevo.",

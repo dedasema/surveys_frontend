@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Menu, X } from "lucide-react"
+import { toast } from "sonner"
 import { login } from "../services/auth"
 import { Link } from "react-router-dom"
 import BrandLogo from "./BrandLogo"
@@ -49,14 +50,10 @@ const Login = () => {
     return newErrors
   }
 
-  // Actualizar el handleSubmit para usar la nueva función de login con redirección automática
-
   const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log("Formulario enviado", formData)
     const newErrors = validateForm()
 
-    console.log("Errores de validación:", newErrors)
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       return
@@ -64,12 +61,14 @@ const Login = () => {
 
     setIsLoading(true)
     try {
-      console.log("Intentando iniciar sesión...")
+      toast.loading("Iniciando sesión...", { id: "login-toast" })
       await login(formData)
-      console.log("Login exitoso")
+      toast.success("¡Bienvenido! Redirigiendo...", { id: "login-toast" })
     } catch (error) {
       console.error("Login error:", error)
-      setErrors({ general: error.message || "Error en el inicio de sesión" })
+      const msg = error.message || "Credenciales incorrectas o error en el inicio de sesión"
+      toast.error(msg, { id: "login-toast" })
+      setErrors({ general: msg })
     } finally {
       setIsLoading(false)
     }

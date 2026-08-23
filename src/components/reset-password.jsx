@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Eye, EyeOff, Lock, ArrowLeft, ArrowRight, BarChart3, Menu, X, CheckCircle } from "lucide-react"
+import { toast } from "sonner"
 import { resetPassword } from "../services/auth"
 import { Link, useSearchParams, useNavigate } from "react-router-dom"
 
@@ -76,15 +77,21 @@ const ResetPassword = () => {
 
     setIsLoading(true)
     try {
+      toast.loading("Restableciendo tu contraseña...", { id: "reset-pwd-toast" })
       await resetPassword(token, formData.password)
+      toast.success("Contraseña restablecida exitosamente", { id: "reset-pwd-toast" })
       setIsPasswordReset(true)
     } catch (error) {
       console.error("Password reset error:", error)
       if (error.message.includes("token") || error.message.includes("expirado")) {
         setIsTokenValid(false)
-        setErrors({ general: "El enlace de restablecimiento ha expirado o no es válido. Solicita uno nuevo." })
+        const msg = "El enlace de restablecimiento ha expirado o no es válido. Solicita uno nuevo."
+        toast.error(msg, { id: "reset-pwd-toast" })
+        setErrors({ general: msg })
       } else {
-        setErrors({ general: error.message || "Error al restablecer la contraseña" })
+        const msg = error.message || "Error al restablecer la contraseña"
+        toast.error(msg, { id: "reset-pwd-toast" })
+        setErrors({ general: msg })
       }
     } finally {
       setIsLoading(false)

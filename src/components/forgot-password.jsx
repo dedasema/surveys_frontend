@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Mail, ArrowLeft, ArrowRight, BarChart3, Menu, X, CheckCircle } from "lucide-react"
+import { toast } from "sonner"
 import { requestPasswordReset } from "../services/auth"
 import { Link } from "react-router-dom"
 
@@ -47,11 +48,15 @@ const ForgotPassword = () => {
 
     setIsLoading(true)
     try {
+      toast.loading("Enviando enlace de restablecimiento...", { id: "reset-toast" })
       await requestPasswordReset(email)
+      toast.success("Enlace de restablecimiento enviado. Revisa tu correo.", { id: "reset-toast" })
       setIsEmailSent(true)
     } catch (error) {
       console.error("Password reset error:", error)
-      setErrors({ general: error.message || "Error al enviar el email de restablecimiento" })
+      const msg = error.message || "Error al enviar el email de restablecimiento"
+      toast.error(msg, { id: "reset-toast" })
+      setErrors({ general: msg })
     } finally {
       setIsLoading(false)
     }

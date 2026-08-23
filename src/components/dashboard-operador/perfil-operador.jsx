@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 import DashboardOperadorLayout from "./layout"
 import AvatarUpload from "../AvatarUpload"
+import { toast } from "sonner"
 import { getCurrentUser, requestPasswordReset } from "../../services/auth"
 import { updateOperator } from "../../services/api"
 
@@ -36,6 +37,7 @@ const PerfilOperador = () => {
       })
     } catch (err) {
       console.error(err)
+      toast.error("Error al cargar el perfil")
       setNotification({ type: "error", message: "Error al cargar el perfil." })
     } finally {
       setLoading(false)
@@ -84,11 +86,13 @@ const PerfilOperador = () => {
         nombre_completo: formData.nombre_completo,
         email: formData.email,
       })
+      toast.success("Perfil actualizado con éxito")
       setNotification({ type: "success", message: "Perfil actualizado con éxito." })
       await cargarUsuario()
       setIsEditing(false)
     } catch (err) {
       console.error(err)
+      toast.error(err.message || "Error al actualizar")
       setNotification({ type: "error", message: err.message || "Error al actualizar." })
     } finally {
       setIsSaving(false)
@@ -100,12 +104,14 @@ const PerfilOperador = () => {
     setNotification({ type: "", message: "" })
     try {
       await requestPasswordReset(usuario.email)
+      toast.success(`Enviamos un enlace para restablecer la contraseña a ${usuario.email}`)
       setNotification({
         type: "success",
         message: `Enviamos un enlace para restablecer la contraseña a ${usuario.email}.`,
       })
     } catch (err) {
       console.error(err)
+      toast.error(err.message || "No se pudo enviar el enlace")
       setNotification({ type: "error", message: err.message || "No se pudo enviar el enlace." })
     } finally {
       setTimeout(() => setNotification({ type: "", message: "" }), 5000)

@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Eye, EyeOff, Mail, Lock, User, Building, ArrowRight, Menu, X } from "lucide-react"
+import { toast } from "sonner"
 import { requestRegistration } from "../services/auth"
 import { useNavigate } from "react-router-dom"
 import BrandLogo from "./BrandLogo"
@@ -72,20 +73,23 @@ const Register = () => {
     setIsLoading(true)
 
     try {
+      toast.loading("Creando tu cuenta empresarial...", { id: "register-toast" })
       // Registrar suscriptor con los campos correctos
-    await requestRegistration({
-      nombre: formData.nombre,
-      email: formData.email,
-      telefono: formData.telefono,
-      password: formData.password,
-    })
+      await requestRegistration({
+        nombre: formData.nombre,
+        email: formData.email,
+        telefono: formData.telefono,
+        password: formData.password,
+      })
 
-
+      toast.success("¡Registro exitoso! Revisa tu correo de confirmación.", { id: "register-toast" })
       // Redirigir a la página de confirmación de email
       navigate("/email-sent")
     } catch (error) {
       console.error("Registration error:", error)
-      setErrors({ general: error.message || "Error en el registro" })
+      const msg = error.message || "Error al registrar la empresa"
+      toast.error(msg, { id: "register-toast" })
+      setErrors({ general: msg })
     } finally {
       setIsLoading(false)
     }
