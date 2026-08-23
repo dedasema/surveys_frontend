@@ -18,6 +18,12 @@ import {
   UserCheck,
   UserX,
   ExternalLink,
+  Unlock,
+  Sparkles,
+  HardDrive,
+  DollarSign,
+  Cpu,
+  Image,
 } from "lucide-react";
 import DashboardLayout from "../dashboard-layout";
 import LoadingScreen from "../LoadingScreen";
@@ -28,6 +34,8 @@ import {
   actualizarEstadoSuscriptorAdmin,
   asignarPlanSuscriptorAdmin,
   listarPlanes,
+  impersonarSuscriptorAdmin,
+  obtenerConsumoIASuscriptorAdmin,
 } from "../../services/api-admin";
 
 export default function SuscriptorDetallePage() {
@@ -35,9 +43,10 @@ export default function SuscriptorDetallePage() {
   const [suscriptor, setSuscriptor] = useState(null);
   const [pagos, setPagos] = useState([]);
   const [operadores, setOperadores] = useState([]);
+  const [consumoIA, setConsumoIA] = useState(null);
   const [planesDisponibles, setPlanesDisponibles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("consumo"); // 'consumo' | 'pagos' | 'operadores'
+  const [activeTab, setActiveTab] = useState("consumo"); // 'consumo' | 'ia' | 'pagos' | 'operadores'
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
@@ -45,11 +54,12 @@ export default function SuscriptorDetallePage() {
   const loadAll = async () => {
     try {
       setLoading(true);
-      const [detailRes, pagosRes, opsRes, planesRes] = await Promise.allSettled([
+      const [detailRes, pagosRes, opsRes, planesRes, iaRes] = await Promise.allSettled([
         obtenerSuscriptorDetalleAdmin(id),
         obtenerPagosSuscriptorAdmin(id),
         obtenerOperadoresSuscriptorAdmin(id),
         listarPlanes().catch(() => []),
+        obtenerConsumoIASuscriptorAdmin(id).catch(() => null),
       ]);
 
       if (detailRes.status === "fulfilled" && detailRes.value) {
@@ -67,6 +77,10 @@ export default function SuscriptorDetallePage() {
 
       if (planesRes.status === "fulfilled" && Array.isArray(planesRes.value)) {
         setPlanesDisponibles(planesRes.value);
+      }
+
+      if (iaRes.status === "fulfilled" && iaRes.value) {
+        setConsumoIA(iaRes.value);
       }
     } catch (err) {
       console.error("Error al cargar detalle del suscriptor:", err);
@@ -100,6 +114,45 @@ export default function SuscriptorDetallePage() {
       toast.error("Error al actualizar el estado: " + err.message);
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleImpersonate = async () => {
+    const empresaNombre =
+      suscriptor?.nombre_empresa || suscriptor?.empresa || suscriptor?.nombre || `Suscriptor #${id}`;
+    const email = suscriptor?.email_contacto || suscriptor?.email || "Cliente";
+
+    if (
+      !window.confirm(
+        `¿Deseas iniciar sesión en vivo como la empresa "${empresaNombre}" (${email}) para soporte técnico directo?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      toast.loading("Generando token de soporte en vivo...", { id: "impersonate-detail" });
+      const res = await impersonarSuscriptorAdmin(id);
+
+      if (res?.access_token) {
+        const currentToken = localStorage.getItem("token");
+        if (currentToken) {
+          localStorage.setItem("superadmin_token_backup", currentToken);
+        }
+        localStorage.setItem("impersonated_email", res.impersonated_email || email);
+        localStorage.setItem("token", res.access_token);
+
+        toast.success("Modo soporte activado. Redirigiendo...", { id: "impersonate-detail" });
+        setTimeout(() => {
+          window.location.href = "/dashboard-suscriptor/dashboard";
+        }, 400);
+      } else {
+        toast.error(res?.message || "No se pudo generar el token de soporte.", {
+          id: "impersonate-detail",
+        });
+      }
+    } catch (err) {
+      toast.error("Error al iniciar modo soporte: " + err.message, { id: "impersonate-detail" });
     }
   };
 
@@ -232,18 +285,30 @@ export default function SuscriptorDetallePage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
+              {/* Botón Soporte en Vivo */}
+              <button
+                onClick={handleImpersonate}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs sm:text-sm transition-all shadow-md shadow-amber-500/25 cursor-pointer active:scale-95"
+                title="Iniciar sesión directamente como esta empresa para darle soporte en vivo"
+              >
+                <Unlock className="w-4 h-4" />
+                <span>Soporte en Vivo</span>
+              </button>
+
+              {/* Botón Asignar Plan */}
               <button
                 onClick={() => setShowPlanModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100/80 font-semibold rounded-xl text-xs sm:text-sm transition-colors border border-blue-200/60 shadow-xs"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold rounded-xl text-xs sm:text-sm transition-colors border border-blue-200/60 shadow-xs cursor-pointer"
               >
                 <Crown className="w-4 h-4 text-blue-600" />
                 <span>Asignar Plan Manual</span>
               </button>
 
+              {/* Botón Activar / Suspender */}
               <button
                 onClick={handleToggleEstado}
                 disabled={actionLoading}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 font-semibold rounded-xl text-xs sm:text-sm transition-all shadow-xs ${
+                className={`inline-flex items-center gap-2 px-4 py-2.5 font-semibold rounded-xl text-xs sm:text-sm transition-all shadow-xs cursor-pointer ${
                   isActivo
                     ? "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
                     : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-600/20"
@@ -266,10 +331,10 @@ export default function SuscriptorDetallePage() {
         </div>
 
         {/* Pestañas de Navegación */}
-        <div className="flex items-center gap-2 border-b border-slate-200 mb-6 text-sm font-semibold">
+        <div className="flex items-center gap-2 border-b border-slate-200 mb-6 text-sm font-semibold overflow-x-auto">
           <button
             onClick={() => setActiveTab("consumo")}
-            className={`pb-3 px-4 flex items-center gap-2 transition-colors relative ${
+            className={`pb-3 px-4 flex items-center gap-2 transition-colors whitespace-nowrap ${
               activeTab === "consumo"
                 ? "text-blue-600 border-b-2 border-blue-600"
                 : "text-slate-500 hover:text-slate-800"
@@ -279,8 +344,19 @@ export default function SuscriptorDetallePage() {
             <span>Membresía & Consumo de Cuotas</span>
           </button>
           <button
+            onClick={() => setActiveTab("ia")}
+            className={`pb-3 px-4 flex items-center gap-2 transition-colors whitespace-nowrap ${
+              activeTab === "ia"
+                ? "text-purple-600 border-b-2 border-purple-600"
+                : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-purple-600" />
+            <span>Consumo de IA & Recursos (Gemini)</span>
+          </button>
+          <button
             onClick={() => setActiveTab("pagos")}
-            className={`pb-3 px-4 flex items-center gap-2 transition-colors relative ${
+            className={`pb-3 px-4 flex items-center gap-2 transition-colors whitespace-nowrap ${
               activeTab === "pagos"
                 ? "text-blue-600 border-b-2 border-blue-600"
                 : "text-slate-500 hover:text-slate-800"
@@ -291,7 +367,7 @@ export default function SuscriptorDetallePage() {
           </button>
           <button
             onClick={() => setActiveTab("operadores")}
-            className={`pb-3 px-4 flex items-center gap-2 transition-colors relative ${
+            className={`pb-3 px-4 flex items-center gap-2 transition-colors whitespace-nowrap ${
               activeTab === "operadores"
                 ? "text-blue-600 border-b-2 border-blue-600"
                 : "text-slate-500 hover:text-slate-800"
@@ -505,7 +581,169 @@ export default function SuscriptorDetallePage() {
           </div>
         )}
 
-        {/* Contenido Pestaña 2: Historial de Pagos */}
+        {/* Contenido Pestaña 2: Consumo de IA & Recursos (Gemini) */}
+        {activeTab === "ia" && (
+          <div className="space-y-6 animate-fade-in">
+            {/* Header del Monitor de IA */}
+            <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-7 text-white shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-purple-300 shadow-inner flex-shrink-0">
+                  <Brain className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+                    <span>Monitor de Consumo de IA (Google Gemini)</span>
+                    <span className="px-2.5 py-0.5 bg-purple-500/30 text-purple-200 text-xs font-semibold rounded-full border border-purple-400/30">
+                      En Vivo
+                    </span>
+                  </h3>
+                  <p className="text-xs sm:text-sm text-purple-200/80 mt-1 max-w-xl">
+                    Registro de inferencias multimodales (OCR en papel y transcripción/deducción de voz) y costos generados.
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-left sm:text-right bg-white/5 p-4 rounded-2xl border border-white/10 flex-shrink-0">
+                <span className="text-xs text-purple-300 font-semibold uppercase tracking-wider block">
+                  Costo Estimado Acumulado
+                </span>
+                <span className="text-3xl font-extrabold text-white">
+                  ${parseFloat(consumoIA?.costo_estimado_usd ?? 0).toFixed(4)}
+                </span>
+                <span className="text-xs text-purple-200/70 font-mono block">USD</span>
+              </div>
+            </div>
+
+            {/* Tarjetas de Métricas de IA */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {/* 1. OCR Papel */}
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="p-3 bg-orange-50 text-orange-600 rounded-2xl">
+                    <Image className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    OCR Papel (Gemini)
+                  </span>
+                </div>
+                <p className="text-3xl font-black text-slate-900 mb-1">
+                  {consumoIA?.total_peticiones_ocr ?? 0}
+                </p>
+                <p className="text-xs text-slate-500">
+                  Formularios físicos escaneados y digitalizados por visión
+                </p>
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                  <span>Tokens generados:</span>
+                  <span className="font-bold text-slate-900 font-mono">
+                    {(consumoIA?.tokens_ocr ?? 0).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* 2. Audio y Voz */}
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl">
+                    <Mic className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    Audio / Voz (Gemini)
+                  </span>
+                </div>
+                <p className="text-3xl font-black text-slate-900 mb-1">
+                  {consumoIA?.total_peticiones_audio ?? 0}
+                </p>
+                <p className="text-xs text-slate-500">
+                  Llamadas e interpretaciones de audio por asistente virtual
+                </p>
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                  <span>Tokens generados:</span>
+                  <span className="font-bold text-slate-900 font-mono">
+                    {(consumoIA?.tokens_audio ?? 0).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* 3. Tokens Totales */}
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                    <Cpu className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    Tokens Totales
+                  </span>
+                </div>
+                <p className="text-3xl font-black text-slate-900 mb-1 font-mono">
+                  {(consumoIA?.estimacion_tokens_totales ?? 0).toLocaleString()}
+                </p>
+                <p className="text-xs text-slate-500">
+                  Volumen combinado de inferencia y procesamiento
+                </p>
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                  <span>Costo tokens:</span>
+                  <span className="font-bold text-emerald-700 font-mono">
+                    ${parseFloat(consumoIA?.costo_estimado_usd ?? 0).toFixed(4)} USD
+                  </span>
+                </div>
+              </div>
+
+              {/* 4. Almacenamiento Utilizado */}
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+                    <HardDrive className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    Almacenamiento
+                  </span>
+                </div>
+                <p className="text-3xl font-black text-slate-900 mb-1">
+                  {parseFloat(consumoIA?.almacenamiento_estimado_mb ?? 0).toFixed(1)}{" "}
+                  <span className="text-base font-semibold text-slate-500">MB</span>
+                </p>
+                <p className="text-xs text-slate-500">
+                  Espacio ocupado por grabaciones de audio y escaneos de papel
+                </p>
+              </div>
+
+              {/* 5. Estado de Canales de IA */}
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm sm:col-span-2 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      Disponibilidad en Plan Actual
+                    </span>
+                    <span className="text-xs font-semibold text-blue-600 font-mono">
+                      Plan: {plan.nombre}
+                    </span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-900 mb-4">
+                    Permisos de Inferencia Multimodal
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className={`p-3 rounded-2xl border flex items-center justify-between ${plan.permite_audio_voz ? "bg-purple-50 border-purple-200 text-purple-900" : "bg-slate-50 border-slate-200 text-slate-400"}`}>
+                    <span className="font-semibold flex items-center gap-1.5">
+                      <Mic className="w-4 h-4" /> Voz con IA
+                    </span>
+                    <span className="font-bold">{plan.permite_audio_voz ? "Habilitado" : "Bloqueado"}</span>
+                  </div>
+
+                  <div className={`p-3 rounded-2xl border flex items-center justify-between ${plan.permite_papel ? "bg-orange-50 border-orange-200 text-orange-900" : "bg-slate-50 border-slate-200 text-slate-400"}`}>
+                    <span className="font-semibold flex items-center gap-1.5">
+                      <FileText className="w-4 h-4" /> Papel & OCR
+                    </span>
+                    <span className="font-bold">{plan.permite_papel ? "Habilitado" : "Bloqueado"}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Contenido Pestaña 3: Historial de Pagos */}
         {activeTab === "pagos" && (
           <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
             {pagos.length === 0 ? (
@@ -569,7 +807,7 @@ export default function SuscriptorDetallePage() {
           </div>
         )}
 
-        {/* Contenido Pestaña 3: Operadores */}
+        {/* Contenido Pestaña 4: Operadores */}
         {activeTab === "operadores" && (
           <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
             {operadores.length === 0 ? (
@@ -624,7 +862,7 @@ export default function SuscriptorDetallePage() {
                 </div>
                 <button
                   onClick={() => setShowPlanModal(false)}
-                  className="text-slate-400 hover:text-slate-600 font-bold text-lg"
+                  className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer"
                 >
                   ✕
                 </button>
@@ -659,14 +897,14 @@ export default function SuscriptorDetallePage() {
                   <button
                     type="button"
                     onClick={() => setShowPlanModal(false)}
-                    className="px-4 py-2 border border-slate-300 text-slate-700 text-xs font-semibold rounded-xl hover:bg-slate-50"
+                    className="px-4 py-2 border border-slate-300 text-slate-700 text-xs font-semibold rounded-xl hover:bg-slate-50 cursor-pointer"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={actionLoading || !selectedPlanId}
-                    className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-600/20 disabled:opacity-50"
+                    className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-600/20 disabled:opacity-50 cursor-pointer"
                   >
                     {actionLoading ? "Asignando..." : "Confirmar Asignación"}
                   </button>

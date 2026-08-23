@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'sonner';
 import './App.css';
 import OfflineIndicator from './components/OfflineIndicator';
+import ImpersonationBanner from './components/ImpersonationBanner';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -49,6 +50,7 @@ function App() {
     <Router>
       <Toaster position="top-right" richColors />
       <OfflineIndicator />
+      <ImpersonationBanner />
       <Routes>
         {/* Rutas públicas */}
         <Route path="/" element={<LandingPage />} />
