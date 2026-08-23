@@ -11,7 +11,7 @@ import {
   Search,
   User,
   UserCog,
-  PhoneCall,
+  Send,
 } from "lucide-react"
 import { useLocation } from "react-router-dom"
 import { getCurrentUser } from "../../services/auth"
@@ -81,7 +81,7 @@ const DashboardSuscriptorLayout = ({ children }) => {
         { title: "Operadores", url: "/dashboard-suscriptor/operadores", icon: UserCog },
         { title: "Campañas", url: "/dashboard-suscriptor/campanas", icon: Target },
         { title: "Respuestas", url: "/dashboard-suscriptor/respuestas", icon: MessageSquare },
-        { title: "Entregas", url: "/dashboard-suscriptor/entregas", icon: PhoneCall },
+        { title: "Entregas", url: "/dashboard-suscriptor/entregas", icon: Send },
       ],
     },
     {

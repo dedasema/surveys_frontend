@@ -5,6 +5,7 @@ import {
   LogOut,
   Search,
   User,
+  Send,
 } from "lucide-react"
 import { getCurrentUser } from "../../services/auth"
 import { useAuth } from "../../context/AuthContext"
@@ -60,7 +61,7 @@ const DashboardOperadorLayout = ({ children, activeSection = "plantillas" }) => 
       items: [
         { title: "Plantillas", url: "/dashboard-operador/plantillas", icon: FileText },
         { title: "Destinatarios", url: "/dashboard-operador/destinatarios", icon: Users },
-        { title: "Entregas", url: "/dashboard-operador/entregas", icon: PhoneCall },
+        { title: "Entregas", url: "/dashboard-operador/entregas", icon: Send },
       ],
     },
   ]
