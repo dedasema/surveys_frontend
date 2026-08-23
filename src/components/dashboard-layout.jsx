@@ -8,6 +8,7 @@ import {
   User,
   ShieldAlert,
   Building2,
+  Megaphone,
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import {
@@ -82,6 +83,17 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
           url: "/dashboard/planes",
           icon: Crown,
           isActive: activeSection === "planes",
+        },
+      ],
+    },
+    {
+      title: "Comunicación & Avisos",
+      items: [
+        {
+          title: "Anuncios Globales",
+          url: "/dashboard/anuncios",
+          icon: Megaphone,
+          isActive: activeSection === "anuncios",
         },
       ],
     },

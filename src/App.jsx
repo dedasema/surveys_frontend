@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import './App.css';
 import OfflineIndicator from './components/OfflineIndicator';
 import ImpersonationBanner from './components/ImpersonationBanner';
+import GlobalAnnouncementBanner from './components/GlobalAnnouncementBanner';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -18,6 +19,7 @@ import EstadosCampaña from './components/dashboard/estados-campana';
 import Planes from './components/dashboard/planes';
 import PerfilAdmin from './components/dashboard/perfil-admin';
 import Auditoria from './components/dashboard/auditoria';
+import AnunciosPage from './components/dashboard/anuncios';
 import SuscriptoresPage from './components/dashboard/suscriptores';
 import SuscriptorDetallePage from './components/dashboard/suscriptor-detalle';
 import PerfilSuscriptor from './components/dashboard-suscriptor/perfil-suscriptor';
@@ -51,6 +53,7 @@ function App() {
       <Toaster position="top-right" richColors />
       <OfflineIndicator />
       <ImpersonationBanner />
+      <GlobalAnnouncementBanner />
       <Routes>
         {/* Rutas públicas */}
         <Route path="/" element={<LandingPage />} />
@@ -104,8 +107,13 @@ function App() {
         <Route path="/dashboard/perfil-admin" element={
           <PrivateRoute requiredType="admin"><PerfilAdmin /></PrivateRoute>
         } />
+        <Route path="/admin/auditoria" element={<Navigate to="/dashboard/auditoria" replace />} />
         <Route path="/dashboard/auditoria" element={
           <PrivateRoute requiredType="admin"><Auditoria /></PrivateRoute>
+        } />
+        <Route path="/admin/anuncios" element={<Navigate to="/dashboard/anuncios" replace />} />
+        <Route path="/dashboard/anuncios" element={
+          <PrivateRoute requiredType="admin"><AnunciosPage /></PrivateRoute>
         } />
 
         {/* Rutas protegidas - suscriptor */}

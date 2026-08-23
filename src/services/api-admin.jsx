@@ -183,10 +183,18 @@ export const listarAuditoria = (params = {}) => {
   const query = new URLSearchParams()
   if (params.modulo) query.append("modulo", params.modulo)
   if (params.accion) query.append("accion", params.accion)
+  if (params.usuario) query.append("usuario", params.usuario)
+  if (params.search) query.append("search", params.search)
+  if (params.fecha_inicio) query.append("fecha_inicio", params.fecha_inicio)
+  if (params.fecha_fin) query.append("fecha_fin", params.fecha_fin)
   if (params.limit) query.append("limit", params.limit)
   if (params.offset) query.append("offset", params.offset)
   const qs = query.toString()
-  return authFetch(`/auditoria${qs ? `?${qs}` : ""}`)
+  return authFetch(`/auditoria/logs${qs ? `?${qs}` : ""}`).catch(async () => {
+    return authFetch(`/auditoria${qs ? `?${qs}` : ""}`).catch(async () => {
+      return authFetch(`/admin/auditoria/logs${qs ? `?${qs}` : ""}`).catch(() => ({ items: [], total: 0 }))
+    })
+  })
 }
 
 export const obtenerFiltrosAuditoria = () => authFetch("/auditoria/filtros")
@@ -241,3 +249,26 @@ export const obtenerConsumoIASuscriptorAdmin = (suscriptorId) =>
 
 export const obtenerMetricasFinancierasAdmin = () =>
   authFetch("/admin/suscriptores/metrics/financieras")
+
+// Gestión de Anuncios Globales
+export const listarAnunciosAdmin = () =>
+  authFetch("/admin/anuncios").catch(async () => {
+    return authFetch("/anuncios/activos").catch(() => [])
+  })
+
+export const crearAnuncioAdmin = (data) =>
+  authFetch("/admin/anuncios", {
+    method: "POST",
+    body: JSON.stringify(data),
+  })
+
+export const actualizarAnuncioAdmin = (id, data) =>
+  authFetch(`/admin/anuncios/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  })
+
+export const eliminarAnuncioAdmin = (id) =>
+  authFetch(`/admin/anuncios/${id}`, {
+    method: "DELETE",
+  })

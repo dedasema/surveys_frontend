@@ -224,8 +224,20 @@ export const getMiSuscripcion = () => authFetch("/subscription/actual");
 
 export const getHistorialPagos = () => authFetch("/subscription/historial-pagos");
 
-export const obtenerPortalCliente = () =>
-  authFetch("/subscription/portal-cliente", { method: "POST" });
+export const obtenerPortalCliente = async () => {
+  return authFetch("/subscription/portal-cliente", { method: "POST" })
+}
+
+export const obtenerAnunciosActivos = async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/anuncios/activos`)
+    if (!res.ok) return []
+    return await res.json()
+  } catch (err) {
+    console.error("Error al obtener anuncios activos:", err)
+    return []
+  }
+}
 
 export const iniciarStripeCheckout = (suscriptorId, planId) =>
   authFetch(`/subscription/stripe-checkout?suscriptor_id=${suscriptorId}&plan_id=${planId}`, {

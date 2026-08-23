@@ -254,7 +254,7 @@ export default function Auditoria() {
                   <th className="px-6 py-4">Usuario</th>
                   <th className="px-6 py-4">Módulo</th>
                   <th className="px-6 py-4">Acción</th>
-                  <th className="px-6 py-4">Entidad ID</th>
+                  <th className="px-6 py-4">IP Address</th>
                   <th className="px-6 py-4 text-center">Detalles</th>
                 </tr>
               </thead>
@@ -313,7 +313,7 @@ export default function Auditoria() {
                       </td>
 
                       <td className="px-6 py-4 whitespace-nowrap font-mono text-xs text-slate-500">
-                        {log.entidad_id ? log.entidad_id.slice(0, 18) + (log.entidad_id.length > 18 ? "..." : "") : "-"}
+                        {log.ip_address || "127.0.0.1"}
                       </td>
 
                       <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -322,7 +322,7 @@ export default function Auditoria() {
                             setSelectedLog(log)
                             setShowModal(true)
                           }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 rounded-lg text-xs font-medium transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 rounded-lg text-xs font-medium transition-colors cursor-pointer"
                         >
                           <Code2 className="w-3.5 h-3.5" />
                           <span>Ver Payload</span>
