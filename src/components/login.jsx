@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Eye, EyeOff, Mail, Lock, ArrowRight, BarChart3, Menu, X } from "lucide-react"
 import { login } from "../services/auth"
 import { Link } from "react-router-dom"
+import BrandLogo from "./BrandLogo"
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -80,10 +81,7 @@ const Login = () => {
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <BarChart3 className="h-8 w-8 text-blue-600 mr-2" />
-              <span className="text-xl font-bold text-gray-900">SurveySaaS</span>
-            </div>
+            <BrandLogo size="lg" />
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
@@ -150,8 +148,7 @@ const Login = () => {
           {/* Header */}
           <div className="text-center">
             <div className="flex items-center justify-center mb-6">
-              <BarChart3 className="h-12 w-12 text-blue-600 mr-3" />
-              <span className="text-2xl font-bold text-gray-900">SurveySaaS</span>
+              <BrandLogo size="xl" />
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Bienvenido de vuelta</h2>
             <p className="text-gray-600">Inicia sesión en tu cuenta para continuar</p>

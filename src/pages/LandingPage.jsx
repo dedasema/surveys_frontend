@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react"
 import { useAuth } from "../context/AuthContext";
+import BrandLogo from "../components/BrandLogo";
 
 const LandingPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -37,10 +38,7 @@ const LandingPage = () => {
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <BarChart3 className="h-8 w-8 text-blue-600 mr-2" />
-              <span className="text-xl font-bold text-gray-900">SurveySaaS</span>
-            </div>
+            <BrandLogo size="lg" />
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
@@ -666,10 +664,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center mb-4">
-                <BarChart3 className="h-8 w-8 text-blue-400 mr-2" />
-                <span className="text-xl font-bold">SurveySaaS</span>
-              </div>
+              <BrandLogo size="lg" textColor="light" className="mb-4" />
               <p className="text-gray-400 mb-4">
                 Automatización inteligente de encuestas y documentos para empresas modernas.
               </p>

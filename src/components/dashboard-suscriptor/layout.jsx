@@ -96,9 +96,7 @@ const DashboardSuscriptorLayout = ({ children }) => {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)}>
         <SidebarHeader className="h-16 flex items-center px-4">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 grid place-items-center bg-blue-600 rounded-lg">
-              <BarChart3 className="h-6 w-6 text-white" />
-            </div>
+            <img src="/favicon.svg" alt="SurveySaaS Logo" className="w-10 h-10 rounded-xl shadow-sm object-contain flex-shrink-0" />
             <div>
               <h2 className="text-lg font-semibold text-gray-900">SurveySaaS</h2>
               <p className="text-sm text-gray-500">Panel de Control</p>
