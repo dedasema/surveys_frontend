@@ -21,7 +21,6 @@ import {
   Unlock,
   Sparkles,
   HardDrive,
-  DollarSign,
   Cpu,
   Image,
 } from "lucide-react";
