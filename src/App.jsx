@@ -69,6 +69,7 @@ function App() {
         <Route path="/dashboard" element={<Navigate to="/dashboard/suscriptores" replace />} />
         <Route path="/admin/dashboard" element={<Navigate to="/dashboard/suscriptores" replace />} />
         <Route path="/admin/suscriptores" element={<Navigate to="/dashboard/suscriptores" replace />} />
+        <Route path="/admin/roles" element={<Navigate to="/dashboard/roles" replace />} />
         <Route path="/dashboard/suscriptores" element={
           <PrivateRoute requiredType="admin"><SuscriptoresPage /></PrivateRoute>
         } />
