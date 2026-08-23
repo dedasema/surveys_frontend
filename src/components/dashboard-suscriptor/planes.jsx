@@ -1,7 +1,23 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { listPlanes, iniciarStripeCheckout, getMe, getMiSuscripcion } from "../../services/api";
-import { CheckCircle, Check } from "lucide-react";
+import {
+  listPlanes,
+  iniciarStripeCheckout,
+  getMe,
+  getMiSuscripcion,
+} from "../../services/api";
+import {
+  CheckCircle,
+  Check,
+  Layers,
+  Send,
+  Users,
+  Mic,
+  FileText,
+  Brain,
+  Download,
+  Sparkles,
+} from "lucide-react";
 import DashboardSuscriptorLayout from "./layout";
 import LoadingScreen from "../LoadingScreen";
 
@@ -16,7 +32,11 @@ const Planes = () => {
     (async () => {
       try {
         const dataPlanes = await listPlanes();
-        setPlanes(dataPlanes);
+        // Mostrar solo planes activos (o si no tiene el campo activo, todos)
+        const planesActivos = Array.isArray(dataPlanes)
+          ? dataPlanes.filter((p) => p.activo !== false)
+          : [];
+        setPlanes(planesActivos);
       } catch (err) {
         console.error(err);
         setError("Error cargando planes.");
@@ -35,7 +55,6 @@ const Planes = () => {
         }
       } catch (err) {
         console.error(err);
-        setError("Error obteniendo datos del suscriptor.");
       }
     })();
   }, []);
@@ -55,69 +74,176 @@ const Planes = () => {
     }
   };
 
+  const formatLimit = (val) => {
+    if (val === -1 || val === "-1" || val === 0 || val === "0" || val === null || val === undefined) {
+      return "Ilimitado";
+    }
+    return val.toLocaleString ? val.toLocaleString() : val;
+  };
+
   if (loading) return <LoadingScreen message="Cargando planes de suscripción..." />;
-  if (error)   return <div className="p-4 text-red-600">{error}</div>;
+  if (error) return <div className="p-4 text-red-600 font-medium">{error}</div>;
 
   return (
     <DashboardSuscriptorLayout activeSection="planes">
-      <div className="p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
+      <div className="p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/40 min-h-screen">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-2">
-              Planes de Suscripción
+            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-1">
+              Planes y Suscripción
             </h1>
-            <p className="text-slate-600 text-lg">Elige el plan que mejor se adapte a tu crecimiento</p>
+            <p className="text-slate-600 text-sm sm:text-base">
+              Escala tu volumen de encuestas, cuotas mensuales y canales con IA
+            </p>
           </div>
         </div>
 
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {planes.map((plan) => {
-            const isCurrent = suscripcionActual?.plan_id === plan.id || suscripcionActual?.plan?.id === plan.id;
+            const isCurrent =
+              suscripcionActual?.plan_id === plan.id || suscripcionActual?.plan?.id === plan.id;
+            const precio = parseFloat(plan.precio_mensual) || 0;
+
             return (
               <div
                 key={plan.id}
-                className={`bg-white/80 backdrop-blur-sm rounded-2xl border ${
-                  isCurrent ? "border-green-500 ring-2 ring-green-500/20" : "border-white/20"
-                } p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 hover:-translate-y-1 flex flex-col relative`}
+                className={`bg-white/90 backdrop-blur-sm rounded-3xl border ${
+                  isCurrent
+                    ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-emerald-500/10"
+                    : "border-slate-200/80 shadow-slate-200/40"
+                } p-6 sm:p-7 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col relative`}
               >
+                {/* Badge de Plan Actual */}
                 {isCurrent && (
-                  <span className="absolute top-4 right-4 bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1 border border-green-200">
+                  <span className="absolute top-5 right-5 bg-emerald-100 text-emerald-800 text-xs px-3.5 py-1 rounded-full font-bold flex items-center gap-1 border border-emerald-300 shadow-xs">
                     <Check className="h-3.5 w-3.5" /> Plan Actual
                   </span>
                 )}
 
-                <h2 className="text-xl font-semibold text-slate-900 mb-1 truncate pr-20">{plan.nombre}</h2>
-                <div className="text-3xl font-bold text-slate-900 mb-4">
-                  {plan.precio_mensual === 0 ? "Gratis" : `$${plan.precio_mensual}/mes`}
+                {/* Nombre y Precio */}
+                <h2 className="text-2xl font-bold text-slate-900 mb-1 pr-24">{plan.nombre}</h2>
+                <div className="flex items-baseline gap-1 my-3">
+                  <span className="text-4xl font-extrabold text-slate-900 tracking-tight">
+                    {precio === 0 ? "Gratis" : `$${precio}`}
+                  </span>
+                  {precio > 0 && <span className="text-sm font-medium text-slate-500">/mes</span>}
                 </div>
 
-                <p className="text-slate-600 mb-4 line-clamp-3">{plan.descripcion}</p>
+                <p className="text-slate-600 text-xs sm:text-sm mb-5 leading-relaxed">
+                  {plan.descripcion}
+                </p>
 
-                <ul className="space-y-2 mb-6 text-sm text-slate-600">
-                  {plan.caracteristicas?.split(";").map((c, idx) => (
-                    <li key={idx} className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      {c}
-                    </li>
-                  ))}
-                </ul>
+                {/* Cuotas Destacadas */}
+                <div className="bg-slate-50/90 rounded-2xl p-4 border border-slate-100 mb-5 space-y-2.5">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Cuotas Incluidas
+                  </p>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center justify-between text-slate-700">
+                      <span className="flex items-center gap-1.5 text-slate-600">
+                        <Layers className="w-3.5 h-3.5 text-blue-600" /> Plantillas de Encuestas
+                      </span>
+                      <span className="font-bold text-slate-900">{formatLimit(plan.max_plantillas)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-slate-700">
+                      <span className="flex items-center gap-1.5 text-slate-600">
+                        <Send className="w-3.5 h-3.5 text-blue-600" /> Respuestas / mes
+                      </span>
+                      <span className="font-bold text-slate-900">{formatLimit(plan.max_entregas)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-slate-700">
+                      <span className="flex items-center gap-1.5 text-slate-600">
+                        <Users className="w-3.5 h-3.5 text-blue-600" /> Operadores de Equipo
+                      </span>
+                      <span className="font-bold text-slate-900">{formatLimit(plan.max_operadores)}</span>
+                    </div>
+                  </div>
+                </div>
 
-                <div className="mt-auto pt-4">
+                {/* Canales y Módulos */}
+                <div className="space-y-2 mb-6">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    Canales y Funcionalidades
+                  </p>
+                  <div className="space-y-1.5 text-xs text-slate-700">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                      <span>Canal Email y Enlaces Web</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {plan.permite_audio_voz ? (
+                        <CheckCircle className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                      ) : (
+                        <div className="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center flex-shrink-0">
+                          <span className="text-[10px] text-slate-400">✕</span>
+                        </div>
+                      )}
+                      <span className={plan.permite_audio_voz ? "font-medium text-purple-900" : "text-slate-400 line-through"}>
+                        Encuestas Asistidas por Voz (IA)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {plan.permite_papel ? (
+                        <CheckCircle className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                      ) : (
+                        <div className="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center flex-shrink-0">
+                          <span className="text-[10px] text-slate-400">✕</span>
+                        </div>
+                      )}
+                      <span className={plan.permite_papel ? "font-medium text-orange-900" : "text-slate-400 line-through"}>
+                        Papel con QR y Digitalización OCR
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {plan.permite_ia_analisis ? (
+                        <CheckCircle className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+                      ) : (
+                        <div className="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center flex-shrink-0">
+                          <span className="text-[10px] text-slate-400">✕</span>
+                        </div>
+                      )}
+                      <span className={plan.permite_ia_analisis ? "font-medium text-indigo-900" : "text-slate-400 line-through"}>
+                        Análisis Inteligente Gemini AI
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Características comerciales extras */}
+                {plan.caracteristicas && (
+                  <div className="border-t border-slate-100 pt-4 mb-6">
+                    <ul className="space-y-1.5 text-xs text-slate-600">
+                      {plan.caracteristicas.split(";").map((c, idx) => {
+                        const trimmed = c.trim();
+                        if (!trimmed) return null;
+                        return (
+                          <li key={idx} className="flex items-center gap-2">
+                            <Sparkles className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                            <span>{trimmed}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Botón de Acción */}
+                <div className="mt-auto pt-4 border-t border-slate-100">
                   {isCurrent ? (
                     <button
                       disabled
-                      className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-green-600 cursor-default shadow-md"
+                      className="w-full inline-flex items-center justify-center px-6 py-3.5 border border-emerald-300 text-sm font-semibold rounded-2xl text-emerald-800 bg-emerald-50 cursor-default shadow-xs"
                     >
-                      Plan Actual (Activo)
+                      Plan Actual Activo
                     </button>
                   ) : (
                     <button
                       onClick={() => handleSuscripcion(plan.id)}
-                      className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg shadow-blue-500/25"
+                      className="w-full inline-flex items-center justify-center px-6 py-3.5 border border-transparent text-sm font-semibold rounded-2xl text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg shadow-blue-500/25 active:scale-[0.98]"
                     >
-                      Suscribirse
+                      {precio === 0 ? "Comenzar Gratis" : "Actualizar a este Plan"}
                     </button>
                   )}
                 </div>

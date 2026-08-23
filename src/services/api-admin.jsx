@@ -80,10 +80,20 @@ export const eliminarMetodoPago = (id) =>
 // Planes de Suscripción
 export const listarPlanes = () => authFetch("/subscription/planes")
 export const obtenerPlan = (id) => authFetch(`/subscription/planes/${id}`)
-export const crearPlan = (nombre, precio_mensual, descripcion) =>
-  authFetch("/subscription/planes", {method: "POST", body: JSON.stringify({ nombre, precio_mensual, descripcion }) })
-export const actualizarPlan = (id, nombre, precio_mensual, descripcion) =>
-  authFetch(`/subscription/planes/${id}`, {method: "PUT", body: JSON.stringify({ nombre, precio_mensual, descripcion }) })
+export const crearPlan = (dataOrNombre, precio_mensual, descripcion) => {
+  const body =
+    typeof dataOrNombre === "object"
+      ? dataOrNombre
+      : { nombre: dataOrNombre, precio_mensual, descripcion }
+  return authFetch("/subscription/planes", { method: "POST", body: JSON.stringify(body) })
+}
+export const actualizarPlan = (id, dataOrNombre, precio_mensual, descripcion) => {
+  const body =
+    typeof dataOrNombre === "object"
+      ? dataOrNombre
+      : { nombre: dataOrNombre, precio_mensual, descripcion }
+  return authFetch(`/subscription/planes/${id}`, { method: "PUT", body: JSON.stringify(body) })
+}
 export const eliminarPlan = (id) =>
   authFetch(`/subscription/planes/${id}`, { method: "DELETE" })
 

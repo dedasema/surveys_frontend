@@ -4,7 +4,6 @@ import {
   Users,
   LogOut,
   Search,
-  DollarSign,
   Crown,
   User,
   ShieldAlert
@@ -71,12 +70,6 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
           url: "/dashboard/planes",
           icon: Crown,
           isActive: activeSection === "planes",
-        },
-        {
-          title: "Métodos de Pago",
-          url: "/dashboard/metodos-pago",
-          icon: DollarSign,
-          isActive: activeSection === "metodos-pago",
         },
       ],
     },
