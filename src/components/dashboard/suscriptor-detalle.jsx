@@ -6,7 +6,6 @@ import {
   Building2,
   Crown,
   CheckCircle,
-  AlertCircle,
   Layers,
   Send,
   Users,
@@ -16,14 +15,9 @@ import {
   Brain,
   Download,
   Receipt,
-  ShieldCheck,
   UserCheck,
   UserX,
-  RefreshCw,
   ExternalLink,
-  Edit,
-  Check,
-  Clock,
 } from "lucide-react";
 import DashboardLayout from "../dashboard-layout";
 import LoadingScreen from "../LoadingScreen";
@@ -84,6 +78,7 @@ export default function SuscriptorDetallePage() {
 
   useEffect(() => {
     loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleToggleEstado = async () => {
