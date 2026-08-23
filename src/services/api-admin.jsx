@@ -238,3 +238,6 @@ export const impersonarSuscriptorAdmin = (suscriptorId) =>
 
 export const obtenerConsumoIASuscriptorAdmin = (suscriptorId) =>
   authFetch(`/admin/suscriptores/${suscriptorId}/consumo-ia`)
+
+export const obtenerMetricasFinancierasAdmin = () =>
+  authFetch("/admin/suscriptores/metrics/financieras")

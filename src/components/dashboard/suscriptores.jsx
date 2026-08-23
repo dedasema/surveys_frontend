@@ -14,31 +14,61 @@ import {
   UserCheck,
   Building,
   Unlock,
+  Send,
+  PieChart as PieIcon,
 } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import DashboardLayout from "../dashboard-layout";
-import { listarSuscriptoresAdmin, impersonarSuscriptorAdmin } from "../../services/api-admin";
+import {
+  listarSuscriptoresAdmin,
+  impersonarSuscriptorAdmin,
+  obtenerMetricasFinancierasAdmin,
+} from "../../services/api-admin";
+
+const PLAN_COLORS = {
+  Enterprise: "#7c3aed", // Purple
+  Profesional: "#2563eb", // Blue
+  Pro: "#2563eb",
+  Básico: "#059669", // Emerald
+  Starter: "#059669",
+  Gratuito: "#64748b", // Slate
+  Free: "#64748b",
+};
+
+const DEFAULT_COLORS = ["#7c3aed", "#2563eb", "#059669", "#f59e0b", "#ec4899", "#06b6d4"];
 
 export default function SuscriptoresPage() {
   const [suscriptores, setSuscriptores] = useState([]);
+  const [metricas, setMetricas] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
 
-  const fetchSuscriptores = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const data = await listarSuscriptoresAdmin();
-      setSuscriptores(Array.isArray(data) ? data : []);
+      const [subsRes, metricsRes] = await Promise.allSettled([
+        listarSuscriptoresAdmin(),
+        obtenerMetricasFinancierasAdmin().catch(() => null),
+      ]);
+
+      if (subsRes.status === "fulfilled" && Array.isArray(subsRes.value)) {
+        setSuscriptores(subsRes.value);
+      }
+
+      if (metricsRes.status === "fulfilled" && metricsRes.value) {
+        setMetricas(metricsRes.value);
+      }
     } catch (err) {
-      console.error("Error cargando suscriptores:", err);
-      toast.error("Error al cargar la lista de suscriptores");
+      console.error("Error cargando datos del dashboard:", err);
+      toast.error("Error al cargar la información del dashboard");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSuscriptores();
+    fetchData();
   }, []);
 
   const filteredSuscriptores = suscriptores.filter((s) => {
@@ -93,13 +123,49 @@ export default function SuscriptoresPage() {
     }
   };
 
-  // Métricas Globales
-  const totalEmpresas = suscriptores.length;
-  const activas = suscriptores.filter((s) => (s.estado || "activo").toLowerCase() === "activo").length;
-  const mrrEstimado = suscriptores.reduce((acc, s) => {
+  // Métricas financieras calculadas (con fallback de la lista)
+  const totalEmpresas = metricas?.total_empresas_registradas ?? suscriptores.length;
+  const activas =
+    metricas?.total_empresas_activas ??
+    suscriptores.filter((s) => (s.estado || "activo").toLowerCase() === "activo").length;
+  const suspendidas =
+    metricas?.total_empresas_suspendidas ??
+    suscriptores.filter((s) => (s.estado || "activo").toLowerCase() === "suspendido").length;
+
+  const fallbackMRR = suscriptores.reduce((acc, s) => {
     const precio = parseFloat(s.plan?.precio_mensual || s.precio_mensual || 0);
     return acc + (isNaN(precio) ? 0 : precio);
   }, 0);
+
+  const mrr = metricas?.mrr_usd !== undefined ? parseFloat(metricas.mrr_usd) : fallbackMRR;
+  const arr = metricas?.arr_usd !== undefined ? parseFloat(metricas.arr_usd) : mrr * 12;
+  const arpu =
+    metricas?.arpu_usd !== undefined
+      ? parseFloat(metricas.arpu_usd)
+      : totalEmpresas > 0
+      ? mrr / totalEmpresas
+      : 0;
+
+  const entregasMes =
+    metricas?.entregas_totales_mes_plataforma ??
+    suscriptores.reduce((acc, s) => acc + (s.resumen_uso?.entregas_mes ?? s.entregas_mes ?? 0), 0);
+
+  // Transformar distribución por plan para Recharts
+  const distribucionRaw = metricas?.distribucion_suscriptores_por_plan || {};
+  let chartData = Object.entries(distribucionRaw).map(([name, value]) => ({
+    name,
+    value: Number(value),
+  }));
+
+  // Fallback para el gráfico si aún no viene del backend
+  if (chartData.length === 0 && suscriptores.length > 0) {
+    const counts = {};
+    suscriptores.forEach((s) => {
+      const p = s.plan?.nombre || s.plan_nombre || "Básico";
+      counts[p] = (counts[p] || 0) + 1;
+    });
+    chartData = Object.entries(counts).map(([name, value]) => ({ name, value }));
+  }
 
   const getStatusBadge = (estado = "activo") => {
     const st = (estado || "activo").toLowerCase();
@@ -127,77 +193,193 @@ export default function SuscriptoresPage() {
   return (
     <DashboardLayout activeSection="suscriptores">
       <div className="min-h-full p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/40">
-        {/* Header */}
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* Header Principal */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <div className="p-2 bg-blue-600 text-white rounded-xl shadow-md shadow-blue-600/20">
+              <div className="p-2.5 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl shadow-md shadow-blue-600/20">
                 <Building2 className="w-7 h-7" />
               </div>
-              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
-                Gestión de Suscriptores
-              </h1>
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+                  Cockpit de Suscriptores & Métricas SaaS
+                </h1>
+                <p className="text-slate-600 text-xs sm:text-sm">
+                  Monitoreo de ingresos recurrentes, distribución de clientes y soporte técnico en vivo
+                </p>
+              </div>
             </div>
-            <p className="text-slate-600 text-sm sm:text-base">
-              Directorio de empresas, salud de membresías y consumo en tiempo real
-            </p>
           </div>
         </div>
 
-        {/* Métricas Globales */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Total Empresas
-              </span>
-              <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
-                <Building className="w-5 h-5" />
+        {/* 👑 COCKPIT FINANCIERO Y SALUD DEL SAAS (Fase 2) */}
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-xl shadow-slate-200/25 mb-8">
+          <div className="flex items-center justify-between pb-5 mb-6 border-b border-slate-100">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-amber-50 text-amber-600 rounded-xl">
+                <Crown className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">Salud Financiera & Monetización</h2>
+                <p className="text-xs text-slate-500">Métricas clave calculadas en tiempo real</p>
               </div>
             </div>
-            <p className="text-3xl font-extrabold text-slate-900">{totalEmpresas}</p>
-            <p className="text-xs text-slate-400 mt-1">Registradas en la plataforma</p>
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold rounded-full">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              En Vivo
+            </span>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Cuentas Activas
-              </span>
-              <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
-                <UserCheck className="w-5 h-5" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Columna Izquierda: 4 Cards de Métricas */}
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* 1. MRR */}
+              <div className="bg-gradient-to-br from-blue-50/70 to-indigo-50/40 p-5 rounded-2xl border border-blue-100 shadow-xs">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-blue-900 uppercase tracking-wider">
+                    MRR (Monthly Recurring)
+                  </span>
+                  <div className="p-2 bg-blue-600 text-white rounded-xl shadow-xs">
+                    <DollarSign className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-3xl font-black text-slate-900 font-mono">${mrr.toFixed(2)}</p>
+                <p className="text-xs text-slate-500 mt-1 font-medium">Ingreso mensual recurrente</p>
               </div>
-            </div>
-            <p className="text-3xl font-extrabold text-emerald-700">{activas}</p>
-            <p className="text-xs text-slate-400 mt-1">Empresas operando sin restricciones</p>
-          </div>
 
-          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                MRR Estimado
-              </span>
-              <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
-                <DollarSign className="w-5 h-5" />
+              {/* 2. ARR */}
+              <div className="bg-gradient-to-br from-purple-50/70 to-indigo-50/40 p-5 rounded-2xl border border-purple-100 shadow-xs">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-purple-900 uppercase tracking-wider">
+                    ARR (Annual Projection)
+                  </span>
+                  <div className="p-2 bg-purple-600 text-white rounded-xl shadow-xs">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-3xl font-black text-slate-900 font-mono">${arr.toFixed(2)}</p>
+                <p className="text-xs text-slate-500 mt-1 font-medium">Proyección anualizada de ingresos</p>
               </div>
-            </div>
-            <p className="text-3xl font-extrabold text-slate-900">${mrrEstimado.toFixed(2)}</p>
-            <p className="text-xs text-slate-400 mt-1">Ingresos mensuales recurrentes</p>
-          </div>
 
-          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Tasa de Retención
-              </span>
-              <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl">
-                <TrendingUp className="w-5 h-5" />
+              {/* 3. ARPU */}
+              <div className="bg-gradient-to-br from-emerald-50/70 to-teal-50/40 p-5 rounded-2xl border border-emerald-100 shadow-xs">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-emerald-900 uppercase tracking-wider">
+                    ARPU (Avg Revenue)
+                  </span>
+                  <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-xs">
+                    <UserCheck className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-3xl font-black text-slate-900 font-mono">${arpu.toFixed(2)}</p>
+                <p className="text-xs text-slate-500 mt-1 font-medium">Ingreso promedio por empresa</p>
+              </div>
+
+              {/* 4. Entregas Totales */}
+              <div className="bg-gradient-to-br from-amber-50/70 to-orange-50/40 p-5 rounded-2xl border border-amber-100 shadow-xs">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-amber-900 uppercase tracking-wider">
+                    Capacidad Plataforma
+                  </span>
+                  <div className="p-2 bg-amber-600 text-white rounded-xl shadow-xs">
+                    <Send className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-3xl font-black text-slate-900 font-mono">
+                  {entregasMes.toLocaleString()}
+                </p>
+                <p className="text-xs text-slate-500 mt-1 font-medium">
+                  Respuestas totales registradas en el mes
+                </p>
+              </div>
+
+              {/* Barra de estado de cuentas */}
+              <div className="sm:col-span-2 bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2">
+                  <Building className="w-4 h-4 text-slate-500" />
+                  <span className="font-semibold text-slate-700">
+                    Directorio de Clientes: {totalEmpresas} empresas registradas
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 font-semibold">
+                  <span className="text-emerald-700 bg-emerald-100/80 px-2.5 py-1 rounded-lg">
+                    {activas} Activas
+                  </span>
+                  <span className="text-red-700 bg-red-100/80 px-2.5 py-1 rounded-lg">
+                    {suspendidas} Suspendidas
+                  </span>
+                </div>
               </div>
             </div>
-            <p className="text-3xl font-extrabold text-purple-700">
-              {totalEmpresas > 0 ? `${Math.round((activas / totalEmpresas) * 100)}%` : "100%"}
-            </p>
-            <p className="text-xs text-slate-400 mt-1">Salud operativa de clientes</p>
+
+            {/* Columna Derecha: Gráfico Donut de Distribución por Plan */}
+            <div className="bg-slate-50/80 rounded-2xl p-5 border border-slate-100 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+                    <PieIcon className="w-4 h-4 text-blue-600" /> Distribución por Plan
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-mono">{chartData.length} tiers</span>
+                </div>
+                <p className="text-xs text-slate-500 mb-3">Segmentación de clientes por nivel de suscripción</p>
+              </div>
+
+              {chartData.length === 0 ? (
+                <div className="h-44 flex items-center justify-center text-xs text-slate-400">
+                  Sin datos de planes activos
+                </div>
+              ) : (
+                <div className="h-44 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={chartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={42}
+                        outerRadius={68}
+                        paddingAngle={4}
+                        dataKey="value"
+                      >
+                        {chartData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={PLAN_COLORS[entry.name] || DEFAULT_COLORS[index % DEFAULT_COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(val, name) => [`${val} empresa(s)`, `Plan ${name}`]}
+                        contentStyle={{
+                          borderRadius: "12px",
+                          border: "1px solid #e2e8f0",
+                          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              {/* Leyenda del gráfico */}
+              <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-200/60">
+                {chartData.map((entry, idx) => (
+                  <div key={idx} className="flex items-center gap-1.5 text-xs">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full"
+                      style={{
+                        backgroundColor:
+                          PLAN_COLORS[entry.name] || DEFAULT_COLORS[idx % DEFAULT_COLORS.length],
+                      }}
+                    ></span>
+                    <span className="font-medium text-slate-700">{entry.name}:</span>
+                    <span className="font-bold text-slate-900">{entry.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -340,7 +522,7 @@ export default function SuscriptoresPage() {
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => handleImpersonate(s)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-800 hover:bg-amber-600 hover:text-white border border-amber-200/80 rounded-xl text-xs font-semibold transition-all duration-150 shadow-xs"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-800 hover:bg-amber-600 hover:text-white border border-amber-200/80 rounded-xl text-xs font-semibold transition-all duration-150 shadow-xs cursor-pointer"
                               title="Iniciar sesión como esta empresa para soporte técnico en vivo"
                             >
                               <Unlock className="w-3.5 h-3.5" />

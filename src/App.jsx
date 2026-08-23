@@ -65,6 +65,9 @@ function App() {
         <Route path="/dashboard-suscriptor/planes/success" element={<SuccessPage />} />
 
         {/* Rutas protegidas - admin */}
+        <Route path="/dashboard" element={<Navigate to="/dashboard/suscriptores" replace />} />
+        <Route path="/admin/dashboard" element={<Navigate to="/dashboard/suscriptores" replace />} />
+        <Route path="/admin/suscriptores" element={<Navigate to="/dashboard/suscriptores" replace />} />
         <Route path="/dashboard/suscriptores" element={
           <PrivateRoute requiredType="admin"><SuscriptoresPage /></PrivateRoute>
         } />
