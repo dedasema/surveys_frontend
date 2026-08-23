@@ -1,16 +1,9 @@
 
 import { useState, useEffect } from "react"
 import {
-  BarChart3,
   Users,
-  Radio,
-  FileText,
   LogOut,
   Search,
-  MessageSquare,
-  Target,
-  Truck,
-  CreditCard,
   DollarSign,
   Crown,
   User,
@@ -60,10 +53,10 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
 
   const menuItems = [
     {
-      title: "Gestión de Usuarios",
+      title: "Gestión y Accesos",
       items: [
         {
-          title: "Roles",
+          title: "Roles y Permisos",
           url: "/dashboard/roles",
           icon: Users,
           isActive: activeSection === "roles",
@@ -71,53 +64,7 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
       ],
     },
     {
-      title: "Configuración de Encuestas",
-      items: [
-        {
-          title: "Tipos de Pregunta",
-          url: "/dashboard/tipos-pregunta",
-          icon: MessageSquare,
-          isActive: activeSection === "tipos-pregunta",
-        },
-        {
-          title: "Canales",
-          url: "/dashboard/canales",
-          icon: Radio,
-          isActive: activeSection === "canales",
-        },
-      ],
-    },
-    {
-      title: "Estados del Sistema",
-      items: [
-        {
-          title: "Estados Campaña",
-          url: "/dashboard/estados-campana",
-          icon: Target,
-          isActive: activeSection === "estados-campana",
-        },
-        {
-          title: "Estados Entrega",
-          url: "/dashboard/estados-entrega",
-          icon: Truck,
-          isActive: activeSection === "estados-entrega",
-        },
-        {
-          title: "Estados Documento",
-          url: "/dashboard/estado-documento",
-          icon: FileText,
-          isActive: activeSection === "estado-documento",
-        },
-        {
-          title: "Estados Pago",
-          url: "/dashboard/estados-pago",
-          icon: CreditCard,
-          isActive: activeSection === "estados-pago",
-        },
-      ],
-    },
-    {
-      title: "Suscripciones y Pagos",
+      title: "Suscripciones y Negocio",
       items: [
         {
           title: "Planes",

@@ -5,8 +5,6 @@ import {
   LogOut,
   Search,
   User,
-  PhoneCall,
-  BarChart3,
 } from "lucide-react"
 import { getCurrentUser } from "../../services/auth"
 import { useAuth } from "../../context/AuthContext"

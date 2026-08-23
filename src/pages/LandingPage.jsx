@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import {
-  BarChart3,
   FileText,
   Brain,
   Mail,

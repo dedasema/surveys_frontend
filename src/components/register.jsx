@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Eye, EyeOff, Mail, Lock, User, Building, ArrowRight, BarChart3, Menu, X } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Menu, X } from "lucide-react"
 import { requestRegistration } from "../services/auth"
 import { useNavigate } from "react-router-dom"
 import BrandLogo from "./BrandLogo"
