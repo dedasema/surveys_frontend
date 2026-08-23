@@ -154,7 +154,8 @@ export const registerOperator = (data) =>
     body: JSON.stringify(data),
   });
 export const listOperadores = (suscriptorId) =>
-  authFetch(`/auth/operadores/${suscriptorId}`);
+  authFetch(suscriptorId ? `/auth/operadores/${suscriptorId}` : "/auth/operadores");
+export const obtenerOperadores = listOperadores;
 
 // Campañas
 export const getCampanas = () => authFetch("/campanas")
