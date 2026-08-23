@@ -172,7 +172,6 @@ const DashboardOperadorLayout = ({ children, activeSection = "plantillas" }) => 
                 </span>
               </a>
             </div>
-          </div>
         </header>
         <SystemAnnouncementsBanner />
 
