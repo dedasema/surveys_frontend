@@ -113,7 +113,7 @@ const Dashboard = () => {
 
     const mapCanalName = (rawKey) => {
       const k = String(rawKey).toLowerCase().trim()
-      if (k.includes("vapi") || k.includes("voz") || k.includes("audio") || k.includes("whatsapp") || k === "5" || k === "2") return "Audio / Voz"
+      if (k.includes("voz") || k.includes("audio") || k === "5") return "Audio / Voz"
       if (k.includes("papel") || k.includes("qr") || k.includes("fisico") || k === "4") return "Papel"
       if (k.includes("email") || k.includes("correo") || k.includes("web") || k === "1") return "Email"
       return rawKey.charAt(0).toUpperCase() + rawKey.slice(1)
