@@ -37,7 +37,7 @@
 
 ```bash
 # Instala dependencias y levanta
-npm i && npm start
+pnpm install && pnpm start
 # La app quedará en http://localhost:3000
 ```
 
@@ -50,10 +50,11 @@ npm i && npm start
 | Capa          | Paquetes / Tecnologías                       |
 | ------------- | -------------------------------------------- |
 | Framework     | **React 19** (CRA 5)                         |
+| Arquitectura  | **Screaming Architecture** (Feature-Driven)  |
 | Ruteo         | `react-router-dom@7`                         |
 | UI / Estilos  | Tailwind CSS, shadcn/ui, lucide‑react        |
-| Estado global | Context API + hooks personalizados           |
-| Datos / HTTP  | `fetch` wrappers (`lib/api.js`)              |
+| Estado global | Context API + custom hooks                   |
+| Package Mgr   | **pnpm** (v11)                               |
 | Charts        | Recharts 3                                   |
 | Offline       | Service Worker + IndexedDB (Background Sync) |
 
@@ -90,31 +91,29 @@ surveys_frontend/
 ### 1. Requisitos
 
 * **Node.js ≥ 20**
-* **npm 8** (o `pnpm` / `yarn`)
+* **pnpm ≥ 9**
 
 ### 2. Clona e instala
 
 ```bash
 git clone https://github.com/Aliaga23/surveys_frontend.git
 cd surveys_frontend
-npm install
+pnpm install
 ```
 
 ### 3. Ejecuta
 
 ```bash
-npm start
+pnpm start
 ```
 
-
-## Scripts npm
+## Scripts pnpm
 
 | Comando | Acción                                         |
 | ------- | ---------------------------------------------- |
-| `start` | Levanta dev‑server con HMR                     |
-| `build` | Compila producción al directorio `build/`      |
-| `test`  | Ejecuta tests con React Testing Library + Jest |
-| `eject` | Copia config de CRA (irreversible)             |
+| `pnpm start` | Levanta dev‑server con HMR                |
+| `pnpm build` | Compila producción al directorio `build/` |
+| `pnpm test`  | Ejecuta tests con React Testing Library   |
 
 ---
 

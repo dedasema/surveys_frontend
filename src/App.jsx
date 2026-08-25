@@ -46,6 +46,14 @@ import DestinatariosOperadorPage from './components/dashboard-operador/destinata
 import EntregasOperadorPage from './components/dashboard-operador/entregas';
 import PerfilOperador from './components/dashboard-operador/perfil-operador';
 
+// Domain-Driven Feature Containers (Screaming Architecture)
+import { RecipientsContainer } from './features/recipients';
+import { CampaignsContainer } from './features/campaigns';
+import { DeliveriesContainer } from './features/deliveries';
+import { SurveysContainer } from './features/surveys';
+import { ResponsesContainer } from './features/responses';
+import { OperatorsContainer } from './features/operators';
+
 function App() {
   return (
     <Router>
@@ -117,19 +125,19 @@ function App() {
 
         {/* Rutas protegidas - suscriptor */}
         <Route path="/dashboard-suscriptor/plantillas" element={
-          <PrivateRoute requiredType="suscriptor"><PlantillasPage /></PrivateRoute>
+          <PrivateRoute requiredType="suscriptor"><SurveysContainer role="suscriptor" /></PrivateRoute>
         } />
         <Route path="/dashboard-suscriptor/campanas" element={
-          <PrivateRoute requiredType="suscriptor"><CampanasPage /></PrivateRoute>
+          <PrivateRoute requiredType="suscriptor"><CampaignsContainer role="suscriptor" /></PrivateRoute>
         } />
         <Route path="/dashboard-suscriptor/destinatarios" element={
-          <PrivateRoute requiredType="suscriptor"><DestinatariosPage /></PrivateRoute>
+          <PrivateRoute requiredType="suscriptor"><RecipientsContainer role="suscriptor" /></PrivateRoute>
         } />
         <Route path="/dashboard-suscriptor/entregas" element={
-          <PrivateRoute requiredType="suscriptor"><EntregasPage /></PrivateRoute>
+          <PrivateRoute requiredType="suscriptor"><DeliveriesContainer role="suscriptor" /></PrivateRoute>
         } />
         <Route path="/dashboard-suscriptor/respuestas" element={
-          <PrivateRoute requiredType="suscriptor"><RespuestasPage /></PrivateRoute>
+          <PrivateRoute requiredType="suscriptor"><ResponsesContainer role="suscriptor" /></PrivateRoute>
         } />
         <Route path="/dashboard-suscriptor/configuracion" element={
           <PrivateRoute requiredType="suscriptor"><ConfiguracionPage /></PrivateRoute>
@@ -147,7 +155,7 @@ function App() {
           <PrivateRoute requiredType="suscriptor"><PerfilSuscriptor /></PrivateRoute>
         } />
         <Route path="/dashboard-suscriptor/operadores" element={
-          <PrivateRoute requiredType="suscriptor"><Operadores /></PrivateRoute>
+          <PrivateRoute requiredType="suscriptor"><OperatorsContainer role="suscriptor" /></PrivateRoute>
         } />
         <Route path="/dashboard-suscriptor/dashboard" element={
           <PrivateRoute requiredType="suscriptor"><DashboardPage /></PrivateRoute>
@@ -155,13 +163,13 @@ function App() {
 
         {/* Rutas protegidas - operador */}
         <Route path="/dashboard-operador/plantillas" element={
-          <PrivateRoute requiredType="operator"><PlantillasOperadorPage /></PrivateRoute>
+          <PrivateRoute requiredType="operator"><SurveysContainer role="operator" /></PrivateRoute>
         } />
         <Route path="/dashboard-operador/destinatarios" element={
-          <PrivateRoute requiredType="operator"><DestinatariosOperadorPage /></PrivateRoute>
+          <PrivateRoute requiredType="operator"><RecipientsContainer role="operator" /></PrivateRoute>
         } />
         <Route path="/dashboard-operador/entregas" element={
-          <PrivateRoute requiredType="operator"><EntregasOperadorPage /></PrivateRoute>
+          <PrivateRoute requiredType="operator"><DeliveriesContainer role="operator" /></PrivateRoute>
         } />
         <Route path="/dashboard-operador/perfil-operador" element={
           <PrivateRoute requiredType="operator"><PerfilOperador /></PrivateRoute>
