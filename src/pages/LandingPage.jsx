@@ -13,6 +13,8 @@ import {
   Star,
   ArrowRight,
   Sparkles,
+  Mail,
+  Smartphone,
 } from "lucide-react"
 import { useAuth } from "../context/AuthContext";
 import PublicNavbar from "../components/PublicNavbar";
