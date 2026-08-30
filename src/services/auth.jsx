@@ -59,17 +59,35 @@ export async function login(credentials) {
 
 
 export function isTokenExpired(token) {
-  if (!token) return true;
+  if (!token || typeof token !== "string") return true;
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return true;
-    const payloadBase64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const decoded = JSON.parse(atob(payloadBase64));
+    let payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    while (payload.length % 4 !== 0) {
+      payload += "=";
+    }
+    const decodedStr = decodeURIComponent(
+      atob(payload)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    const decoded = JSON.parse(decodedStr);
     if (!decoded.exp) return false;
-    // Si la fecha actual supera exp (con 5 segundos de margen) está expirado
     return Date.now() >= (decoded.exp * 1000) - 5000;
   } catch {
-    return true;
+    try {
+      let payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+      while (payload.length % 4 !== 0) {
+        payload += "=";
+      }
+      const decoded = JSON.parse(atob(payload));
+      if (!decoded.exp) return false;
+      return Date.now() >= (decoded.exp * 1000) - 5000;
+    } catch {
+      return false;
+    }
   }
 }
 

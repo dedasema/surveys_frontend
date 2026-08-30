@@ -1,11 +1,11 @@
 import { useState } from "react"
-import { Eye, EyeOff, Mail, Lock, User, Building, ArrowRight, Menu, X } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, User, Building, ArrowRight } from "lucide-react"
 import { toast } from "sonner"
 import { requestRegistration } from "../services/auth"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import BrandLogo from "./BrandLogo"
-
-
+import PublicNavbar from "./PublicNavbar"
+import PublicFooter from "./PublicFooter"
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -17,7 +17,6 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState({})
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const navigate = useNavigate()
 
   const handleChange = (e) => {
@@ -97,74 +96,10 @@ const Register = () => {
 
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* NAVIGATION */}
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <BrandLogo size="lg" />
+    <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen flex flex-col justify-between">
+      <PublicNavbar />
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="/#funcionalidades" className="text-gray-600 hover:text-blue-600 transition-colors">
-                Funcionalidades
-              </a>
-              <a href="/#beneficios" className="text-gray-600 hover:text-blue-600 transition-colors">
-                Beneficios
-              </a>
-              <a href="/#testimonios" className="text-gray-600 hover:text-blue-600 transition-colors">
-                Testimonios
-              </a>
-              <a href="/#precios" className="text-gray-600 hover:text-blue-600 transition-colors">
-                Precios
-              </a>
-              <a href="/login" className="text-gray-600 hover:text-blue-600 transition-colors">
-                Iniciar sesión
-              </a>
-              <a
-                href="/register"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
-              >
-                Registrarse
-              </a>
-            </div>
-
-            {/* Mobile menu button */}
-            <div className="md:hidden">
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-600 hover:text-gray-900">
-                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Navigation */}
-          {isMenuOpen && (
-            <div className="md:hidden py-4 border-t">
-              <div className="flex flex-col space-y-4">
-                <a href="/#funcionalidades" className="text-gray-600 hover:text-blue-600">
-                  Funcionalidades
-                </a>
-                <a href="/#beneficios" className="text-gray-600 hover:text-blue-600">
-                  Beneficios
-                </a>
-                <a href="/#testimonios" className="text-gray-600 hover:text-blue-600">
-                  Testimonios
-                </a>
-                <a href="/#precios" className="text-gray-600 hover:text-blue-600">
-                  Precios
-                </a>
-                <a href="/login" className="text-gray-600 hover:text-blue-600">
-                  Iniciar sesión
-                </a>
-                <a href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-center font-medium">
-                  Registrarse
-                </a>
-              </div>
-            </div>
-          )}
-        </div>
-      </nav>
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl w-full space-y-8">
           {/* Header */}
           <div className="text-center">
@@ -318,13 +253,14 @@ const Register = () => {
           <div className="text-center">
             <p className="text-sm text-gray-600">
               ¿Ya tienes una cuenta?{" "}
-              <a href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+              <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
                 Inicia sesión aquí
-              </a>
+              </Link>
             </p>
           </div>
         </div>
       </div>
+      <PublicFooter />
     </div>
   )
 }
