@@ -16,10 +16,10 @@ export default function PublicFooter() {
             </p>
 
             <div className="pt-2 space-y-2.5 text-sm text-gray-300">
-              <div className="flex items-center gap-2.5">
-                <MapPin className="h-4 w-4 text-blue-400 flex-shrink-0" />
+              <Link to="/sobre-nosotros#ubicacion" className="flex items-center gap-2.5 hover:text-white transition-colors group">
+                <MapPin className="h-4 w-4 text-blue-400 flex-shrink-0 group-hover:scale-110 transition-transform" />
                 <span>Santa Cruz de la Sierra, Bolivia</span>
-              </div>
+              </Link>
               <div className="flex items-center gap-2.5">
                 <Mail className="h-4 w-4 text-blue-400 flex-shrink-0" />
                 <a href="mailto:contacto@desesoft.com" className="hover:text-white transition-colors">
@@ -76,7 +76,7 @@ export default function PublicFooter() {
               </li>
               <li>
                 <Link to="/sobre-nosotros#ubicacion" className="hover:text-blue-400 transition-colors">
-                  Santa Cruz, Bolivia
+                  Ubicación
                 </Link>
               </li>
               <li>

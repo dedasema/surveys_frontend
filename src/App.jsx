@@ -41,6 +41,7 @@ import AboutPage from './pages/AboutPage';
 import SupportPage from './pages/SupportPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsPage from './pages/TermsPage';
+import ScrollToTop from './components/ScrollToTop';
 
 // Domain-Driven Feature Containers (Screaming Architecture)
 import { RecipientsContainer } from './features/recipients';
@@ -53,6 +54,7 @@ import { OperatorsContainer } from './features/operators';
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Toaster position="top-right" richColors />
       <OfflineIndicator />
       <ImpersonationBanner />

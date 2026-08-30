@@ -151,7 +151,7 @@ export default function SupportPage() {
         </section>
 
         {/* FORMULARIO DE SOPORTE & INFO DE CONTACTO */}
-        <section className="py-12 px-4 bg-gray-50/70 border-y border-gray-100">
+        <section id="ticket" className="py-12 px-4 bg-gray-50/70 border-y border-gray-100 scroll-mt-24">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
               {/* Información de contacto */}
@@ -320,7 +320,7 @@ export default function SupportPage() {
         </section>
 
         {/* PREGUNTAS FRECUENTES (FAQS) */}
-        <section id="faqs" className="py-20 px-4">
+        <section id="faqs" className="py-20 px-4 scroll-mt-24">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3">

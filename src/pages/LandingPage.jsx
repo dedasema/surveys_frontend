@@ -209,7 +209,7 @@ const LandingPage = () => {
       </section>
 
       {/* FUNCIONALIDADES */}
-      <section id="funcionalidades" className="py-20 px-4 bg-white">
+      <section id="funcionalidades" className="py-20 px-4 bg-white scroll-mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold mb-4">Funcionalidades Poderosas</h2>
@@ -295,7 +295,7 @@ const LandingPage = () => {
       </section>
 
       {/* BENEFICIOS */}
-      <section id="beneficios" className="py-20 px-4 bg-gray-50">
+      <section id="beneficios" className="py-20 px-4 bg-gray-50 scroll-mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -356,7 +356,7 @@ const LandingPage = () => {
       </section>
 
       {/* TESTIMONIOS */}
-      <section id="testimonios" className="py-20 px-4 bg-white">
+      <section id="testimonios" className="py-20 px-4 bg-white scroll-mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold mb-4">Lo que dicen nuestros clientes</h2>
@@ -370,20 +370,12 @@ const LandingPage = () => {
                   <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
                 ))}
               </div>
-              <p className="text-gray-600 mb-6">
-                "Hemos reducido el tiempo de procesamiento de encuestas de 2 semanas a 2 horas. La automatización es
-                increíble."
+              <p className="text-gray-600 mb-6 italic">
+                "SurveySaaS transformó completamente nuestra forma de recolectar encuestas en campo. La digitalización OCR nos ahorró incontables horas de transcripción manual."
               </p>
-              <div className="flex items-center">
-                <img
-                  src="/placeholder.svg?height=40&width=40"
-                  alt="María González"
-                  className="w-10 h-10 rounded-full mr-3"
-                />
-                <div>
-                  <div className="font-semibold">María González</div>
-                  <div className="text-sm text-gray-500">Directora de Operaciones, TechCorp</div>
-                </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">María González</h4>
+                <p className="text-sm text-gray-500">Directora de Investigación, DataCorp</p>
               </div>
             </div>
 
@@ -393,19 +385,12 @@ const LandingPage = () => {
                   <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
                 ))}
               </div>
-              <p className="text-gray-600 mb-6">
-                "La precisión del OCR es impresionante. Procesamos miles de documentos sin errores."
+              <p className="text-gray-600 mb-6 italic">
+                "La integración multicanal es fantástica. Podemos llegar a nuestros clientes por correo, enlaces web y llamadas de voz automatizadas con IA desde un único panel."
               </p>
-              <div className="flex items-center">
-                <img
-                  src="/placeholder.svg?height=40&width=40"
-                  alt="Carlos Ruiz"
-                  className="w-10 h-10 rounded-full mr-3"
-                />
-                <div>
-                  <div className="font-semibold">Carlos Ruiz</div>
-                  <div className="text-sm text-gray-500">CTO, DataFlow Solutions</div>
-                </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">Carlos Rodríguez</h4>
+                <p className="text-sm text-gray-500">Gerente de Operaciones, GlobalRetail</p>
               </div>
             </div>
 
@@ -415,19 +400,12 @@ const LandingPage = () => {
                   <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
                 ))}
               </div>
-              <p className="text-gray-600 mb-6">
-                "El ROI fue evidente desde el primer mes. Altamente recomendado para cualquier empresa."
+              <p className="text-gray-600 mb-6 italic">
+                "El soporte técnico y la facilidad para crear encuestas personalizadas nos permitieron desplegar campañas complejas en cuestión de minutos."
               </p>
-              <div className="flex items-center">
-                <img
-                  src="/placeholder.svg?height=40&width=40"
-                  alt="Ana Martínez"
-                  className="w-10 h-10 rounded-full mr-3"
-                />
-                <div>
-                  <div className="font-semibold">Ana Martínez</div>
-                  <div className="text-sm text-gray-500">CEO, InnovateLab</div>
-                </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">Ana Martínez</h4>
+                <p className="text-sm text-gray-500">Líder de Experiencia de Cliente, InnovaTech</p>
               </div>
             </div>
           </div>
@@ -435,7 +413,7 @@ const LandingPage = () => {
       </section>
 
       {/* PRECIOS */}
-      <section id="precios" className="py-20 px-4 bg-gray-50">
+      <section id="precios" className="py-20 px-4 bg-gray-50 scroll-mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center bg-blue-100 text-blue-800 px-3.5 py-1 rounded-full text-sm font-medium mb-3">
@@ -647,7 +625,7 @@ const LandingPage = () => {
       </section>
 
       {/* CONTACTO */}
-      <section id="contacto" className="py-20 px-4 bg-white">
+      <section id="contacto" className="py-20 px-4 bg-white scroll-mt-20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold mb-4">Hablemos de tu proyecto</h2>

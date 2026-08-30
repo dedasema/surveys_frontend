@@ -39,8 +39,8 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* QUIÉNES SOMOS & HISTORIA */}
-        <section className="py-20 px-4">
+        {/* QUIÉNES SOMOS & HISTORIA & SEDE */}
+        <section id="ubicacion" className="py-20 px-4 scroll-mt-24">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
@@ -118,7 +118,7 @@ export default function AboutPage() {
         </section>
 
         {/* MISIÓN & VISIÓN */}
-        <section id="mision" className="py-20 px-4 bg-gray-50/70 border-y border-gray-100">
+        <section id="mision" className="py-20 px-4 bg-gray-50/70 border-y border-gray-100 scroll-mt-24">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Nuestros Pilares</h2>
