@@ -4,14 +4,12 @@ import {
   MapPin,
   Target,
   Eye,
-  Award,
   Users,
   Cpu,
   ShieldCheck,
   Globe2,
   Sparkles,
   ArrowRight,
-  CheckCircle2,
 } from "lucide-react";
 import PublicNavbar from "../components/PublicNavbar";
 import PublicFooter from "../components/PublicFooter";

@@ -1,5 +1,5 @@
 import React from "react";
-import { FileText, CheckCircle2, ShieldAlert } from "lucide-react";
+import { FileText } from "lucide-react";
 import PublicNavbar from "../components/PublicNavbar";
 import PublicFooter from "../components/PublicFooter";
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { Shield, Lock, Eye, FileText, CheckCircle2 } from "lucide-react";
+import { Shield, Lock } from "lucide-react";
 import PublicNavbar from "../components/PublicNavbar";
 import PublicFooter from "../components/PublicFooter";
 

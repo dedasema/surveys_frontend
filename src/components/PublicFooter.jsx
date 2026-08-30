@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Mail, Phone, Heart, Globe, Shield, Sparkles } from "lucide-react";
+import { MapPin, Mail, Globe } from "lucide-react";
 import BrandLogo from "./BrandLogo";
 
 export default function PublicFooter() {

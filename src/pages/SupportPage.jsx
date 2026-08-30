@@ -12,7 +12,6 @@ import {
   Send,
   ChevronDown,
   ChevronUp,
-  CheckCircle,
   LifeBuoy,
 } from "lucide-react";
 import { toast } from "sonner";

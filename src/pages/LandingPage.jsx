@@ -4,9 +4,7 @@ import { useState, useEffect } from "react"
 import {
   FileText,
   Brain,
-  Mail,
   MessageSquare,
-  Smartphone,
   Zap,
   Shield,
   Users,
@@ -14,15 +12,9 @@ import {
   CheckCircle,
   Star,
   ArrowRight,
-  Menu,
-  X,
   Sparkles,
-  Layers,
-  Send,
-  Loader2,
 } from "lucide-react"
 import { useAuth } from "../context/AuthContext";
-import BrandLogo from "../components/BrandLogo";
 import PublicNavbar from "../components/PublicNavbar";
 import PublicFooter from "../components/PublicFooter";
 import { obtenerPlanesPublicos } from "../services/api";
@@ -77,10 +69,8 @@ const DEFAULT_PLANES = [
 ]
 
 const LandingPage = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [email, setEmail] = useState("")
   const [planes, setPlanes] = useState(DEFAULT_PLANES)
-  const [loadingPlanes, setLoadingPlanes] = useState(true)
   const { isAuthenticated, user } = useAuth();
 
   const isUserLoggedIn =
@@ -117,8 +107,6 @@ const LandingPage = () => {
         }
       } catch (err) {
         console.warn("Error cargando planes en landing:", err)
-      } finally {
-        if (isMounted) setLoadingPlanes(false)
       }
     }
     fetchPlanes()
