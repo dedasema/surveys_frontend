@@ -1,6 +1,6 @@
 
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   FileText,
   Brain,
@@ -16,14 +16,93 @@ import {
   ArrowRight,
   Menu,
   X,
+  Sparkles,
+  Layers,
+  Send,
+  Loader2,
 } from "lucide-react"
 import { useAuth } from "../context/AuthContext";
 import BrandLogo from "../components/BrandLogo";
+import { obtenerPlanesPublicos } from "../services/api";
+
+const DEFAULT_PLANES = [
+  {
+    id: 1,
+    nombre: "Gratuito",
+    precio_mensual: "0.00",
+    descripcion: "Plan básico gratuito de prueba para comenzar",
+    max_plantillas: 3,
+    max_campanas: 2,
+    max_entregas: 100,
+    max_operadores: 1,
+    permite_email: true,
+    permite_audio_voz: true,
+    permite_papel: true,
+    permite_ia_analisis: false,
+    caracteristicas: "3 Plantillas de Encuestas;100 Respuestas / mes;1 Operador de Equipo;Canal Email y Enlaces Web;Prueba de OCR e IA",
+  },
+  {
+    id: 2,
+    nombre: "Profesional",
+    precio_mensual: "29.99",
+    descripcion: "Plan profesional con funciones avanzadas e IA",
+    max_plantillas: 50,
+    max_campanas: 50,
+    max_entregas: 5000,
+    max_operadores: 5,
+    permite_email: true,
+    permite_audio_voz: true,
+    permite_papel: true,
+    permite_ia_analisis: true,
+    caracteristicas: "50 Plantillas de Encuestas;5.000 Respuestas / mes;5 Operadores de Equipo;OCR Papel con IA;Audio / Voz con IA;Análisis Avanzado con IA",
+  },
+  {
+    id: 3,
+    nombre: "Enterprise",
+    precio_mensual: "99.99",
+    descripcion: "Plan empresarial ilimitado para organizaciones",
+    max_plantillas: -1,
+    max_campanas: -1,
+    max_entregas: -1,
+    max_operadores: -1,
+    permite_email: true,
+    permite_audio_voz: true,
+    permite_papel: true,
+    permite_ia_analisis: true,
+    caracteristicas: "Plantillas Ilimitadas;Respuestas Ilimitadas;Operadores Ilimitados;OCR Papel y Asistente de Voz;API y Exportación Completa;Soporte Prioritario y SLA",
+  },
+]
 
 const LandingPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [email, setEmail] = useState("")
+  const [planes, setPlanes] = useState(DEFAULT_PLANES)
+  const [loadingPlanes, setLoadingPlanes] = useState(true)
   const { isAuthenticated, user } = useAuth();
+
+  useEffect(() => {
+    let isMounted = true
+    const fetchPlanes = async () => {
+      try {
+        const data = await obtenerPlanesPublicos()
+        if (isMounted && data && data.length > 0) {
+          const sorted = [...data].sort(
+            (a, b) => Number(a.precio_mensual || 0) - Number(b.precio_mensual || 0)
+          )
+          setPlanes(sorted)
+        }
+      } catch (err) {
+        console.warn("Error cargando planes en landing:", err)
+      } finally {
+        if (isMounted) setLoadingPlanes(false)
+      }
+    }
+    fetchPlanes()
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   const handleSubmit = (e) => {
     e.preventDefault()
     // Handle form submission
@@ -432,98 +511,164 @@ const LandingPage = () => {
       <section id="precios" className="py-20 px-4 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Planes que se adaptan a tu negocio</h2>
-            <p className="text-xl text-gray-600">Comienza gratis y escala según tus necesidades</p>
+            <div className="inline-flex items-center bg-blue-100 text-blue-800 px-3.5 py-1 rounded-full text-sm font-medium mb-3">
+              <Sparkles className="h-4 w-4 mr-1.5 text-blue-600" />
+              Precios Transparentes
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4 text-gray-900">Planes que se adaptan a tu negocio</h2>
+            <p className="text-xl text-gray-600">Comienza gratis y escala según tus necesidades de recolección y análisis</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
-              <h3 className="text-xl font-semibold mb-2">Starter</h3>
-              <div className="text-3xl font-bold mb-4">Gratis</div>
-              <p className="text-gray-600 mb-6">Perfecto para equipos pequeños</p>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Hasta 100 respuestas/mes
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />3 canales de distribución
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Reportes básicos
-                </li>
-              </ul>
-              <a
-                href="/register"
-                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 py-3 rounded-lg font-semibold transition-colors block text-center"
-              >
-                Comenzar gratis
-              </a>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+            {planes.map((plan, index) => {
+              const precioNum = Number(plan.precio_mensual || 0)
+              const isPopular =
+                plan.nombre?.toLowerCase().includes("profesional") ||
+                plan.nombre?.toLowerCase().includes("pro") ||
+                (planes.length === 3 && index === 1)
+              const featuresList = plan.caracteristicas
+                ? plan.caracteristicas.split(";").map((f) => f.trim()).filter(Boolean)
+                : []
 
-            <div className="bg-blue-600 text-white p-8 rounded-2xl shadow-lg transform scale-105">
-              <div className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-medium mb-4 inline-block">
-                Más Popular
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Professional</h3>
-              <div className="text-3xl font-bold mb-4">€99/mes</div>
-              <p className="text-blue-100 mb-6">Para empresas en crecimiento</p>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-400 mr-3" />
-                  Respuestas ilimitadas
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-400 mr-3" />
-                  Todos los canales
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-400 mr-3" />
-                  IA y OCR avanzado
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-400 mr-3" />
-                  Soporte prioritario
-                </li>
-              </ul>
-              <a
-                href="/register"
-                className="w-full bg-white text-blue-600 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors block text-center"
-              >
-                Comenzar prueba gratuita
-              </a>
-            </div>
+              return (
+                <div
+                  key={plan.id || index}
+                  className={`relative flex flex-col rounded-3xl transition-all duration-300 p-8 ${
+                    isPopular
+                      ? "bg-blue-600 text-white shadow-xl lg:-translate-y-2 border-2 border-blue-500"
+                      : "bg-white text-gray-900 shadow-sm hover:shadow-md border border-gray-200"
+                  }`}
+                >
+                  {isPopular && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-950 px-4 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider shadow-sm flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5" /> Más Popular
+                    </div>
+                  )}
 
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
-              <h3 className="text-xl font-semibold mb-2">Enterprise</h3>
-              <div className="text-3xl font-bold mb-4">Personalizado</div>
-              <p className="text-gray-600 mb-6">Para grandes organizaciones</p>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Volumen ilimitado
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Integraciones personalizadas
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Soporte dedicado
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  SLA garantizado
-                </li>
-              </ul>
-              <a
-                href="#contacto"
-                className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg font-semibold transition-colors block text-center"
-              >
-                Contactar ventas
-              </a>
-            </div>
+                  <div className="mb-6">
+                    <h3 className={`text-2xl font-bold mb-2 ${isPopular ? "text-white" : "text-gray-900"}`}>
+                      {plan.nombre}
+                    </h3>
+                    <p className={`text-sm min-h-[40px] leading-relaxed ${isPopular ? "text-blue-100" : "text-gray-500"}`}>
+                      {plan.descripcion || "Plan para optimizar la gestión de tus encuestas"}
+                    </p>
+                  </div>
+
+                  <div className="flex items-baseline gap-1.5 mb-8 pb-6 border-b border-dashed border-gray-200/40">
+                    <span className="text-4xl lg:text-5xl font-black tracking-tight">
+                      {precioNum === 0 ? "Gratis" : `$${precioNum.toFixed(2).replace(/\.00$/, "")}`}
+                    </span>
+                    {precioNum > 0 && (
+                      <span className={`text-sm font-medium ${isPopular ? "text-blue-100" : "text-gray-500"}`}>
+                        /mes USD
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Cuotas y límites */}
+                  <div className="space-y-3 mb-8 flex-1">
+                    <p className={`text-xs font-bold uppercase tracking-wider mb-3 ${isPopular ? "text-blue-200" : "text-gray-400"}`}>
+                      Incluye:
+                    </p>
+
+                    {featuresList.length > 0 ? (
+                      featuresList.map((feat, fIdx) => (
+                        <div key={fIdx} className="flex items-start text-sm">
+                          <CheckCircle
+                            className={`h-5 w-5 mr-3 flex-shrink-0 mt-0.5 ${
+                              isPopular ? "text-yellow-300" : "text-emerald-500"
+                            }`}
+                          />
+                          <span className={isPopular ? "text-blue-50" : "text-gray-700"}>{feat}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className="flex items-center text-sm">
+                          <CheckCircle
+                            className={`h-5 w-5 mr-3 flex-shrink-0 ${
+                              isPopular ? "text-yellow-300" : "text-emerald-500"
+                            }`}
+                          />
+                          <span className={isPopular ? "text-blue-50" : "text-gray-700"}>
+                            {plan.max_plantillas === -1 ? "Plantillas Ilimitadas" : `Hasta ${plan.max_plantillas} plantillas`}
+                          </span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <CheckCircle
+                            className={`h-5 w-5 mr-3 flex-shrink-0 ${
+                              isPopular ? "text-yellow-300" : "text-emerald-500"
+                            }`}
+                          />
+                          <span className={isPopular ? "text-blue-50" : "text-gray-700"}>
+                            {plan.max_entregas === -1
+                              ? "Respuestas Ilimitadas"
+                              : `Hasta ${Number(plan.max_entregas).toLocaleString()} respuestas/mes`}
+                          </span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <CheckCircle
+                            className={`h-5 w-5 mr-3 flex-shrink-0 ${
+                              isPopular ? "text-yellow-300" : "text-emerald-500"
+                            }`}
+                          />
+                          <span className={isPopular ? "text-blue-50" : "text-gray-700"}>
+                            {plan.max_operadores === -1
+                              ? "Operadores Ilimitados"
+                              : `${plan.max_operadores} Operador(es) de equipo`}
+                          </span>
+                        </div>
+                        {plan.permite_audio_voz && (
+                          <div className="flex items-center text-sm">
+                            <CheckCircle
+                              className={`h-5 w-5 mr-3 flex-shrink-0 ${
+                                isPopular ? "text-yellow-300" : "text-emerald-500"
+                              }`}
+                            />
+                            <span className={isPopular ? "text-blue-50" : "text-gray-700"}>Encuestas por Voz e IA</span>
+                          </div>
+                        )}
+                        {plan.permite_papel && (
+                          <div className="flex items-center text-sm">
+                            <CheckCircle
+                              className={`h-5 w-5 mr-3 flex-shrink-0 ${
+                                isPopular ? "text-yellow-300" : "text-emerald-500"
+                              }`}
+                            />
+                            <span className={isPopular ? "text-blue-50" : "text-gray-700"}>
+                              OCR y Digitalización de Papel
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  <a
+                    href={
+                      isAuthenticated
+                        ? user?.tipo === "admin"
+                          ? "/dashboard/planes"
+                          : "/dashboard-suscriptor/planes"
+                        : "/register"
+                    }
+                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-center transition-all block shadow-xs ${
+                      isPopular
+                        ? "bg-white hover:bg-gray-50 text-blue-700 hover:shadow-md"
+                        : precioNum === 0
+                        ? "bg-gray-100 hover:bg-gray-200 text-gray-900"
+                        : "bg-blue-600 hover:bg-blue-700 text-white"
+                    }`}
+                  >
+                    {isAuthenticated
+                      ? "Ver Planes en Dashboard"
+                      : precioNum === 0
+                      ? "Comenzar gratis"
+                      : "Comenzar prueba"}
+                  </a>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>

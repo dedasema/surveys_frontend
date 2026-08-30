@@ -241,6 +241,18 @@ export const getDashboardData = async () => {
 }
 
 // Planes
+export const obtenerPlanesPublicos = async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/subscription/planes`);
+    if (!res.ok) throw new Error("Error al obtener planes");
+    const data = await res.json();
+    return Array.isArray(data) ? data.filter((p) => p.activo !== false) : [];
+  } catch (err) {
+    console.warn("Error al obtener planes públicos:", err);
+    return null;
+  }
+};
+
 export const listPlanes = () => authFetch("/subscription/planes");
 
 export const getPlan = (id) => authFetch(`/subscription/planes/${id}`);
