@@ -46,6 +46,11 @@ import DestinatariosOperadorPage from './components/dashboard-operador/destinata
 import EntregasOperadorPage from './components/dashboard-operador/entregas';
 import PerfilOperador from './components/dashboard-operador/perfil-operador';
 
+import AboutPage from './pages/AboutPage';
+import SupportPage from './pages/SupportPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsPage from './pages/TermsPage';
+
 // Domain-Driven Feature Containers (Screaming Architecture)
 import { RecipientsContainer } from './features/recipients';
 import { CampaignsContainer } from './features/campaigns';
@@ -65,6 +70,15 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/sobre-nosotros" element={<AboutPage />} />
+        <Route path="/about" element={<Navigate to="/sobre-nosotros" replace />} />
+        <Route path="/soporte" element={<SupportPage />} />
+        <Route path="/support" element={<Navigate to="/soporte" replace />} />
+        <Route path="/ayuda" element={<Navigate to="/soporte" replace />} />
+        <Route path="/privacidad" element={<PrivacyPolicyPage />} />
+        <Route path="/privacy" element={<Navigate to="/privacidad" replace />} />
+        <Route path="/terminos" element={<TermsPage />} />
+        <Route path="/terms" element={<Navigate to="/terminos" replace />} />
         <Route path="/encuestas/:token" element={<EncuestaPage />} />
         <Route path="/email-sent" element={<EmailSentPage />} />
         <Route path="/verify-registration" element={<VerifyRegistrationPage />} />

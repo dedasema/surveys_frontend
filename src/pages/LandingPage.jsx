@@ -23,6 +23,8 @@ import {
 } from "lucide-react"
 import { useAuth } from "../context/AuthContext";
 import BrandLogo from "../components/BrandLogo";
+import PublicNavbar from "../components/PublicNavbar";
+import PublicFooter from "../components/PublicFooter";
 import { obtenerPlanesPublicos } from "../services/api";
 import { isTokenExpired, redirectBasedOnRole } from "../services/auth";
 
@@ -133,99 +135,8 @@ const LandingPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-      {/* NAVIGATION */}
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <BrandLogo size="lg" />
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#funcionalidades" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm">
-                Funcionalidades
-              </a>
-              <a href="#beneficios" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm">
-                Beneficios
-              </a>
-              <a href="#testimonios" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm">
-                Testimonios
-              </a>
-              <a href="#precios" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm">
-                Precios
-              </a>
-              {isUserLoggedIn ? (
-                <div className="flex items-center gap-3">
-                  <a
-                    href={targetDashboard}
-                    className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-xs hover:shadow-md text-sm"
-                  >
-                    <span>Ir al dashboard</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </a>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-4">
-                  <a href="/login" className="text-gray-700 hover:text-blue-600 font-medium text-sm transition-colors">
-                    Iniciar sesión
-                  </a>
-                  <a
-                    href="/register"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-xs hover:shadow-md"
-                  >
-                    Registrarse
-                  </a>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile menu button */}
-            <div className="md:hidden">
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-600 hover:text-gray-900 p-2">
-                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Navigation */}
-          {isMenuOpen && (
-            <div className="md:hidden py-4 border-t">
-              <div className="flex flex-col space-y-4">
-                <a href="#funcionalidades" className="text-gray-600 hover:text-blue-600 font-medium">
-                  Funcionalidades
-                </a>
-                <a href="#beneficios" className="text-gray-600 hover:text-blue-600 font-medium">
-                  Beneficios
-                </a>
-                <a href="#testimonios" className="text-gray-600 hover:text-blue-600 font-medium">
-                  Testimonios
-                </a>
-                <a href="#precios" className="text-gray-600 hover:text-blue-600 font-medium">
-                  Precios
-                </a>
-                {isUserLoggedIn ? (
-                  <a
-                    href={targetDashboard}
-                    className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-center font-semibold text-sm"
-                  >
-                    <span>Ir al dashboard</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </a>
-                ) : (
-                  <div className="flex flex-col space-y-2 pt-2 border-t border-gray-100">
-                    <a href="/login" className="text-gray-700 hover:text-blue-600 font-medium text-center py-2">
-                      Iniciar sesión
-                    </a>
-                    <a href="/register" className="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-center font-semibold">
-                      Registrarse
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </nav>
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col justify-between">
+      <PublicNavbar />
 
       {/* HERO SECTION */}
       <section className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20 px-4">
@@ -830,122 +741,7 @@ const LandingPage = () => {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-gray-900 text-white py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <BrandLogo size="lg" textColor="light" className="mb-4" />
-              <p className="text-gray-400 mb-4">
-                Automatización inteligente de encuestas y documentos para empresas modernas.
-              </p>
-              <div className="flex space-x-4">
-                <a href="https://linkedin.com" className="text-gray-400 hover:text-white transition-colors">
-                  LinkedIn
-                </a>
-                <a href="https://twitter.com" className="text-gray-400 hover:text-white transition-colors">
-                  Twitter
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Producto</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="https://example.com" className="hover:text-white transition-colors">
-                    Funcionalidades
-                  </a>
-                </li>
-                <li>
-                  <a href="https://example.com" className="hover:text-white transition-colors">
-                    Precios
-                  </a>
-                </li>
-                <li>
-                  <a href="https://example.com" className="hover:text-white transition-colors">
-                    Integraciones
-                  </a>
-                </li>
-                <li>
-                  <a href="https://example.com" className="hover:text-white transition-colors">
-                    API
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Empresa</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="https://example.com" className="hover:text-white transition-colors">
-                    Sobre nosotros
-                  </a>
-                </li>
-                <li>
-                  <a href="https://example.com" className="hover:text-white transition-colors">
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="https://example.com" className="hover:text-white transition-colors">
-                    Carreras
-                  </a>
-                </li>
-                <li>
-                  <a href="https://example.com" className="hover:text-white transition-colors">
-                    Prensa
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Soporte</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="https://example.com" className="hover:text-white transition-colors">
-                    Centro de ayuda
-                  </a>
-                </li>
-                <li>
-                  <a href="https://example.com" className="hover:text-white transition-colors">
-                    Documentación
-                  </a>
-                </li>
-                <li>
-                  <a href="https://example.com" className="hover:text-white transition-colors">
-                    Estado del servicio
-                  </a>
-                </li>
-                <li>
-                  <a href="https://example.com" className="hover:text-white transition-colors">
-                    Contacto
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">
-              &copy; {new Date().getFullYear()} SurveySaaS. Todos los derechos reservados.
-            </p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="https://example.com" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Política de Privacidad
-              </a>
-              <a href="https://example.com" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Términos de Servicio
-              </a>
-              <a href="https://example.com" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Cookies
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
-
+      <PublicFooter />
     </div>
   )
 }
