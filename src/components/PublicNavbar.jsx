@@ -36,6 +36,9 @@ export default function PublicNavbar() {
     return isHome ? hash : `/${hash}`;
   };
 
+  const isLoginPage = location.pathname === "/login";
+  const isRegisterPage = location.pathname === "/register";
+
   return (
     <nav className="bg-white/95 backdrop-blur-md shadow-xs sticky top-0 z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -97,18 +100,22 @@ export default function PublicNavbar() {
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <Link
-                  to="/login"
-                  className="text-gray-700 hover:text-blue-600 font-medium text-sm transition-colors"
-                >
-                  Iniciar sesión
-                </Link>
-                <Link
-                  to="/register"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-xs hover:shadow-md"
-                >
-                  Registrarse
-                </Link>
+                {!isLoginPage && (
+                  <Link
+                    to="/login"
+                    className="text-gray-700 hover:text-blue-600 font-medium text-sm transition-colors"
+                  >
+                    Iniciar sesión
+                  </Link>
+                )}
+                {!isRegisterPage && (
+                  <Link
+                    to="/register"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-xs hover:shadow-md"
+                  >
+                    Registrarse
+                  </Link>
+                )}
               </div>
             )}
           </div>
@@ -175,20 +182,24 @@ export default function PublicNavbar() {
                 </a>
               ) : (
                 <div className="flex flex-col space-y-2 pt-2 border-t border-gray-100">
-                  <Link
-                    to="/login"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="text-gray-700 hover:text-blue-600 font-medium text-center py-2"
-                  >
-                    Iniciar sesión
-                  </Link>
-                  <Link
-                    to="/register"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-center font-semibold"
-                  >
-                    Registrarse
-                  </Link>
+                  {!isLoginPage && (
+                    <Link
+                      to="/login"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="text-gray-700 hover:text-blue-600 font-medium text-center py-2"
+                    >
+                      Iniciar sesión
+                    </Link>
+                  )}
+                  {!isRegisterPage && (
+                    <Link
+                      to="/register"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-center font-semibold"
+                    >
+                      Registrarse
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
