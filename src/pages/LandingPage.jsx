@@ -24,6 +24,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import BrandLogo from "../components/BrandLogo";
 import { obtenerPlanesPublicos } from "../services/api";
+import { isTokenExpired, redirectBasedOnRole } from "../services/auth";
 
 const DEFAULT_PLANES = [
   {
@@ -80,6 +81,27 @@ const LandingPage = () => {
   const [loadingPlanes, setLoadingPlanes] = useState(true)
   const { isAuthenticated, user } = useAuth();
 
+  const isUserLoggedIn =
+    isAuthenticated ||
+    Boolean(
+      localStorage.getItem("token") &&
+        !isTokenExpired(localStorage.getItem("token"))
+    );
+
+  const getTargetDashboard = () => {
+    if (user) return redirectBasedOnRole(user);
+    const cached = localStorage.getItem("user");
+    if (cached) {
+      try {
+        return redirectBasedOnRole(JSON.parse(cached));
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+    return "/dashboard-suscriptor/plantillas";
+  };
+  const targetDashboard = getTargetDashboard();
+
   useEffect(() => {
     let isMounted = true
     const fetchPlanes = async () => {
@@ -120,43 +142,46 @@ const LandingPage = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#funcionalidades" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <a href="#funcionalidades" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm">
                 Funcionalidades
               </a>
-              <a href="#beneficios" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <a href="#beneficios" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm">
                 Beneficios
               </a>
-              <a href="#testimonios" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <a href="#testimonios" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm">
                 Testimonios
               </a>
-              <a href="#precios" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <a href="#precios" className="text-gray-600 hover:text-blue-600 transition-colors font-medium text-sm">
                 Precios
               </a>
-              {isAuthenticated ? (
-                <a
-                  href={user?.tipo === "admin" ? "/dashboard/roles" : "/dashboard-suscriptor/plantillas"}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                  Ir al dashboard
-                </a>
+              {isUserLoggedIn ? (
+                <div className="flex items-center gap-3">
+                  <a
+                    href={targetDashboard}
+                    className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-xs hover:shadow-md text-sm"
+                  >
+                    <span>Ir al dashboard</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                </div>
               ) : (
-                <>
-                  <a href="/login" className="text-gray-600 hover:text-blue-600 transition-colors">
+                <div className="flex items-center space-x-4">
+                  <a href="/login" className="text-gray-700 hover:text-blue-600 font-medium text-sm transition-colors">
                     Iniciar sesión
                   </a>
                   <a
                     href="/register"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-xs hover:shadow-md"
                   >
                     Registrarse
                   </a>
-                </>
+                </div>
               )}
             </div>
 
             {/* Mobile menu button */}
             <div className="md:hidden">
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-600 hover:text-gray-900">
+              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-600 hover:text-gray-900 p-2">
                 {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
@@ -166,34 +191,35 @@ const LandingPage = () => {
           {isMenuOpen && (
             <div className="md:hidden py-4 border-t">
               <div className="flex flex-col space-y-4">
-                <a href="#funcionalidades" className="text-gray-600 hover:text-blue-600">
+                <a href="#funcionalidades" className="text-gray-600 hover:text-blue-600 font-medium">
                   Funcionalidades
                 </a>
-                <a href="#beneficios" className="text-gray-600 hover:text-blue-600">
+                <a href="#beneficios" className="text-gray-600 hover:text-blue-600 font-medium">
                   Beneficios
                 </a>
-                <a href="#testimonios" className="text-gray-600 hover:text-blue-600">
+                <a href="#testimonios" className="text-gray-600 hover:text-blue-600 font-medium">
                   Testimonios
                 </a>
-                <a href="#precios" className="text-gray-600 hover:text-blue-600">
+                <a href="#precios" className="text-gray-600 hover:text-blue-600 font-medium">
                   Precios
                 </a>
-                {isAuthenticated ? (
+                {isUserLoggedIn ? (
                   <a
-                    href={user?.tipo === "admin" ? "/dashboard/roles" : "/dashboard-suscriptor/plantillas"}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg text-center"
+                    href={targetDashboard}
+                    className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-center font-semibold text-sm"
                   >
-                    Ir al dashboard
+                    <span>Ir al dashboard</span>
+                    <ArrowRight className="w-4 h-4" />
                   </a>
                 ) : (
-                  <>
-                    <a href="/login" className="text-gray-600 hover:text-blue-600">
+                  <div className="flex flex-col space-y-2 pt-2 border-t border-gray-100">
+                    <a href="/login" className="text-gray-700 hover:text-blue-600 font-medium text-center py-2">
                       Iniciar sesión
                     </a>
-                    <a href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-center">
+                    <a href="/register" className="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-center font-semibold">
                       Registrarse
                     </a>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
@@ -222,10 +248,10 @@ const LandingPage = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <a
-                  href="/register"
+                  href={isUserLoggedIn ? targetDashboard : "/register"}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all transform hover:scale-105 flex items-center justify-center"
                 >
-                  Comenzar gratis ahora
+                  {isUserLoggedIn ? "Ir a mi dashboard" : "Comenzar gratis ahora"}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
                 <a
@@ -703,10 +729,10 @@ const LandingPage = () => {
           </form>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="/register"
-              className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center"
+              href={isUserLoggedIn ? targetDashboard : "/register"}
+              className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center shadow-md"
             >
-              Comenzar prueba gratuita
+              {isUserLoggedIn ? "Ir a mi dashboard" : "Comenzar prueba gratuita"}
               <ArrowRight className="ml-2 h-5 w-5" />
             </a>
             <a
