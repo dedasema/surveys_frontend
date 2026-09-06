@@ -35,14 +35,19 @@ export async function login(credentials) {
     const data = await response.json();
     console.log("Respuesta login:", data);
 
-    localStorage.setItem("token", data.access_token);
+    if (data.access_token) {
+      localStorage.setItem("token", data.access_token);
+    }
+    if (data.refresh_token) {
+      localStorage.setItem("refresh_token", data.refresh_token);
+    }
 
-    const userInfo = await getCurrentUser(); // este ya guarda en localStorage también
+    const userInfo = await getCurrentUser();
     console.log("Info de usuario:", userInfo);
 
-    localStorage.setItem("user", JSON.stringify(userInfo)); //  Guarda usuario local para offline
+    localStorage.setItem("user", JSON.stringify(userInfo));
 
-  if (userInfo.rol === "admin") {
+    if (userInfo.rol === "admin") {
       window.location.href = "/dashboard/roles";
     } else if (userInfo.tipo === "suscriptor") {
       window.location.href = "/dashboard-suscriptor/plantillas";
@@ -54,6 +59,29 @@ export async function login(credentials) {
   } catch (error) {
     console.error("Error en login:", error);
     throw error;
+  }
+}
+
+export async function logout() {
+  const refreshToken = localStorage.getItem("refresh_token") || localStorage.getItem("token");
+  try {
+    if (refreshToken) {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+    }
+  } catch (err) {
+    console.warn("Error revocando sesión en servidor:", err);
+  } finally {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("last_user_id");
   }
 }
 
@@ -165,12 +193,6 @@ export function isAuthenticated() {
     return false;
   }
   return true;
-}
-
-export function logout() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  window.location.replace("/login");
 }
 
 export function getAuthToken() {

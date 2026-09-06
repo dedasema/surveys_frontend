@@ -1,23 +1,35 @@
 import React, { useState } from "react"
-import { Download, Search, FileText } from "lucide-react"
+import { Download, Search } from "lucide-react"
 import { AppLayout } from "../../../shared/layouts/AppLayout"
 import { Button, Modal } from "../../../shared/components/ui"
 import { useResponses } from "../hooks/useResponses"
 import { ResponseTable } from "../components/ResponseTable"
+import { useCampaignWebSocket, LiveUpdateIndicator } from "../../realtime"
+import { toast } from "sonner"
 
 export const ResponsesContainer = ({ role = "suscriptor" }) => {
   const {
     campaigns,
     selectedCampaignId,
     setSelectedCampaignId,
-    selectedCampaign,
     filteredResponses,
     loading,
     responsesLoading,
     searchTerm,
     setSearchTerm,
+    loadResponses,
     exportCsv,
   } = useResponses()
+
+  const { status, reconnect } = useCampaignWebSocket({
+    campanaId: selectedCampaignId,
+    onNewResponse: () => {
+      toast.info("¡Nueva respuesta recibida en tiempo real!")
+      if (selectedCampaignId) {
+        loadResponses(selectedCampaignId)
+      }
+    },
+  })
 
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [selectedResponse, setSelectedResponse] = useState(null)
@@ -39,10 +51,13 @@ export const ResponsesContainer = ({ role = "suscriptor" }) => {
             </p>
           </div>
 
-          <Button variant="outline" onClick={exportCsv} className="gap-2">
-            <Download className="w-4 h-4" />
-            Exportar CSV
-          </Button>
+          <div className="flex items-center gap-3">
+            <LiveUpdateIndicator status={status} onReconnect={reconnect} />
+            <Button variant="outline" onClick={exportCsv} className="gap-2">
+              <Download className="w-4 h-4" />
+              Exportar CSV
+            </Button>
+          </div>
         </div>
 
         {/* Campaign Selector & Search */}

@@ -1,4 +1,5 @@
 import { addToOfflineQueue, isOnline, registerSync } from './offlineSync'
+import { refreshAccessToken } from '../features/auth/apiClient'
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveys-backend-83d9.onrender.com"
 
@@ -89,13 +90,24 @@ const authFetch = async (endpoint, options = {}) => {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config)
 
     if (!response.ok) {
-      if (response.status === 401 || response.status === 403 && (await response.clone().text()).toLowerCase().includes("token")) {
-        localStorage.removeItem("token")
-        localStorage.removeItem("user")
-        if (window.location.pathname !== "/login" && window.location.pathname !== "/") {
-          window.location.replace("/login")
+      if (response.status === 401 || (response.status === 403 && (await response.clone().text()).toLowerCase().includes("token"))) {
+        try {
+          const newToken = await refreshAccessToken();
+          config.headers.Authorization = `Bearer ${newToken}`;
+          const retryRes = await fetch(`${API_BASE_URL}${endpoint}`, config);
+          if (retryRes.ok) {
+            if (retryRes.status === 204) return true;
+            return retryRes.json();
+          }
+        } catch {
+          localStorage.removeItem("token");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("user");
+          if (window.location.pathname !== "/login" && window.location.pathname !== "/") {
+            window.location.replace("/login");
+          }
+          throw new Error("Sesión expirada");
         }
-        throw new Error("Sesión expirada")
       }
       const rawText = await response.text()
       const friendlyMsg = parseApiErrorMessage(response.status, rawText)

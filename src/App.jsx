@@ -51,6 +51,14 @@ import { SurveysContainer } from './features/surveys';
 import { ResponsesContainer } from './features/responses';
 import { OperatorsContainer } from './features/operators';
 
+// Software 2 Intelligence & Analytics Containers
+import { ClustersContainer } from './features/clusters';
+import { FraudReviewContainer } from './features/fraud-review';
+import { PredictiveContainer } from './features/predictive';
+import { AgentLogsContainer } from './features/agent-logs';
+import { RagAssistantContainer } from './features/rag-assistant';
+import AdaptiveSurveyPage from './pages/AdaptiveSurveyPage';
+
 function App() {
   return (
     <Router>
@@ -73,6 +81,7 @@ function App() {
         <Route path="/terminos" element={<TermsPage />} />
         <Route path="/terms" element={<Navigate to="/terminos" replace />} />
         <Route path="/encuestas/:token" element={<EncuestaPage />} />
+        <Route path="/encuestas/:token/adaptativa" element={<AdaptiveSurveyPage />} />
         <Route path="/email-sent" element={<EmailSentPage />} />
         <Route path="/verify-registration" element={<VerifyRegistrationPage />} />
 
@@ -166,6 +175,21 @@ function App() {
         } />
         <Route path="/dashboard-suscriptor/dashboard" element={
           <PrivateRoute requiredType="suscriptor"><DashboardPage /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/clusters" element={
+          <PrivateRoute requiredType="suscriptor"><ClustersContainer role="suscriptor" /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/fraude" element={
+          <PrivateRoute requiredType="suscriptor"><FraudReviewContainer role="suscriptor" /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/predictivo" element={
+          <PrivateRoute requiredType="suscriptor"><PredictiveContainer role="suscriptor" /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/agente-logs" element={
+          <PrivateRoute requiredType="suscriptor"><AgentLogsContainer role="suscriptor" /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/asistente-rag" element={
+          <PrivateRoute requiredType="suscriptor"><RagAssistantContainer role="suscriptor" /></PrivateRoute>
         } />
 
         {/* Rutas protegidas - operador */}

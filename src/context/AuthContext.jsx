@@ -71,16 +71,22 @@ export const AuthProvider = ({ children }) => {
     setUser(data.user);
     setIsAuthenticated(true);
     localStorage.setItem("last_user_id", data.user.id);
-    localStorage.setItem("token", data.token);
+    localStorage.setItem("token", data.token || data.access_token || "");
+    if (data.refresh_token) {
+      localStorage.setItem("refresh_token", data.refresh_token);
+    }
   };
 
-  const logout = () => {
-    logoutApi();
-    handleInvalidSession();
+  const logout = async () => {
+    try {
+      await logoutApi();
+    } finally {
+      handleInvalidSession();
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, permisos: user?.permisos || [], login, logout }}>
       {children}
     </AuthContext.Provider>
   );

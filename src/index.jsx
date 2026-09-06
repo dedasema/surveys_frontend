@@ -18,7 +18,6 @@ if ('serviceWorker' in navigator) {
       event.ports[0].postMessage({ token });
     } else if (event.data && event.data.type === 'SYNC_COMPLETED') {
       console.log('Sincronización completada para:', event.data.endpoint);
-      // Aquí podrías disparar una actualización en la UI si es necesario
     }
   });
 
@@ -40,5 +39,5 @@ root.render(
     </AuthProvider>
   </React.StrictMode>
 );
-serviceWorkerRegistration.register();
 
+serviceWorkerRegistration.register();

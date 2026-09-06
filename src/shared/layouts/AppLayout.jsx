@@ -16,6 +16,11 @@ import {
   UserCog,
   PhoneCall,
   Settings,
+  Sparkles,
+  ShieldAlert,
+  TrendingUp,
+  Bot,
+  MessageSquareText,
 } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import {
@@ -167,6 +172,41 @@ const ROLE_STRATEGIES = {
             url: "/dashboard-suscriptor/respuestas",
             icon: MessageSquare,
             isActive: pathname.includes("/dashboard-suscriptor/respuestas"),
+          },
+        ],
+      },
+      {
+        title: "Inteligencia y Analítica",
+        items: [
+          {
+            title: "Clusters Semánticos",
+            url: "/dashboard-suscriptor/clusters",
+            icon: Sparkles,
+            isActive: pathname.includes("/dashboard-suscriptor/clusters"),
+          },
+          {
+            title: "Revisión de Fraude",
+            url: "/dashboard-suscriptor/fraude",
+            icon: ShieldAlert,
+            isActive: pathname.includes("/dashboard-suscriptor/fraude"),
+          },
+          {
+            title: "Análisis Predictivo",
+            url: "/dashboard-suscriptor/predictivo",
+            icon: TrendingUp,
+            isActive: pathname.includes("/dashboard-suscriptor/predictivo"),
+          },
+          {
+            title: "Log del Agente IA",
+            url: "/dashboard-suscriptor/agente-logs",
+            icon: Bot,
+            isActive: pathname.includes("/dashboard-suscriptor/agente-logs"),
+          },
+          {
+            title: "Asistente RAG",
+            url: "/dashboard-suscriptor/asistente-rag",
+            icon: MessageSquareText,
+            isActive: pathname.includes("/dashboard-suscriptor/asistente-rag"),
           },
         ],
       },

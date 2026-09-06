@@ -14,6 +14,10 @@ import {
   Crown,
   Receipt,
   Sparkles,
+  ShieldAlert,
+  TrendingUp,
+  Bot,
+  MessageSquareText,
 } from "lucide-react"
 import { useLocation } from "react-router-dom"
 import { getCurrentUser, getAvatarUrl } from "../../services/auth"
@@ -98,6 +102,16 @@ const DashboardSuscriptorLayout = ({ children }) => {
         { title: "Campañas", url: "/dashboard-suscriptor/campanas", icon: Target },
         { title: "Respuestas", url: "/dashboard-suscriptor/respuestas", icon: MessageSquare },
         { title: "Entregas", url: "/dashboard-suscriptor/entregas", icon: Send },
+      ],
+    },
+    {
+      title: "Inteligencia y Analítica",
+      items: [
+        { title: "Clusters Semánticos", url: "/dashboard-suscriptor/clusters", icon: Sparkles },
+        { title: "Revisión de Fraude", url: "/dashboard-suscriptor/fraude", icon: ShieldAlert },
+        { title: "Análisis Predictivo", url: "/dashboard-suscriptor/predictivo", icon: TrendingUp },
+        { title: "Log del Agente IA", url: "/dashboard-suscriptor/agente-logs", icon: Bot },
+        { title: "Asistente RAG", url: "/dashboard-suscriptor/asistente-rag", icon: MessageSquareText },
       ],
     },
     {
