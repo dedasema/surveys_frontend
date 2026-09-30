@@ -630,12 +630,9 @@ export default function RolesPage() {
                                     <div className="text-xs min-w-0 flex-1">
                                       <div className="flex items-center justify-between gap-2 mb-0.5">
                                         <p className="font-bold text-slate-900">{p.nombre}</p>
-                                        <span className="font-mono text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 flex-shrink-0">
-                                          {p.codigo}
-                                        </span>
                                       </div>
                                       <p className="text-slate-500 text-[11px] leading-relaxed">
-                                        {p.descripcion || `Permite ejecutar la acción ${p.codigo}`}
+                                        {p.descripcion || "Permite ejecutar esta acción en el sistema"}
                                       </p>
                                     </div>
                                   </label>
