@@ -18,6 +18,8 @@ import {
   TrendingUp,
   Bot,
   MessageSquareText,
+  FolderOpen,
+  Activity,
 } from "lucide-react"
 import { useLocation } from "react-router-dom"
 import { getCurrentUser, getAvatarUrl } from "../../services/auth"
@@ -112,6 +114,13 @@ const DashboardSuscriptorLayout = ({ children }) => {
         { title: "Análisis Predictivo", url: "/dashboard-suscriptor/predictivo", icon: TrendingUp },
         { title: "Log del Agente IA", url: "/dashboard-suscriptor/agente-logs", icon: Bot },
         { title: "Asistente RAG", url: "/dashboard-suscriptor/asistente-rag", icon: MessageSquareText },
+      ],
+    },
+    {
+      title: "Archivos y Métricas",
+      items: [
+        { title: "Archivos de Empresa", url: "/dashboard-suscriptor/archivos", icon: FolderOpen },
+        { title: "Uso del Sistema", url: "/dashboard-suscriptor/uso-sistema", icon: Activity },
       ],
     },
     {
