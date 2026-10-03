@@ -125,16 +125,24 @@ export const QuestionBuilderModal = ({
     }
   }
 
-  const handleDeleteQuestion = async (questionId) => {
-    if (window.confirm("¿Eliminar esta pregunta?")) {
-      try {
-        await surveysApi.deleteQuestion(template.id, questionId)
-        toast.success("Pregunta eliminada")
-        await loadQuestions()
-      } catch (err) {
-        toast.error(err.message || "Error al eliminar pregunta")
-      }
-    }
+  const handleDeleteQuestion = (questionId) => {
+    toast("¿Eliminar esta pregunta?", {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          try {
+            await surveysApi.deleteQuestion(template.id, questionId)
+            toast.success("Pregunta eliminada")
+            await loadQuestions()
+          } catch (err) {
+            toast.error(err.message || "Error al eliminar pregunta")
+          }
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    })
   }
 
   return (

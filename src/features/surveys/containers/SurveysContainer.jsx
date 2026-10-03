@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { toast } from "sonner"
 import { Plus, Search, FileSpreadsheet } from "lucide-react"
 import { AppLayout } from "../../../shared/layouts/AppLayout"
 import { Button } from "../../../shared/components/ui"
@@ -55,10 +56,18 @@ export const SurveysContainer = ({ role = "suscriptor" }) => {
     }
   }
 
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de que querés eliminar esta plantilla?")) {
-      await deleteTemplate(id)
-    }
+  const handleDelete = (id) => {
+    toast("¿Estás seguro de que querés eliminar esta plantilla?", {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          await deleteTemplate(id)
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    })
   }
 
   return (

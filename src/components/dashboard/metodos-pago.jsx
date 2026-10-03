@@ -1,5 +1,6 @@
 // src/components/dashboard/metodos-pago.jsx
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import {
   Plus, Edit, Trash2,
   CreditCard, Smartphone, Building, Banknote, Wallet, Globe, MessageSquare,
@@ -58,14 +59,25 @@ export default function MetodosPagoPage() {
   }
 
   /* ──────────────── eliminar ──────────────── */
-  const borrar = async (id) => {
-    if (!window.confirm("¿Eliminar método de pago?")) return
-    try {
-      await eliminarMetodoPago(id)
-      setRows(prev => prev.filter(r => r.id !== id))
-    } catch (err) {
-      console.error(err)
-    }
+  const borrar = (id) => {
+    toast("¿Eliminar método de pago?", {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          try {
+            await eliminarMetodoPago(id)
+            setRows(prev => prev.filter(r => r.id !== id))
+            toast.success("Método de pago eliminado")
+          } catch (err) {
+            console.error(err)
+            toast.error("Error al eliminar el método de pago")
+          }
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    })
   }
 
   /* ──────────────── render ──────────────── */

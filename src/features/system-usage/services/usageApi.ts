@@ -2,11 +2,15 @@ import { apiClient } from '../../auth/apiClient';
 import { SystemUsageMetricsResponse } from '../types';
 
 export const usageApi = {
-  async getSystemUsage(dias: number = 30): Promise<SystemUsageMetricsResponse> {
+  async getSystemUsage(dias: number = 30, empresaId?: string | number): Promise<SystemUsageMetricsResponse> {
+    const empresaParam =
+      empresaId !== undefined && empresaId !== null && empresaId !== ''
+        ? `&empresa_id=${empresaId}`
+        : '';
     try {
-      let res = await apiClient.get(`/analytics/uso-sistema?dias=${dias}`);
+      let res = await apiClient.get(`/analytics/uso-sistema?dias=${dias}${empresaParam}`);
       if (!res.ok && res.status === 404) {
-        res = await apiClient.get(`/empresa/uso-sistema?dias=${dias}`);
+        res = await apiClient.get(`/empresa/uso-sistema?dias=${dias}${empresaParam}`);
       }
 
       if (res.ok) {

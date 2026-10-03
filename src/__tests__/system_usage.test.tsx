@@ -42,6 +42,36 @@ describe('Métricas de Uso del Sistema — Unit Tests', () => {
       expect(data.tipos_operaciones_cud).toHaveProperty('total');
       expect(data.tipos_operaciones_cud).toHaveProperty('porcentajes');
     });
+
+    it('passes &empresa_id in query when empresaId parameter is provided', async () => {
+      const getSpy = vi.spyOn(apiClient, 'get').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          ultima_sesion: '',
+          espacio_usado: { bytes: 0, mb: 0, limite_mb: 100, porcentaje_usado: 0, unidad: 'MB', formateado: '' },
+          pago_total_acumulado: 0,
+          moneda: 'usd',
+          frecuencia_pago: '',
+          plan_nombre: '',
+          estado_suscripcion: '',
+          proximo_pago: '',
+          grafica_dias_mayor_uso: [],
+          dia_pico: { fecha: '', cantidad: 0 },
+          top_5_usuarios: [],
+          tipos_operaciones_cud: {
+            crear: 0,
+            modificar: 0,
+            eliminar: 0,
+            otros: 0,
+            total: 0,
+            porcentajes: { crear: 0, modificar: 0, eliminar: 0, otros: 0 },
+          },
+        }),
+      } as any);
+
+      await usageApi.getSystemUsage(15, 'empresa-99');
+      expect(getSpy).toHaveBeenCalledWith(expect.stringContaining('empresa_id=empresa-99'));
+    });
   });
 
   describe('UI Components', () => {

@@ -1,5 +1,6 @@
 // src/components/dashboard/estados-documento.jsx
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import {
   Plus, Edit, Trash2,
   Clock, CheckCircle, XCircle, MessageSquare, Target, Play, Pause
@@ -62,12 +63,25 @@ const EstadosDocumentoPage = () => {
     } catch (err) { console.error(err) }
   }
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("¿Eliminar este estado?")) return
-    try {
-      await eliminarEstadoDocumento(id)
-      setEstados(prev => prev.filter(e => e.id !== id))
-    } catch (err) { console.error(err) }
+  const handleDelete = (id) => {
+    toast("¿Eliminar este estado?", {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          try {
+            await eliminarEstadoDocumento(id)
+            setEstados(prev => prev.filter(e => e.id !== id))
+            toast.success("Estado eliminado")
+          } catch (err) {
+            console.error(err)
+            toast.error("Error al eliminar el estado")
+          }
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    })
   }
 
   const openEdit = (s) => { setEditing(s); setNombre(s.nombre); setShow(true) }

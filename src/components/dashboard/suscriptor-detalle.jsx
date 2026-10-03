@@ -18,14 +18,18 @@ import {
   UserCheck,
   UserX,
   ExternalLink,
-  Unlock,
   Sparkles,
   HardDrive,
   Cpu,
   Image,
+  FolderOpen,
+  BarChart2,
+  LogIn,
 } from "lucide-react";
 import DashboardLayout from "../dashboard-layout";
 import LoadingScreen from "../LoadingScreen";
+import { CompanyFilesDashboard } from "../../features/company-files";
+import { SystemUsageDashboard } from "../../features/system-usage";
 import {
   obtenerSuscriptorDetalleAdmin,
   obtenerPagosSuscriptorAdmin,
@@ -94,7 +98,37 @@ export default function SuscriptorDetallePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const handleToggleEstado = async () => {
+  const allUsers = React.useMemo(() => {
+    if (!suscriptor) return [];
+    const adminUser = {
+      id: suscriptor.usuario_id || suscriptor.admin_id || suscriptor.id,
+      nombre:
+        suscriptor.nombre ||
+        suscriptor.nombre_contacto ||
+        suscriptor.nombre_empresa ||
+        "Administrador",
+      email: suscriptor.email_contacto || suscriptor.email || "",
+      rol: "suscriptor",
+      rolLabel: "Administrador (Suscriptor)",
+      creado_en: suscriptor.creado_en,
+      isPrimaryAdmin: true,
+    };
+    const operatorUsers = (operadores || [])
+      .filter((op) => op.email !== adminUser.email && op.id !== adminUser.id)
+      .map((op, idx) => ({
+        id: op.id || `op-${idx}`,
+        nombre: `${op.nombre || ""} ${op.apellido || ""}`.trim() || op.nombre || "Operador",
+        email: op.email || "",
+        rol: op.rol || "operator",
+        rolLabel: "Operador",
+        creado_en: op.creado_en,
+        isPrimaryAdmin: false,
+      }));
+
+    return [adminUser, ...operatorUsers];
+  }, [suscriptor, operadores]);
+
+  const handleToggleEstado = () => {
     const estadoActual = (suscriptor?.estado || "activo").toLowerCase();
     const nuevoEstado = estadoActual === "activo" ? "suspendido" : "activo";
     const confirmMsg =
@@ -102,57 +136,70 @@ export default function SuscriptorDetallePage() {
         ? "¿Seguro que deseas suspender esta empresa? Sus usuarios no podrán ingresar."
         : "¿Deseas reactivar el acceso de esta empresa?";
 
-    if (!window.confirm(confirmMsg)) return;
-
-    try {
-      setActionLoading(true);
-      await actualizarEstadoSuscriptorAdmin(id, nuevoEstado);
-      setSuscriptor((prev) => ({ ...prev, estado: nuevoEstado }));
-      toast.success(`Empresa ${nuevoEstado === "activo" ? "activada" : "suspendida"} correctamente`);
-    } catch (err) {
-      toast.error("Error al actualizar el estado: " + err.message);
-    } finally {
-      setActionLoading(false);
-    }
+    toast(confirmMsg, {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          try {
+            setActionLoading(true);
+            await actualizarEstadoSuscriptorAdmin(id, nuevoEstado);
+            setSuscriptor((prev) => ({ ...prev, estado: nuevoEstado }));
+            toast.success(
+              `Empresa ${nuevoEstado === "activo" ? "activada" : "suspendida"} correctamente`
+            );
+          } catch (err) {
+            toast.error("Error al actualizar el estado: " + err.message);
+          } finally {
+            setActionLoading(false);
+          }
+        },
+      },
+      cancel: { label: "Cancelar" },
+    });
   };
 
-  const handleImpersonate = async () => {
-    const empresaNombre =
-      suscriptor?.nombre_empresa || suscriptor?.empresa || suscriptor?.nombre || `Suscriptor #${id}`;
-    const email = suscriptor?.email_contacto || suscriptor?.email || "Cliente";
-
-    if (
-      !window.confirm(
-        `¿Deseas iniciar sesión en vivo como la empresa "${empresaNombre}" (${email}) para soporte técnico directo?`
-      )
-    ) {
-      return;
-    }
-
+  const executeUserImpersonation = async (user) => {
     try {
-      toast.loading("Generando token de soporte en vivo...", { id: "impersonate-detail" });
-      const res = await impersonarSuscriptorAdmin(id);
+      toast.loading(`Iniciando sesión como ${user.nombre}...`, { id: "impersonate-action" });
+      const currentToken = localStorage.getItem("token");
+      const res = await impersonarSuscriptorAdmin(id, user.id);
 
       if (res?.access_token) {
-        const currentToken = localStorage.getItem("token");
         if (currentToken) {
           localStorage.setItem("superadmin_token_backup", currentToken);
         }
-        localStorage.setItem("impersonated_email", res.impersonated_email || email);
+        localStorage.setItem("impersonated_email", user.email || res.impersonated_email || "");
         localStorage.setItem("token", res.access_token);
 
-        toast.success("Modo soporte activado. Redirigiendo...", { id: "impersonate-detail" });
+        toast.success(`Acceso concedido como ${user.nombre}`, { id: "impersonate-action" });
+        const isOperator = user.rol === "operator" || user.rol === "operador";
+        const redirectUrl = isOperator
+          ? "/dashboard-operador/plantillas"
+          : "/dashboard-suscriptor/plantillas";
+
         setTimeout(() => {
-          window.location.href = "/dashboard-suscriptor/dashboard";
+          window.location.href = redirectUrl;
         }, 400);
       } else {
-        toast.error(res?.message || "No se pudo generar el token de soporte.", {
-          id: "impersonate-detail",
+        toast.error(res?.message || "No se pudo iniciar sesión como este usuario.", {
+          id: "impersonate-action",
         });
       }
     } catch (err) {
-      toast.error("Error al iniciar modo soporte: " + err.message, { id: "impersonate-detail" });
+      toast.error("Error al iniciar sesión: " + err.message, { id: "impersonate-action" });
     }
+  };
+
+  const handleImpersonateUser = (user) => {
+    const userName = user.nombre || "Usuario";
+    const userEmail = user.email || "";
+    toast(`¿Iniciar sesión como ${userName} (${userEmail})?`, {
+      action: {
+        label: "Acceder",
+        onClick: () => executeUserImpersonation(user),
+      },
+      cancel: { label: "Cancelar" },
+    });
   };
 
   const handleAsignarPlan = async (e) => {
@@ -284,16 +331,6 @@ export default function SuscriptorDetallePage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              {/* Botón Soporte en Vivo */}
-              <button
-                onClick={handleImpersonate}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs sm:text-sm transition-all shadow-md shadow-amber-500/25 cursor-pointer active:scale-95"
-                title="Iniciar sesión directamente como esta empresa para darle soporte en vivo"
-              >
-                <Unlock className="w-4 h-4" />
-                <span>Soporte en Vivo</span>
-              </button>
-
               {/* Botón Asignar Plan */}
               <button
                 onClick={() => setShowPlanModal(true)}
@@ -365,15 +402,37 @@ export default function SuscriptorDetallePage() {
             <span>Historial de Pagos ({pagos.length})</span>
           </button>
           <button
-            onClick={() => setActiveTab("operadores")}
-            className={`pb-3 px-4 flex items-center gap-2 transition-colors whitespace-nowrap ${
-              activeTab === "operadores"
+            onClick={() => setActiveTab("usuarios")}
+            className={`pb-3 px-4 flex items-center gap-2 transition-colors whitespace-nowrap cursor-pointer ${
+              activeTab === "usuarios" || activeTab === "operadores"
                 ? "text-blue-600 border-b-2 border-blue-600"
                 : "text-slate-500 hover:text-slate-800"
             }`}
           >
             <Users className="w-4 h-4" />
-            <span>Operadores ({operadores.length})</span>
+            <span>Usuarios del Sistema / Equipo ({allUsers.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("archivos")}
+            className={`pb-3 px-4 flex items-center gap-2 transition-colors whitespace-nowrap cursor-pointer ${
+              activeTab === "archivos"
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <FolderOpen className="w-4 h-4" />
+            <span>Archivos de la Empresa</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("uso")}
+            className={`pb-3 px-4 flex items-center gap-2 transition-colors whitespace-nowrap cursor-pointer ${
+              activeTab === "uso"
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <BarChart2 className="w-4 h-4" />
+            <span>Métricas de Uso</span>
           </button>
         </div>
 
@@ -806,40 +865,64 @@ export default function SuscriptorDetallePage() {
           </div>
         )}
 
-        {/* Contenido Pestaña 4: Operadores */}
-        {activeTab === "operadores" && (
+        {/* Contenido Pestaña 4: Usuarios del Sistema / Equipo */}
+        {(activeTab === "usuarios" || activeTab === "operadores") && (
           <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-            {operadores.length === 0 ? (
+            {allUsers.length === 0 ? (
               <div className="p-12 text-center">
                 <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <h3 className="text-base font-bold text-slate-900 mb-1">Sin operadores registrados</h3>
-                <p className="text-slate-500 text-xs">Esta empresa no ha dado de alta operadores de equipo todavía.</p>
+                <h3 className="text-base font-bold text-slate-900 mb-1">Sin usuarios registrados</h3>
+                <p className="text-slate-500 text-xs">Esta empresa no tiene usuarios ni operadores registrados todavía.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-slate-600">
                   <thead className="bg-slate-50/80 border-b border-slate-200 text-xs font-bold uppercase tracking-wider text-slate-500">
                     <tr>
-                      <th className="py-3.5 px-6">Operador</th>
+                      <th className="py-3.5 px-6">Usuario</th>
                       <th className="py-3.5 px-6">Correo</th>
                       <th className="py-3.5 px-6">Rol</th>
                       <th className="py-3.5 px-6">Fecha Registro</th>
+                      <th className="py-3.5 px-6 text-right">Acción</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {operadores.map((op, idx) => (
-                      <tr key={op.id || idx} className="hover:bg-slate-50/60">
+                    {allUsers.map((u, idx) => (
+                      <tr key={u.id || idx} className="hover:bg-slate-50/60">
                         <td className="py-4 px-6 font-bold text-slate-900">
-                          {op.nombre} {op.apellido || ""}
+                          <div className="flex items-center gap-2">
+                            <span>{u.nombre}</span>
+                            {u.isPrimaryAdmin && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 text-2xs font-semibold rounded-md border border-amber-200">
+                                <Crown className="w-3 h-3 text-amber-600" /> Principal
+                              </span>
+                            )}
+                          </div>
                         </td>
-                        <td className="py-4 px-6 text-xs text-slate-600">{op.email}</td>
+                        <td className="py-4 px-6 text-xs text-slate-600">{u.email}</td>
                         <td className="py-4 px-6 text-xs">
-                          <span className="px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full font-semibold border border-purple-200">
-                            Operador
-                          </span>
+                          {u.rol === "suscriptor" ? (
+                            <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full font-semibold border border-blue-200">
+                              Administrador
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full font-semibold border border-purple-200">
+                              Operador
+                            </span>
+                          )}
                         </td>
                         <td className="py-4 px-6 text-xs text-slate-500">
-                          {op.creado_en ? new Date(op.creado_en).toLocaleDateString() : "-"}
+                          {u.creado_en ? new Date(u.creado_en).toLocaleDateString() : "-"}
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <button
+                            onClick={() => handleImpersonateUser(u)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white rounded-xl text-xs font-semibold transition-all duration-150 shadow-xs cursor-pointer border border-blue-200/60"
+                            title="Acceder al sistema como este usuario"
+                          >
+                            <LogIn className="w-3.5 h-3.5" />
+                            <span>Acceder al sistema como este usuario</span>
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -847,6 +930,20 @@ export default function SuscriptorDetallePage() {
                 </table>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Contenido Pestaña 5: Archivos de la Empresa */}
+        {activeTab === "archivos" && (
+          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+            <CompanyFilesDashboard empresaId={id} />
+          </div>
+        )}
+
+        {/* Contenido Pestaña 6: Métricas de Uso */}
+        {activeTab === "uso" && (
+          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+            <SystemUsageDashboard empresaId={id} />
           </div>
         )}
 

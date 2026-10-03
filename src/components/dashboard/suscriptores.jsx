@@ -13,7 +13,6 @@ import {
   DollarSign,
   UserCheck,
   Building,
-  Unlock,
   Send,
   PieChart as PieIcon,
 } from "lucide-react";
@@ -21,7 +20,6 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import DashboardLayout from "../dashboard-layout";
 import {
   listarSuscriptoresAdmin,
-  impersonarSuscriptorAdmin,
   obtenerMetricasFinancierasAdmin,
 } from "../../services/api-admin";
 
@@ -84,44 +82,6 @@ export default function SuscriptoresPage() {
 
     return matchSearch && matchStatus;
   });
-
-  const handleImpersonate = async (s) => {
-    const empresaNombre = s.nombre_empresa || s.empresa || s.nombre || `Suscriptor #${s.id}`;
-    const email = s.email_contacto || s.email || "Cliente";
-
-    if (
-      !window.confirm(
-        `¿Deseas iniciar sesión en vivo como la empresa "${empresaNombre}" (${email}) para darle soporte técnico?`
-      )
-    ) {
-      return;
-    }
-
-    try {
-      toast.loading("Generando token de soporte en vivo...", { id: "impersonate-action" });
-      const res = await impersonarSuscriptorAdmin(s.id);
-
-      if (res?.access_token) {
-        const currentToken = localStorage.getItem("token");
-        if (currentToken) {
-          localStorage.setItem("superadmin_token_backup", currentToken);
-        }
-        localStorage.setItem("impersonated_email", res.impersonated_email || email);
-        localStorage.setItem("token", res.access_token);
-
-        toast.success("Modo soporte activado. Redirigiendo...", { id: "impersonate-action" });
-        setTimeout(() => {
-          window.location.href = "/dashboard-suscriptor/dashboard";
-        }, 400);
-      } else {
-        toast.error(res?.message || "No se pudo generar el token de soporte.", {
-          id: "impersonate-action",
-        });
-      }
-    } catch (err) {
-      toast.error("Error al iniciar modo soporte: " + err.message, { id: "impersonate-action" });
-    }
-  };
 
   // Métricas financieras calculadas (con fallback de la lista)
   const totalEmpresas = metricas?.total_empresas_registradas ?? suscriptores.length;
@@ -520,14 +480,6 @@ export default function SuscriptoresPage() {
                         {/* Acciones */}
                         <td className="py-4 px-6 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleImpersonate(s)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-800 hover:bg-amber-600 hover:text-white border border-amber-200/80 rounded-xl text-xs font-semibold transition-all duration-150 shadow-xs cursor-pointer"
-                              title="Iniciar sesión como esta empresa para soporte técnico en vivo"
-                            >
-                              <Unlock className="w-3.5 h-3.5" />
-                              <span>Soporte en Vivo</span>
-                            </button>
                             <Link
                               to={`/dashboard/suscriptores/${s.id}`}
                               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white rounded-xl text-xs font-semibold transition-all duration-150 shadow-xs"

@@ -94,18 +94,28 @@ export default function RolesPage() {
   }, [])
 
   const handleSelectRol = (rol) => {
-    // Si hay cambios sin guardar, avisar
-    if (hasUnsavedChanges) {
-      const confirmLeave = window.confirm(
-        `Tienes cambios sin guardar en '${selectedRol.nombre}'. ¿Deseas descartarlos y cambiar de rol?`
-      )
-      if (!confirmLeave) return
+    const doSelect = (r) => {
+      setSelectedRol(r)
+      const perms = r.permisos ? r.permisos.map((p) => p.id) : []
+      setSelectedPermisos(perms)
+      setOriginalPermisos(perms)
     }
 
-    setSelectedRol(rol)
-    const perms = rol.permisos ? rol.permisos.map((p) => p.id) : []
-    setSelectedPermisos(perms)
-    setOriginalPermisos(perms)
+    // Si hay cambios sin guardar, avisar
+    if (hasUnsavedChanges) {
+      toast(`Tienes cambios sin guardar en '${selectedRol.nombre}'. ¿Deseas descartarlos y cambiar de rol?`, {
+        action: {
+          label: "Descartar y cambiar",
+          onClick: () => doSelect(rol),
+        },
+        cancel: {
+          label: "Cancelar",
+        },
+      })
+      return
+    }
+
+    doSelect(rol)
   }
 
   // Comprobar si hay cambios sin guardar en los permisos

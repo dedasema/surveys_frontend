@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useCallback } from "react"
+import { toast } from "sonner"
 
 import {
   getCampanas,
@@ -163,15 +164,25 @@ export default function Campanas() {
     setShowModal(true)
   }
 
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar esta campaña?")) {
-      try {
-        await deleteCampana(id)
-        loadData()
-      } catch (err) {
-        setError("Error al eliminar: " + err.message)
-      }
-    }
+  const handleDelete = (id) => {
+    toast("¿Estás seguro de eliminar esta campaña?", {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          try {
+            await deleteCampana(id)
+            loadData()
+            toast.success("Campaña eliminada correctamente")
+          } catch (err) {
+            setError("Error al eliminar: " + err.message)
+            toast.error("Error al eliminar: " + err.message)
+          }
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    })
   }
 
   const handleProgramar = async (campana) => {

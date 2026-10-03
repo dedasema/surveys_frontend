@@ -8,7 +8,11 @@ import DailyUsageChart from './components/DailyUsageChart';
 import CudOperationsDonut from './components/CudOperationsDonut';
 import TopUsersRanking from './components/TopUsersRanking';
 
-export const SystemUsageDashboard: React.FC = () => {
+export interface SystemUsageDashboardProps {
+  empresaId?: string | number;
+}
+
+export const SystemUsageDashboard: React.FC<SystemUsageDashboardProps> = ({ empresaId }) => {
   const [data, setData] = useState<SystemUsageMetricsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [chartLoading, setChartLoading] = useState(false);
@@ -20,7 +24,7 @@ export const SystemUsageDashboard: React.FC = () => {
         if (isInitial) setLoading(true);
         else setChartLoading(true);
 
-        const res = await usageApi.getSystemUsage(selectedDays);
+        const res = await usageApi.getSystemUsage(selectedDays, empresaId);
         setData(res);
       } catch {
         toast.error('Error al cargar métricas de uso del sistema');
@@ -29,7 +33,7 @@ export const SystemUsageDashboard: React.FC = () => {
         setChartLoading(false);
       }
     },
-    [selectedDays]
+    [selectedDays, empresaId]
   );
 
   useEffect(() => {

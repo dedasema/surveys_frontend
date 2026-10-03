@@ -18,7 +18,11 @@ import FilesTable from './components/FilesTable';
 import FilePreviewModal from './components/FilePreviewModal';
 import FileUploadModal from './components/FileUploadModal';
 
-export const CompanyFilesDashboard: React.FC = () => {
+export interface CompanyFilesDashboardProps {
+  empresaId?: string | number;
+}
+
+export const CompanyFilesDashboard: React.FC<CompanyFilesDashboardProps> = ({ empresaId }) => {
   const [data, setData] = useState<CompanyFilesResponse>({
     total: 0,
     limit: 10,
@@ -45,6 +49,7 @@ export const CompanyFilesDashboard: React.FC = () => {
         offset,
         categoria: selectedCategory,
         busqueda: searchTerm,
+        empresaId,
       });
       setData(res);
     } catch {
@@ -52,7 +57,7 @@ export const CompanyFilesDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [offset, selectedCategory, searchTerm]);
+  }, [offset, selectedCategory, searchTerm, empresaId]);
 
   useEffect(() => {
     fetchFiles();

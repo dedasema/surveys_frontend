@@ -57,8 +57,6 @@ import { FraudReviewContainer } from './features/fraud-review';
 import { PredictiveContainer } from './features/predictive';
 import { AgentLogsContainer } from './features/agent-logs';
 import { RagAssistantContainer } from './features/rag-assistant';
-import { CompanyFilesContainer } from './features/company-files';
-import { SystemUsageContainer } from './features/system-usage';
 import AdaptiveSurveyPage from './pages/AdaptiveSurveyPage';
 
 function App() {
@@ -193,12 +191,8 @@ function App() {
         <Route path="/dashboard-suscriptor/asistente-rag" element={
           <PrivateRoute requiredType="suscriptor"><RagAssistantContainer role="suscriptor" /></PrivateRoute>
         } />
-        <Route path="/dashboard-suscriptor/archivos" element={
-          <PrivateRoute requiredType="suscriptor"><CompanyFilesContainer role="suscriptor" /></PrivateRoute>
-        } />
-        <Route path="/dashboard-suscriptor/uso-sistema" element={
-          <PrivateRoute requiredType="suscriptor"><SystemUsageContainer role="suscriptor" /></PrivateRoute>
-        } />
+        <Route path="/dashboard-suscriptor/archivos" element={<Navigate to="/dashboard-suscriptor/plantillas" replace />} />
+        <Route path="/dashboard-suscriptor/uso-sistema" element={<Navigate to="/dashboard-suscriptor/plantillas" replace />} />
 
         {/* Rutas protegidas - operador */}
         <Route path="/dashboard-operador/plantillas" element={

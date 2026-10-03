@@ -156,15 +156,25 @@ export default function Entregas({ LayoutComponent = DashboardSuscriptorLayout }
     setSearchDestinatario("")
   }
 
-  const handleDelete = async (campanaId, entregaId) => {
-    if (window.confirm("¿Estás seguro de eliminar esta entrega?")) {
-      try {
-        await deleteEntrega(campanaId, entregaId)
-        loadData()
-      } catch (err) {
-        setError("Error al eliminar: " + err.message)
-      }
-    }
+  const handleDelete = (campanaId, entregaId) => {
+    toast("¿Estás seguro de eliminar esta entrega?", {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          try {
+            await deleteEntrega(campanaId, entregaId)
+            loadData()
+            toast.success("Entrega eliminada correctamente")
+          } catch (err) {
+            setError("Error al eliminar: " + err.message)
+            toast.error("Error al eliminar: " + err.message)
+          }
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    })
   }
 
   const handleMarkAsSent = async (campanaId, entregaId) => {

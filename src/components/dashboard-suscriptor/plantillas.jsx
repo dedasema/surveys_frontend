@@ -1,6 +1,7 @@
 
 import { useCallback } from "react"
 import { useState, useEffect } from "react"
+import { toast } from "sonner"
 import {
   getPlantillas,
   createPlantilla,
@@ -142,15 +143,25 @@ export default function Plantillas({ LayoutComponent = DashboardSuscriptorLayout
     setShowModal(true)
   }
 
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar esta plantilla?")) {
-      try {
-        await deletePlantilla(id)
-        loadData()
-      } catch (err) {
-        setError("Error al eliminar: " + err.message)
-      }
-    }
+  const handleDelete = (id) => {
+    toast("¿Estás seguro de eliminar esta plantilla?", {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          try {
+            await deletePlantilla(id)
+            loadData()
+            toast.success("Plantilla eliminada correctamente")
+          } catch (err) {
+            setError("Error al eliminar: " + err.message)
+            toast.error("Error al eliminar: " + err.message)
+          }
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    })
   }
 
   const openPreguntas = (plantilla) => {
@@ -206,15 +217,25 @@ export default function Plantillas({ LayoutComponent = DashboardSuscriptorLayout
     }
   }
 
-  const handleDeletePregunta = async (preguntaId) => {
-    if (window.confirm("¿Estás seguro de eliminar esta pregunta?")) {
-      try {
-        await deletePregunta(selectedPlantilla.id, preguntaId)
-        loadPreguntas(selectedPlantilla.id)
-      } catch (err) {
-        setError("Error al eliminar pregunta: " + err.message)
-      }
-    }
+  const handleDeletePregunta = (preguntaId) => {
+    toast("¿Estás seguro de eliminar esta pregunta?", {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          try {
+            await deletePregunta(selectedPlantilla.id, preguntaId)
+            loadPreguntas(selectedPlantilla.id)
+            toast.success("Pregunta eliminada correctamente")
+          } catch (err) {
+            setError("Error al eliminar pregunta: " + err.message)
+            toast.error("Error al eliminar pregunta: " + err.message)
+          }
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    })
   }
 
   const addOpcion = () => {

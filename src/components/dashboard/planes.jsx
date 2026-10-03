@@ -95,16 +95,24 @@ const PlanesPage = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar este plan?")) {
-      try {
-        await eliminarPlan(id);
-        setPlanes(planes.filter((p) => p.id !== id));
-        toast.success("Plan eliminado correctamente");
-      } catch (error) {
-        toast.error("Error al eliminar el plan: " + error.message);
-      }
-    }
+  const handleDelete = (id) => {
+    toast("¿Estás seguro de que deseas eliminar este plan?", {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          try {
+            await eliminarPlan(id);
+            setPlanes(planes.filter((p) => p.id !== id));
+            toast.success("Plan eliminado correctamente");
+          } catch (error) {
+            toast.error("Error al eliminar el plan: " + error.message);
+          }
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    });
   };
 
   const handleSubmit = async (e) => {

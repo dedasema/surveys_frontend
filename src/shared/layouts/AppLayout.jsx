@@ -21,8 +21,6 @@ import {
   TrendingUp,
   Bot,
   MessageSquareText,
-  FolderOpen,
-  Activity,
 } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import {
@@ -209,23 +207,6 @@ const ROLE_STRATEGIES = {
             url: "/dashboard-suscriptor/asistente-rag",
             icon: MessageSquareText,
             isActive: pathname.includes("/dashboard-suscriptor/asistente-rag"),
-          },
-        ],
-      },
-      {
-        title: "Archivos y Métricas",
-        items: [
-          {
-            title: "Archivos de Empresa",
-            url: "/dashboard-suscriptor/archivos",
-            icon: FolderOpen,
-            isActive: pathname.includes("/dashboard-suscriptor/archivos"),
-          },
-          {
-            title: "Uso del Sistema",
-            url: "/dashboard-suscriptor/uso-sistema",
-            icon: Activity,
-            isActive: pathname.includes("/dashboard-suscriptor/uso-sistema"),
           },
         ],
       },

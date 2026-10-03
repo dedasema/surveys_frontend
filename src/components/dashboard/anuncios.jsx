@@ -91,19 +91,25 @@ export default function AnunciosPage() {
     }
   };
 
-  const handleDelete = async (id, titulo) => {
-    if (!window.confirm(`¿Estás seguro de eliminar permanentemente el anuncio "${titulo}"?`)) {
-      return;
-    }
-
-    try {
-      toast.loading("Eliminando anuncio...", { id: "delete" });
-      await eliminarAnuncioAdmin(id);
-      setAnuncios((prev) => prev.filter((a) => a.id !== id));
-      toast.success("Anuncio eliminado exitosamente", { id: "delete" });
-    } catch (err) {
-      toast.error("Error al eliminar el anuncio: " + err.message, { id: "delete" });
-    }
+  const handleDelete = (id, titulo) => {
+    toast(`¿Estás seguro de eliminar permanentemente el anuncio "${titulo}"?`, {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          try {
+            toast.loading("Eliminando anuncio...", { id: "delete" });
+            await eliminarAnuncioAdmin(id);
+            setAnuncios((prev) => prev.filter((a) => a.id !== id));
+            toast.success("Anuncio eliminado exitosamente", { id: "delete" });
+          } catch (err) {
+            toast.error("Error al eliminar el anuncio: " + err.message, { id: "delete" });
+          }
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    });
   };
 
   const getTipoIcon = (tipo) => {

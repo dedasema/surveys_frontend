@@ -33,6 +33,7 @@ export interface GetFilesParams {
   offset?: number;
   categoria?: string;
   busqueda?: string;
+  empresaId?: string | number;
 }
 
 export interface UploadFilePayload {

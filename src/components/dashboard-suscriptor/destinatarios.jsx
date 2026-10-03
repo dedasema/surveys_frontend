@@ -61,15 +61,25 @@ const Destinatarios = ({ LayoutComponent = DashboardSuscriptorLayout }) => {
     setShowModal(true)
   }
 
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de que quieres eliminar este destinatario?")) {
-      try {
-        await deleteDestinatario(id)
-        await fetchDestinatarios()
-      } catch (error) {
-        console.error("Error deleting destinatario:", error)
-      }
-    }
+  const handleDelete = (id) => {
+    toast("¿Estás seguro de que quieres eliminar este destinatario?", {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          try {
+            await deleteDestinatario(id)
+            await fetchDestinatarios()
+            toast.success("Destinatario eliminado correctamente")
+          } catch (error) {
+            console.error("Error deleting destinatario:", error)
+            toast.error("Error al eliminar el destinatario")
+          }
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    })
   }
 
   const resetForm = () => {

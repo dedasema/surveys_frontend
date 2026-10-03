@@ -84,12 +84,15 @@ let inMemoryFiles: CompanyFileItem[] = [...MOCK_FILES];
 
 export const filesApi = {
   async getFiles(params: GetFilesParams = {}): Promise<CompanyFilesResponse> {
-    const { limit = 20, offset = 0, categoria, busqueda } = params;
+    const { limit = 20, offset = 0, categoria, busqueda, empresaId } = params;
     const query = new URLSearchParams();
     query.set('limit', String(limit));
     query.set('offset', String(offset));
     if (categoria && categoria !== 'todos') query.set('categoria', categoria);
     if (busqueda && busqueda.trim()) query.set('busqueda', busqueda.trim());
+    if (empresaId !== undefined && empresaId !== null && empresaId !== '') {
+      query.set('empresa_id', String(empresaId));
+    }
 
     try {
       let res = await apiClient.get(`/archivos?${query.toString()}`);

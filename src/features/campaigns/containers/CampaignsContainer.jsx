@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { toast } from "sonner"
 import { Plus, Search, Filter, Megaphone } from "lucide-react"
 import { AppLayout } from "../../../shared/layouts/AppLayout"
 import { Button } from "../../../shared/components/ui"
@@ -48,10 +49,18 @@ export const CampaignsContainer = ({ role = "suscriptor" }) => {
     }
   }
 
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de que querés eliminar esta campaña?")) {
-      await deleteCampaign(id)
-    }
+  const handleDelete = (id) => {
+    toast("¿Estás seguro de que querés eliminar esta campaña?", {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          await deleteCampaign(id)
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    })
   }
 
   return (

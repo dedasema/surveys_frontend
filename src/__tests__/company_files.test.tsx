@@ -38,6 +38,16 @@ describe('Gestión de Archivos de la Empresa — Unit Tests', () => {
       expect(result.archivos.some((f) => f.archivo.includes('audio_respuesta_01'))).toBe(true);
     });
 
+    it('passes empresa_id in query when empresaId parameter is provided', async () => {
+      const getSpy = vi.spyOn(apiClient, 'get').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ total: 0, limit: 10, offset: 0, espacio_total_usado_mb: 0, archivos: [] }),
+      } as any);
+
+      await filesApi.getFiles({ empresaId: 42 });
+      expect(getSpy).toHaveBeenCalledWith(expect.stringContaining('empresa_id=42'));
+    });
+
     it('uploads a new file and returns created item', async () => {
       const dummyBlob = new Blob(['sample content'], { type: 'text/plain' });
       const dummyFile = new File([dummyBlob], 'test_manual.txt', { type: 'text/plain' });

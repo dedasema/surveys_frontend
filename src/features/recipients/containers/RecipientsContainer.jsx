@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { toast } from "sonner"
 import { Plus, Upload, Search } from "lucide-react"
 import { AppLayout } from "../../../shared/layouts/AppLayout"
 import { Button } from "../../../shared/components/ui"
@@ -48,10 +49,18 @@ export const RecipientsContainer = ({ role = "suscriptor" }) => {
     }
   }
 
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de que querés eliminar este destinatario?")) {
-      await deleteRecipient(id)
-    }
+  const handleDelete = (id) => {
+    toast("¿Estás seguro de que querés eliminar este destinatario?", {
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          await deleteRecipient(id)
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+      },
+    })
   }
 
   return (

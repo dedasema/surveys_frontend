@@ -278,10 +278,12 @@ export const asignarPlanSuscriptorAdmin = (id, plan_id) =>
     body: JSON.stringify({ plan_id }),
   })
 
-export const impersonarSuscriptorAdmin = (suscriptorId) =>
-  authFetch(`/admin/suscriptores/${suscriptorId}/impersonate`, {
+export const impersonarSuscriptorAdmin = (suscriptorId, userId = null) => {
+  const query = userId ? `?user_id=${userId}` : ""
+  return authFetch(`/admin/suscriptores/${suscriptorId}/impersonate${query}`, {
     method: "POST",
   })
+}
 
 export const obtenerConsumoIASuscriptorAdmin = (suscriptorId) =>
   authFetch(`/admin/suscriptores/${suscriptorId}/consumo-ia`)
