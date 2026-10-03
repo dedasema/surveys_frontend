@@ -3,20 +3,17 @@ import {
   FolderOpen,
   Search,
   Filter,
-  UploadCloud,
   HardDrive,
   RefreshCw,
   ChevronLeft,
   ChevronRight,
-  Trash2,
-  AlertTriangle,
+  ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { filesApi } from './services/filesApi';
 import { CompanyFileItem, CompanyFilesResponse } from './types';
 import FilesTable from './components/FilesTable';
 import FilePreviewModal from './components/FilePreviewModal';
-import FileUploadModal from './components/FileUploadModal';
 
 export interface CompanyFilesDashboardProps {
   empresaId?: string | number;
@@ -34,9 +31,6 @@ export const CompanyFilesDashboard: React.FC<CompanyFilesDashboardProps> = ({ em
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('todos');
   const [previewFile, setPreviewFile] = useState<CompanyFileItem | null>(null);
-  const [uploadModalOpen, setUploadModalOpen] = useState(false);
-  const [fileToDelete, setFileToDelete] = useState<CompanyFileItem | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
   const limit = 10;
   const [offset, setOffset] = useState(0);
@@ -85,21 +79,6 @@ export const CompanyFilesDashboard: React.FC<CompanyFilesDashboardProps> = ({ em
     toast.success(`Descargando "${file.archivo}"`);
   };
 
-  const confirmDelete = async () => {
-    if (!fileToDelete) return;
-    try {
-      setDeleting(true);
-      await filesApi.deleteFile(fileToDelete.id);
-      toast.success(`Archivo "${fileToDelete.archivo}" eliminado`);
-      setFileToDelete(null);
-      fetchFiles();
-    } catch {
-      toast.error('No se pudo eliminar el archivo');
-    } finally {
-      setDeleting(false);
-    }
-  };
-
   const totalPages = Math.ceil(data.total / limit) || 1;
   const currentPage = Math.floor(offset / limit) + 1;
 
@@ -114,7 +93,7 @@ export const CompanyFilesDashboard: React.FC<CompanyFilesDashboardProps> = ({ em
           <div>
             <h1 className="text-xl font-bold text-gray-900">Gestión de Archivos de la Empresa</h1>
             <p className="text-xs text-gray-500 mt-0.5">
-              Administrá los audios de respuestas, documentos de encuestas y avatares corporativos
+              Auditoría de audios de respuestas, documentos de encuestas y avatares corporativos
             </p>
           </div>
         </div>
@@ -131,14 +110,11 @@ export const CompanyFilesDashboard: React.FC<CompanyFilesDashboardProps> = ({ em
             </div>
           </div>
 
-          {/* Botón Subir Archivo */}
-          <button
-            onClick={() => setUploadModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition cursor-pointer shadow-xs"
-          >
-            <UploadCloud className="w-4 h-4" />
-            Subir Archivo
-          </button>
+          {/* Badge Auditoría Solo Lectura */}
+          <div className="flex items-center gap-2 px-3.5 py-2 bg-indigo-50/70 border border-indigo-200 text-indigo-700 rounded-xl text-xs font-semibold">
+            <ShieldCheck className="w-4 h-4 text-indigo-600" />
+            <span>Auditoría (Solo Lectura)</span>
+          </div>
         </div>
       </div>
 
@@ -187,7 +163,6 @@ export const CompanyFilesDashboard: React.FC<CompanyFilesDashboardProps> = ({ em
         loading={loading}
         onView={(file) => setPreviewFile(file)}
         onDownload={handleDownload}
-        onDelete={(file) => setFileToDelete(file)}
       />
 
       {/* Paginación Estándar */}
@@ -230,48 +205,6 @@ export const CompanyFilesDashboard: React.FC<CompanyFilesDashboardProps> = ({ em
 
       {/* Modal de Vista Previa (Audio, Imagen, PDF) */}
       <FilePreviewModal file={previewFile} onClose={() => setPreviewFile(null)} />
-
-      {/* Modal de Carga de Archivo */}
-      <FileUploadModal
-        isOpen={uploadModalOpen}
-        onClose={() => setUploadModalOpen(false)}
-        onUploaded={() => {
-          fetchFiles();
-        }}
-      />
-
-      {/* Modal de Confirmación de Eliminación */}
-      {fileToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-gray-200 text-center">
-            <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-3">
-              <AlertTriangle className="w-6 h-6" />
-            </div>
-            <h3 className="text-base font-bold text-gray-900">¿Eliminar archivo?</h3>
-            <p className="text-xs text-gray-500 mt-1 mb-5">
-              Se eliminará permanentemente{' '}
-              <strong className="text-gray-800">"{fileToDelete.archivo}"</strong>. Esta acción no se
-              puede deshacer.
-            </p>
-            <div className="flex items-center justify-center gap-2.5">
-              <button
-                onClick={() => setFileToDelete(null)}
-                disabled={deleting}
-                className="px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmDelete}
-                disabled={deleting}
-                className="px-4 py-2 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl transition cursor-pointer disabled:opacity-50"
-              >
-                {deleting ? 'Eliminando...' : 'Sí, eliminar'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

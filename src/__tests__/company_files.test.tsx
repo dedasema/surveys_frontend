@@ -103,10 +103,9 @@ describe('Gestión de Archivos de la Empresa — Unit Tests', () => {
       },
     ];
 
-    it('renders file row information and triggers actions', () => {
+    it('renders file row information and triggers read-only audit actions (view and download)', () => {
       const handleView = vi.fn();
       const handleDownload = vi.fn();
-      const handleDelete = vi.fn();
 
       render(
         <FilesTable
@@ -114,7 +113,6 @@ describe('Gestión de Archivos de la Empresa — Unit Tests', () => {
           loading={false}
           onView={handleView}
           onDownload={handleDownload}
-          onDelete={handleDelete}
         />
       );
 
@@ -131,9 +129,8 @@ describe('Gestión de Archivos de la Empresa — Unit Tests', () => {
       fireEvent.click(downloadBtn);
       expect(handleDownload).toHaveBeenCalledWith(mockFiles[0]);
 
-      const deleteBtn = screen.getByRole('button', { name: /eliminar archivo/i });
-      fireEvent.click(deleteBtn);
-      expect(handleDelete).toHaveBeenCalledWith(mockFiles[0]);
+      // Assert that delete button does NOT exist (read-only audit)
+      expect(screen.queryByRole('button', { name: /eliminar archivo/i })).toBeNull();
     });
   });
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Download, Trash2, Music, Image as ImageIcon, FileText, File, Calendar, HardDrive } from 'lucide-react';
+import { Eye, Download, Music, Image as ImageIcon, FileText, File, Calendar, HardDrive } from 'lucide-react';
 import { CompanyFileItem } from '../types';
 
 export interface FilesTableProps {
@@ -7,7 +7,6 @@ export interface FilesTableProps {
   loading: boolean;
   onView: (file: CompanyFileItem) => void;
   onDownload: (file: CompanyFileItem) => void;
-  onDelete: (file: CompanyFileItem) => void;
 }
 
 export const FilesTable: React.FC<FilesTableProps> = ({
@@ -15,7 +14,6 @@ export const FilesTable: React.FC<FilesTableProps> = ({
   loading,
   onView,
   onDownload,
-  onDelete,
 }) => {
   const getFileIcon = (file: CompanyFileItem) => {
     const ext = file.extension?.toLowerCase() || '';
@@ -177,14 +175,6 @@ export const FilesTable: React.FC<FilesTableProps> = ({
                       aria-label="Descargar archivo"
                     >
                       <Download className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => onDelete(file)}
-                      className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition cursor-pointer"
-                      title="Eliminar archivo"
-                      aria-label="Eliminar archivo"
-                    >
-                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </td>
