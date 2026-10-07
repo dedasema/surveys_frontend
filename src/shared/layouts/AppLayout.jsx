@@ -18,6 +18,7 @@ import {
   Settings,
   Sparkles,
   ShieldAlert,
+  ShieldCheck,
   TrendingUp,
   Bot,
   MessageSquareText,
@@ -219,6 +220,23 @@ const ROLE_STRATEGIES = {
             icon: UserCog,
             isActive: pathname.includes("/dashboard-suscriptor/operadores"),
           },
+          {
+            title: "Roles y Permisos",
+            url: "/dashboard-suscriptor/roles",
+            icon: ShieldCheck,
+            isActive: pathname.includes("/dashboard-suscriptor/roles"),
+          },
+        ],
+      },
+      {
+        title: "Seguridad y Auditoría",
+        items: [
+          {
+            title: "Auditoría",
+            url: "/dashboard-suscriptor/auditoria",
+            icon: ShieldAlert,
+            isActive: pathname.includes("/dashboard-suscriptor/auditoria"),
+          },
         ],
       },
       {
@@ -277,6 +295,18 @@ export const AppLayout = ({ children, role = "suscriptor" }) => {
   const navigate = useNavigate()
   const { logout } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    return localStorage.getItem("sidebar_collapsed") === "true"
+  })
+
+  const toggleSidebarCollapse = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev
+      localStorage.setItem("sidebar_collapsed", next ? "true" : "false")
+      return next
+    })
+  }
+
   const [user, setUser] = useState({
     name: "Usuario",
     email: "",
@@ -312,23 +342,30 @@ export const AppLayout = ({ children, role = "suscriptor" }) => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)}>
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={toggleSidebarCollapse}
+      >
         <SidebarHeader className="h-16 flex items-center px-4">
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg shadow-sm">
+          <div className="flex items-center space-x-3 overflow-hidden">
+            <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg shadow-sm flex-shrink-0">
               <BarChart3 className="h-6 w-6 text-white" />
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 leading-none">SurveySaaS</h2>
-              <p className="text-xs text-gray-500 mt-1">{strategy.panelTitle}</p>
-            </div>
+            {!isCollapsed && (
+              <div className="min-w-0 transition-opacity duration-300">
+                <h2 className="text-lg font-semibold text-gray-900 leading-none truncate">SurveySaaS</h2>
+                <p className="text-xs text-gray-500 mt-1 truncate">{strategy.panelTitle}</p>
+              </div>
+            )}
           </div>
         </SidebarHeader>
 
         <SidebarContent>
           {menu.map((group) => (
             <SidebarGroup key={group.title}>
-              <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+              {!isCollapsed && <SidebarGroupLabel>{group.title}</SidebarGroupLabel>}
               <SidebarMenu>
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
@@ -338,8 +375,8 @@ export const AppLayout = ({ children, role = "suscriptor" }) => {
                       onClick={() => setSidebarOpen(false)}
                       title={item.title}
                     >
-                      <item.icon className="h-5 w-5 mr-3" />
-                      <span>{item.title}</span>
+                      <item.icon className={`h-5 w-5 flex-shrink-0 ${isCollapsed ? "" : "mr-3"}`} />
+                      {!isCollapsed && <span className="truncate">{item.title}</span>}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -351,10 +388,13 @@ export const AppLayout = ({ children, role = "suscriptor" }) => {
         <SidebarFooter>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 transition-colors font-medium text-sm"
+            title="Cerrar sesión"
+            className={`w-full flex items-center justify-center rounded-xl bg-red-50 text-red-700 hover:bg-red-100 transition py-2.5 ${
+              isCollapsed ? "px-0" : "px-4 gap-2"
+            } font-medium text-sm`}
           >
-            <LogOut className="w-4 h-4" />
-            <span>Cerrar sesión</span>
+            <LogOut className="w-4 h-4 flex-shrink-0" />
+            {!isCollapsed && <span>Cerrar sesión</span>}
           </button>
         </SidebarFooter>
       </Sidebar>
@@ -362,7 +402,16 @@ export const AppLayout = ({ children, role = "suscriptor" }) => {
       {/* Main Content Container */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="flex h-16 items-center gap-2 border-b border-gray-200 bg-white px-4 sm:px-6">
-          <SidebarTrigger onClick={() => setSidebarOpen(true)} className="md:hidden" />
+          <SidebarTrigger
+            onClick={() => {
+              if (window.innerWidth < 768) {
+                setSidebarOpen(true)
+              } else {
+                toggleSidebarCollapse()
+              }
+            }}
+            isCollapsed={isCollapsed}
+          />
 
           <div className="flex flex-1 items-center justify-between">
             <div className="flex items-center space-x-2 sm:space-x-4">

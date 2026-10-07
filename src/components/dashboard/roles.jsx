@@ -28,6 +28,8 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import DashboardLayout from "../dashboard-layout"
+import { AppLayout } from "../../shared/layouts/AppLayout"
+import { useLocation } from "react-router-dom"
 import {
   listarRolesDetalle,
   listarPermisos,
@@ -39,7 +41,25 @@ import {
 
 const PROTECTED_ROLES = ["admin", "empresa", "operator"]
 
-export default function RolesPage() {
+const SUPERADMIN_MODULES = [
+  "suscriptores",
+  "empresas",
+  "planes",
+  "subscription_plans",
+  "anuncios",
+  "catalogos",
+  "canales",
+  "estados_pago",
+  "estados_entrega",
+  "estados_documento",
+  "metodos_pago",
+]
+
+export default function RolesPage({ role = "admin" }) {
+  const location = useLocation()
+  const isSuscriptor =
+    role === "suscriptor" || (location.pathname && location.pathname.includes("/dashboard-suscriptor"))
+
   const [roles, setRoles] = useState([])
   const [permisos, setPermisos] = useState([])
   const [loading, setLoading] = useState(true)
@@ -62,21 +82,36 @@ export default function RolesPage() {
   async function cargarDatos(keepSelectedId = null) {
     try {
       setLoading(true)
-      const [rolesData, permisosData] = await Promise.all([
+      const [rolesDataRaw, permisosDataRaw] = await Promise.all([
         listarRolesDetalle(),
         listarPermisos(),
       ])
-      setRoles(rolesData || [])
-      setPermisos(permisosData || [])
 
-      if (rolesData && rolesData.length > 0) {
+      let rolesData = rolesDataRaw || []
+      let permisosData = permisosDataRaw || []
+
+      if (isSuscriptor) {
+        rolesData = rolesData.filter((r) => r.nombre.toLowerCase() !== "admin")
+        permisosData = permisosData.filter((p) => {
+          const mod = (p.modulo || "").toLowerCase()
+          return !SUPERADMIN_MODULES.includes(mod)
+        })
+      }
+
+      setRoles(rolesData)
+      setPermisos(permisosData)
+
+      if (rolesData.length > 0) {
         const targetId = keepSelectedId || selectedRol?.id
         const targetRol = targetId
           ? rolesData.find((r) => r.id === targetId) || rolesData[0]
           : rolesData[0]
 
         setSelectedRol(targetRol)
-        const initialPerms = targetRol.permisos ? targetRol.permisos.map((p) => p.id) : []
+        const validPermisoIds = new Set(permisosData.map((p) => p.id))
+        const initialPerms = targetRol.permisos
+          ? targetRol.permisos.map((p) => p.id).filter((id) => validPermisoIds.has(id))
+          : []
         setSelectedPermisos(initialPerms)
         setOriginalPermisos(initialPerms)
       }
@@ -96,7 +131,10 @@ export default function RolesPage() {
   const handleSelectRol = (rol) => {
     const doSelect = (r) => {
       setSelectedRol(r)
-      const perms = r.permisos ? r.permisos.map((p) => p.id) : []
+      const validPermisoIds = new Set(permisos.map((p) => p.id))
+      const perms = r.permisos
+        ? r.permisos.map((p) => p.id).filter((id) => validPermisoIds.has(id))
+        : []
       setSelectedPermisos(perms)
       setOriginalPermisos(perms)
     }
@@ -194,10 +232,13 @@ export default function RolesPage() {
   const handleOpenEditModal = (rol, e) => {
     e.stopPropagation()
     setEditingRol(rol)
+    const validPermisoIds = new Set(permisos.map((p) => p.id))
     setRolFormData({
       nombre: rol.nombre,
       descripcion: rol.descripcion || "",
-      permisos_ids: rol.permisos ? rol.permisos.map((p) => p.id) : [],
+      permisos_ids: rol.permisos
+        ? rol.permisos.map((p) => p.id).filter((id) => validPermisoIds.has(id))
+        : [],
     })
     setShowModal(true)
   }
@@ -287,8 +328,11 @@ export default function RolesPage() {
     return <Layers className="h-4 w-4 text-blue-600" />
   }
 
+  const Layout = isSuscriptor ? AppLayout : DashboardLayout
+  const layoutProps = isSuscriptor ? { role: "suscriptor" } : { activeSection: "roles" }
+
   return (
-    <DashboardLayout activeSection="roles">
+    <Layout {...layoutProps}>
       <div className="min-h-full p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/40">
         {/* Header Principal */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -302,10 +346,12 @@ export default function RolesPage() {
               </span>
             </div>
             <h1 className="text-3xl font-extrabold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-950 bg-clip-text text-transparent">
-              Matriz de Roles y Permisos Granulares
+              {isSuscriptor ? "Roles y Permisos del Equipo" : "Matriz de Roles y Permisos Granulares"}
             </h1>
             <p className="text-sm text-slate-600">
-              Configura permisos atómicos por módulo, diseña nuevos roles personalizados y controla los accesos del sistema.
+              {isSuscriptor
+                ? "Configura roles personalizados y permisos de acceso para los operadores y miembros de tu empresa"
+                : "Configura permisos atómicos por módulo, diseña nuevos roles personalizados y controla los accesos del sistema."}
             </p>
           </div>
 
@@ -342,7 +388,11 @@ export default function RolesPage() {
                   {roles.map((rol) => {
                     const isSelected = selectedRol?.id === rol.id
                     const isProtected = PROTECTED_ROLES.includes(rol.nombre.toLowerCase())
-                    const totalPerms = rol.permisos ? rol.permisos.length : 0
+                    const totalPerms = rol.permisos
+                      ? (isSuscriptor
+                          ? rol.permisos.filter((p) => !SUPERADMIN_MODULES.includes((p.modulo || "").toLowerCase())).length
+                          : rol.permisos.length)
+                      : 0
 
                     return (
                       <div
@@ -787,6 +837,6 @@ export default function RolesPage() {
           </div>
         )}
       </div>
-    </DashboardLayout>
+    </Layout>
   )
 }

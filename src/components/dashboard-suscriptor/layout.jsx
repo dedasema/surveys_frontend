@@ -15,6 +15,7 @@ import {
   Receipt,
   Sparkles,
   ShieldAlert,
+  ShieldCheck,
   TrendingUp,
   Bot,
   MessageSquareText,
@@ -98,7 +99,6 @@ const DashboardSuscriptorLayout = ({ children }) => {
       items: [
         { title: "Plantillas", url: "/dashboard-suscriptor/plantillas", icon: FileText },
         { title: "Destinatarios", url: "/dashboard-suscriptor/destinatarios", icon: Users },
-        { title: "Operadores", url: "/dashboard-suscriptor/operadores", icon: UserCog },
         { title: "Campañas", url: "/dashboard-suscriptor/campanas", icon: Target },
         { title: "Respuestas", url: "/dashboard-suscriptor/respuestas", icon: MessageSquare },
         { title: "Entregas", url: "/dashboard-suscriptor/entregas", icon: Send },
@@ -115,6 +115,13 @@ const DashboardSuscriptorLayout = ({ children }) => {
       ],
     },
     {
+      title: "Equipo",
+      items: [
+        { title: "Operadores", url: "/dashboard-suscriptor/operadores", icon: UserCog },
+        { title: "Roles y Permisos", url: "/dashboard-suscriptor/roles", icon: ShieldCheck },
+      ],
+    },
+    {
       title: "Facturación y Membresía",
       items: [
         { title: "Mi Suscripción", url: "/dashboard-suscriptor/mi-suscripcion", icon: Crown },
@@ -124,7 +131,10 @@ const DashboardSuscriptorLayout = ({ children }) => {
     },
     {
       title: "Sistema",
-      items: [{ title: "Configuración", url: "/dashboard-suscriptor/configuracion", icon: Settings }],
+      items: [
+        { title: "Auditoría", url: "/dashboard-suscriptor/auditoria", icon: ShieldAlert },
+        { title: "Configuración", url: "/dashboard-suscriptor/configuracion", icon: Settings },
+      ],
     },
   ]
 

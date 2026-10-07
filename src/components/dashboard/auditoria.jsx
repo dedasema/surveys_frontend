@@ -14,9 +14,28 @@ import {
   Database,
 } from "lucide-react"
 import DashboardLayout from "../dashboard-layout"
+import { AppLayout } from "../../shared/layouts/AppLayout"
+import { useLocation } from "react-router-dom"
 import { listarAuditoria, obtenerFiltrosAuditoria } from "../../services/api-admin"
 
-export default function Auditoria() {
+const SUPERADMIN_AUDIT_MODULES = [
+  "PLANES",
+  "SUSCRIPTORES",
+  "ANUNCIOS",
+  "EMPRESAS",
+  "SUBSCRIPTION_PLANS",
+  "CATALOGOS",
+  "CANALES",
+  "ESTADOS_PAGO",
+  "ESTADOS_ENTREGA",
+  "ESTADOS_DOCUMENTO",
+  "METODOS_PAGO",
+]
+
+export default function Auditoria({ role = "admin" }) {
+  const location = useLocation()
+  const isSuscriptor =
+    role === "suscriptor" || (location.pathname && location.pathname.includes("/dashboard-suscriptor"))
   const [logs, setLogs] = useState([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -115,8 +134,17 @@ export default function Auditoria() {
 
   const totalPages = Math.ceil(total / limit) || 1
 
+  const modulosDisponibles = isSuscriptor
+    ? opcionesFiltros.modulos.filter(
+        (m) => !SUPERADMIN_AUDIT_MODULES.includes((m || "").toUpperCase())
+      )
+    : opcionesFiltros.modulos
+
+  const Layout = isSuscriptor ? AppLayout : DashboardLayout
+  const layoutProps = isSuscriptor ? { role: "suscriptor" } : { activeSection: "auditoria" }
+
   return (
-    <DashboardLayout activeSection="auditoria">
+    <Layout {...layoutProps}>
       <div className="p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-slate-100/50 to-blue-50/30 min-h-screen">
         {/* Encabezado */}
         <div className="mb-8">
@@ -126,10 +154,14 @@ export default function Auditoria() {
                 <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-md shadow-blue-500/20">
                   <ShieldAlert className="w-6 h-6" />
                 </div>
-                <h1 className="text-3xl font-bold text-slate-900">Registro de Auditoría</h1>
+                <h1 className="text-3xl font-bold text-slate-900">
+                  {isSuscriptor ? "Registro de Auditoría de la Empresa" : "Registro de Auditoría"}
+                </h1>
               </div>
               <p className="text-slate-600 text-sm sm:text-base">
-                Trazabilidad global y registro inmutable de acciones administrativas en el sistema
+                {isSuscriptor
+                  ? "Trazabilidad y registro de acciones realizadas por los operadores y usuarios de tu empresa"
+                  : "Trazabilidad global y registro inmutable de acciones administrativas en el sistema"}
               </p>
             </div>
 
@@ -163,7 +195,7 @@ export default function Auditoria() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Módulos Auditados</p>
-                <p className="text-3xl font-bold text-indigo-600">{opcionesFiltros.modulos.length}</p>
+                <p className="text-3xl font-bold text-indigo-600">{modulosDisponibles.length}</p>
                 <p className="text-xs text-slate-500 mt-1">Sistemas monitoreados</p>
               </div>
               <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
@@ -212,7 +244,7 @@ export default function Auditoria() {
                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
               >
                 <option value="">Todos los módulos</option>
-                {opcionesFiltros.modulos.map((m) => (
+                {modulosDisponibles.map((m) => (
                   <option key={m} value={m}>{m}</option>
                 ))}
               </select>
@@ -424,6 +456,6 @@ export default function Auditoria() {
           </div>
         )}
       </div>
-    </DashboardLayout>
+    </Layout>
   )
 }

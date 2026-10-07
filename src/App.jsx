@@ -173,6 +173,12 @@ function App() {
         <Route path="/dashboard-suscriptor/operadores" element={
           <PrivateRoute requiredType="suscriptor"><OperatorsContainer role="suscriptor" /></PrivateRoute>
         } />
+        <Route path="/dashboard-suscriptor/roles" element={
+          <PrivateRoute requiredType="suscriptor"><Roles role="suscriptor" /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/auditoria" element={
+          <PrivateRoute requiredType="suscriptor"><Auditoria role="suscriptor" /></PrivateRoute>
+        } />
         <Route path="/dashboard-suscriptor/dashboard" element={
           <PrivateRoute requiredType="suscriptor"><DashboardPage /></PrivateRoute>
         } />
