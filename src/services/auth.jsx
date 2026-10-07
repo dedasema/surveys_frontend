@@ -48,7 +48,7 @@ export async function login(credentials) {
     localStorage.setItem("user", JSON.stringify(userInfo));
 
     if (userInfo.rol === "admin") {
-      window.location.href = "/dashboard/roles";
+      window.location.href = "/dashboard/suscriptores";
     } else if (userInfo.tipo === "suscriptor") {
       window.location.href = "/dashboard-suscriptor/plantillas";
     } else if (userInfo.tipo === "operator") {
@@ -205,7 +205,7 @@ export function getAuthToken() {
 
 export function redirectBasedOnRole(user) {
   if (user.rol === "admin") {
-    return "/dashboard/roles";
+    return "/dashboard/suscriptores";
   } else if (user.tipo === "suscriptor") {
     return "/dashboard-suscriptor/plantillas";
   } else if (user.tipo === "operator") {

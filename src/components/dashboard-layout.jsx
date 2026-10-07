@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react"
 import {
-  Users,
   LogOut,
   Crown,
   User,
@@ -25,7 +24,7 @@ import {
 import { useAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
 import { getCurrentUser, getAvatarUrl } from "../services/auth"
-const DashboardLayout = ({ children, activeSection = "roles" }) => {
+const DashboardLayout = ({ children, activeSection = "suscriptores" }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(() => {
     return localStorage.getItem("sidebar_collapsed") === "true"
@@ -74,17 +73,6 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
           url: "/dashboard/suscriptores",
           icon: Building2,
           isActive: activeSection === "suscriptores",
-        },
-      ],
-    },
-    {
-      title: "Gestión y Accesos",
-      items: [
-        {
-          title: "Roles y Permisos",
-          url: "/dashboard/roles",
-          icon: Users,
-          isActive: activeSection === "roles",
         },
       ],
     },

@@ -93,16 +93,14 @@ function App() {
         <Route path="/dashboard" element={<Navigate to="/dashboard/suscriptores" replace />} />
         <Route path="/admin/dashboard" element={<Navigate to="/dashboard/suscriptores" replace />} />
         <Route path="/admin/suscriptores" element={<Navigate to="/dashboard/suscriptores" replace />} />
-        <Route path="/admin/roles" element={<Navigate to="/dashboard/roles" replace />} />
+        <Route path="/admin/roles" element={<Navigate to="/dashboard/suscriptores" replace />} />
         <Route path="/dashboard/suscriptores" element={
           <PrivateRoute requiredType="admin"><SuscriptoresPage /></PrivateRoute>
         } />
         <Route path="/dashboard/suscriptores/:id" element={
           <PrivateRoute requiredType="admin"><SuscriptorDetallePage /></PrivateRoute>
         } />
-        <Route path="/dashboard/roles" element={
-          <PrivateRoute requiredType="admin"><Roles /></PrivateRoute>
-        } />
+        <Route path="/dashboard/roles" element={<Navigate to="/dashboard/suscriptores" replace />} />
         <Route path="/dashboard/canales" element={
           <PrivateRoute requiredType="admin"><Canales /></PrivateRoute>
         } />

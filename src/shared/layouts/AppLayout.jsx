@@ -50,17 +50,6 @@ const ROLE_STRATEGIES = {
     hasChatbot: false,
     getMenu: (pathname) => [
       {
-        title: "Gestión de Usuarios",
-        items: [
-          {
-            title: "Roles",
-            url: "/dashboard/roles",
-            icon: Users,
-            isActive: pathname.includes("/dashboard/roles"),
-          },
-        ],
-      },
-      {
         title: "Configuración de Encuestas",
         items: [
           {
