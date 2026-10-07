@@ -19,11 +19,13 @@ import {
   TrendingUp,
   Bot,
   MessageSquareText,
+  Bell,
 } from "lucide-react"
 import { useLocation } from "react-router-dom"
 import { getCurrentUser, getAvatarUrl } from "../../services/auth"
 import { useAuth } from "../../context/AuthContext"
 import { Link } from "react-router-dom"
+import { NotificationBellPopover } from "../../features/notifications"
 
 import {
   Sidebar,
@@ -92,7 +94,10 @@ const DashboardSuscriptorLayout = ({ children }) => {
   const menu = [
     {
       title: "Panel Principal",
-      items: [{ title: "Dashboard", url: "/dashboard-suscriptor/dashboard", icon: BarChart3 }],
+      items: [
+        { title: "Dashboard", url: "/dashboard-suscriptor/dashboard", icon: BarChart3 },
+        { title: "Notificaciones", url: "/dashboard-suscriptor/notificaciones", icon: Bell },
+      ],
     },
     {
       title: "Gestión de Encuestas",
@@ -211,7 +216,8 @@ const DashboardSuscriptorLayout = ({ children }) => {
             isCollapsed={isCollapsed}
           />
 
-          <div className="flex flex-1 items-center justify-end">
+          <div className="flex flex-1 items-center justify-end gap-3">
+            <NotificationBellPopover />
             <Link
               to="/dashboard-suscriptor/perfil-suscriptor"
               className="flex items-center space-x-2 hover:opacity-80 transition-opacity"

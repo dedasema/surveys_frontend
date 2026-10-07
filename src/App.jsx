@@ -57,6 +57,7 @@ import { FraudReviewContainer } from './features/fraud-review';
 import { PredictiveContainer } from './features/predictive';
 import { AgentLogsContainer } from './features/agent-logs';
 import { RagAssistantContainer } from './features/rag-assistant';
+import { NotificationsPage } from './features/notifications';
 import AdaptiveSurveyPage from './pages/AdaptiveSurveyPage';
 
 function App() {
@@ -195,6 +196,9 @@ function App() {
         <Route path="/dashboard-suscriptor/asistente-rag" element={
           <PrivateRoute requiredType="suscriptor"><RagAssistantContainer role="suscriptor" /></PrivateRoute>
         } />
+        <Route path="/dashboard-suscriptor/notificaciones" element={
+          <PrivateRoute requiredType="suscriptor"><NotificationsPage role="suscriptor" /></PrivateRoute>
+        } />
         <Route path="/dashboard-suscriptor/archivos" element={<Navigate to="/dashboard-suscriptor/plantillas" replace />} />
         <Route path="/dashboard-suscriptor/uso-sistema" element={<Navigate to="/dashboard-suscriptor/plantillas" replace />} />
 
@@ -207,6 +211,9 @@ function App() {
         } />
         <Route path="/dashboard-operador/entregas" element={
           <PrivateRoute requiredType="operator"><DeliveriesContainer role="operator" /></PrivateRoute>
+        } />
+        <Route path="/dashboard-operador/notificaciones" element={
+          <PrivateRoute requiredType="operator"><NotificationsPage role="operator" /></PrivateRoute>
         } />
         <Route path="/dashboard-operador/perfil-operador" element={
           <PrivateRoute requiredType="operator"><PerfilOperador /></PrivateRoute>

@@ -22,6 +22,7 @@ import {
   TrendingUp,
   Bot,
   MessageSquareText,
+  Bell,
 } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import {
@@ -39,6 +40,8 @@ import {
 import { useAuth } from "../../context/AuthContext"
 import { getCurrentUser } from "../../services/auth"
 import { ChatbotWidget } from "../../features/chatbot"
+import { NotificationBellPopover } from "../../features/notifications"
+import SystemAnnouncementsBanner from "../../components/SystemAnnouncementsBanner"
 
 /**
  * Strategy Pattern: Configuración de navegación y comportamiento por rol
@@ -127,6 +130,12 @@ const ROLE_STRATEGIES = {
             url: "/dashboard-suscriptor/dashboard",
             icon: BarChart3,
             isActive: pathname.includes("/dashboard-suscriptor/dashboard"),
+          },
+          {
+            title: "Notificaciones",
+            url: "/dashboard-suscriptor/notificaciones",
+            icon: Bell,
+            isActive: pathname.includes("/dashboard-suscriptor/notificaciones"),
           },
         ],
       },
@@ -252,6 +261,17 @@ const ROLE_STRATEGIES = {
     profileUrl: "/dashboard-operador/perfil-operador",
     hasChatbot: true,
     getMenu: (pathname) => [
+      {
+        title: "Panel Principal",
+        items: [
+          {
+            title: "Notificaciones",
+            url: "/dashboard-operador/notificaciones",
+            icon: Bell,
+            isActive: pathname.includes("/dashboard-operador/notificaciones"),
+          },
+        ],
+      },
       {
         title: "Gestión de Encuestas",
         items: [
@@ -415,6 +435,7 @@ export const AppLayout = ({ children, role = "suscriptor" }) => {
             </div>
 
             <div className="flex items-center space-x-2 sm:space-x-4">
+              <NotificationBellPopover />
               <Link
                 to={strategy.profileUrl}
                 className="flex items-center space-x-2.5 hover:opacity-85 transition-opacity"
@@ -429,6 +450,9 @@ export const AppLayout = ({ children, role = "suscriptor" }) => {
             </div>
           </div>
         </header>
+
+        {/* Global System Announcements Banner */}
+        <SystemAnnouncementsBanner />
 
         {/* Content View */}
         <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
