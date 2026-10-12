@@ -21,6 +21,7 @@ import PublicNavbar from "../components/PublicNavbar";
 import PublicFooter from "../components/PublicFooter";
 import { obtenerPlanesPublicos } from "../services/api";
 import { isTokenExpired, redirectBasedOnRole } from "../services/auth";
+import { LandingChatbotWidget } from "../features/landing-chatbot";
 
 const DEFAULT_PLANES = [
   {
@@ -710,6 +711,9 @@ const LandingPage = () => {
 
       {/* FOOTER */}
       <PublicFooter />
+
+      {/* LANDING CHATBOT WIDGET */}
+      <LandingChatbotWidget />
     </div>
   )
 }
