@@ -1,5 +1,13 @@
+export interface TipoCambioResponse {
+  valor: number;
+  fuente: string;
+  moneda: string;
+  fecha?: string;
+  es_fallback: boolean;
+}
+
 export interface GenerarQRPayload {
-  plan_id: number;
+  plan_id: number | string;
   document_id?: string;
   document_type?: number;
   phone_number?: string;
@@ -20,21 +28,29 @@ export interface GenerarQRResponse {
   qr_content_url?: string;
   universal_url?: string;
   expiration_date?: string;
+  fecha_vencimiento?: string;
   monto: number;
+  monto_real_bob?: number;
+  monto_qr?: number;
+  tipo_cambio?: number;
+  es_fallback_tc?: boolean;
   moneda: string;
   plan_nombre: string;
 }
 
 export interface ConsultarTransaccionResponse {
-  success: boolean;
+  success?: boolean;
   payment_number: string;
-  estado: string;
-  pagado: boolean;
+  status?: "pendiente" | "completado" | "expirado" | "fallido" | string;
+  estado?: string;
+  pagado?: boolean;
   monto: number;
-  moneda: string;
+  monto_qr?: number;
+  tipo_cambio?: number;
+  moneda?: string;
   pagofacil_transaction_id?: string;
   fecha_pago?: string;
-  mensaje: string;
+  mensaje?: string;
 }
 
 export type PaymentMethodType = 'stripe' | 'pagofacil';

@@ -5,6 +5,7 @@ import {
   iniciarStripeCheckout,
   getMe,
   getMiSuscripcion,
+  obtenerTipoCambioOficial,
 } from "../../services/api";
 import {
   CheckCircle,
@@ -28,8 +29,26 @@ const Planes = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [suscripcionActual, setSuscripcionActual] = useState(null);
   const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState(null);
+  const [tipoCambio, setTipoCambio] = useState({
+    valor: 7.0,
+    fuente: "Banco Central de Bolivia (bcb.gob.bo)",
+    moneda: "USD/BOB",
+    fecha: new Date().toISOString().slice(0, 10),
+    es_fallback: false,
+  });
 
   useEffect(() => {
+    (async () => {
+      try {
+        const tcData = await obtenerTipoCambioOficial();
+        if (tcData && typeof tcData.valor === "number") {
+          setTipoCambio(tcData);
+        }
+      } catch (err) {
+        console.warn("Error cargando tipo de cambio oficial:", err);
+      }
+    })();
+
     (async () => {
       try {
         const dataPlanes = await listPlanes();
@@ -111,6 +130,19 @@ const Planes = () => {
               Escala tu volumen de encuestas, cuotas mensuales y canales con IA
             </p>
           </div>
+
+          {/* Pill informativa de tipo de cambio oficial */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-900 border border-emerald-200/90 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>
+                Tipo de cambio oficial hoy: <strong>1 USD = {Number(tipoCambio.valor).toFixed(2)} BOB</strong>
+              </span>
+              <span className="text-[10px] text-slate-500 font-normal">
+                ({tipoCambio.es_fallback ? "Fallback" : "BCB"})
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Cards */}
@@ -138,7 +170,7 @@ const Planes = () => {
 
                 {/* Nombre y Precio */}
                 <h2 className="text-2xl font-bold text-slate-900 mb-1 pr-24">{plan.nombre}</h2>
-                <div className="flex items-baseline gap-1 my-3">
+                <div className="flex items-baseline gap-1 my-2">
                   <span className="text-4xl font-extrabold text-slate-900 tracking-tight">
                     {precio === 0 ? "Gratis" : `$${precio}`}
                   </span>
@@ -146,13 +178,21 @@ const Planes = () => {
                 </div>
 
                 {precio > 0 && (
-                  <div className="flex items-center gap-1.5 flex-wrap mb-4">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
-                      <QrCode className="w-3 h-3 text-emerald-600" /> QR PagoFácil (Bs.)
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
-                      <CreditCard className="w-3 h-3 text-indigo-600" /> Stripe (USD)
-                    </span>
+                  <div className="mb-4 space-y-1.5">
+                    <p className="text-xs font-semibold text-slate-700">
+                      ≈ Bs. {(precio * tipoCambio.valor).toFixed(2)} BOB{" "}
+                      <span className="text-[10px] text-slate-400 font-normal">
+                        (TC: {Number(tipoCambio.valor).toFixed(2)})
+                      </span>
+                    </p>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                        <QrCode className="w-3 h-3 text-emerald-600" /> QR PagoFácil (Bs.)
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
+                        <CreditCard className="w-3 h-3 text-indigo-600" /> Stripe (USD)
+                      </span>
+                    </div>
                   </div>
                 )}
 
@@ -284,6 +324,7 @@ const Planes = () => {
           plan={selectedPlanForCheckout}
           suscriptorId={suscriptorId}
           userProfile={userProfile}
+          tipoCambio={tipoCambio}
           onSuccess={() => {
             setSelectedPlanForCheckout(null);
             window.location.href = "/dashboard-suscriptor/planes/success?method=pagofacil";

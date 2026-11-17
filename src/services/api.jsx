@@ -303,6 +303,35 @@ export const iniciarStripeCheckout = (suscriptorId, planId) =>
     method: "POST",
   });
 
+// Tipo de Cambio Oficial (USD a BOB - Banco Central de Bolivia)
+export const obtenerTipoCambioOficial = async () => {
+  try {
+    let res = await fetch(`${API_BASE_URL}/pagofacil/tipo-cambio`);
+    if (!res.ok) {
+      res = await fetch(`${API_BASE_URL}/subscription/pagofacil/tipo-cambio`);
+    }
+    if (res.ok) {
+      return await res.json();
+    }
+    return {
+      valor: 7.0,
+      fuente: "Fallback Local",
+      moneda: "USD/BOB",
+      fecha: new Date().toISOString().slice(0, 10),
+      es_fallback: true,
+    };
+  } catch (err) {
+    console.warn("Error obteniendo tipo de cambio oficial, usando fallback:", err);
+    return {
+      valor: 7.0,
+      fuente: "Fallback Local",
+      moneda: "USD/BOB",
+      fecha: new Date().toISOString().slice(0, 10),
+      es_fallback: true,
+    };
+  }
+};
+
 // PagoFácil QR (Bolivia en Bs.)
 export const generarPagoFacilQR = async (payload) => {
   return authFetch("/pagofacil/generar-qr", {
@@ -319,12 +348,28 @@ export const generarPagoFacilQR = async (payload) => {
 export const consultarPagoFacilEstado = async (paymentNumber) => {
   const token = localStorage.getItem("token");
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  let res = await fetch(`${API_BASE_URL}/pagofacil/consultar/${paymentNumber}`, {
+  let res = await fetch(`${API_BASE_URL}/pagofacil/estado/${paymentNumber}`, {
     headers: {
       "Content-Type": "application/json",
       ...headers,
     },
   });
+  if (!res.ok) {
+    res = await fetch(`${API_BASE_URL}/subscription/pagofacil/estado/${paymentNumber}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...headers,
+      },
+    });
+  }
+  if (!res.ok) {
+    res = await fetch(`${API_BASE_URL}/pagofacil/consultar/${paymentNumber}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...headers,
+      },
+    });
+  }
   if (!res.ok) {
     res = await fetch(`${API_BASE_URL}/subscription/pagofacil/consultar/${paymentNumber}`, {
       headers: {

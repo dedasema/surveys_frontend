@@ -12,6 +12,11 @@ import {
   Building2,
   Smartphone,
   Info,
+  Copy,
+  Check,
+  AlertTriangle,
+  RefreshCw,
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { generarPagoFacilQR, consultarPagoFacilEstado, iniciarStripeCheckout } from "../../../services/api";
@@ -22,6 +27,7 @@ export const PlanCheckoutModal = ({
   plan = null,
   suscriptorId = "",
   userProfile = null,
+  tipoCambio = null,
   onSuccess = null,
 }) => {
   const [selectedMethod, setSelectedMethod] = useState("pagofacil"); // 'stripe' | 'pagofacil'
@@ -29,6 +35,8 @@ export const PlanCheckoutModal = ({
   const [loading, setLoading] = useState(false);
   const [qrData, setQrData] = useState(null);
   const [pollingActive, setPollingActive] = useState(false);
+  const [pollingStatus, setPollingStatus] = useState("pendiente"); // 'pendiente' | 'completado' | 'expirado' | 'fallido'
+  const [copied, setCopied] = useState(false);
 
   // Optional billing / transaction data
   const [billingInfo, setBillingInfo] = useState({
@@ -38,6 +46,7 @@ export const PlanCheckoutModal = ({
   });
 
   const pollingTimerRef = useRef(null);
+  const pollingStartTimeRef = useRef(null);
 
   // Initialize prefilled billing information when opened
   useEffect(() => {
@@ -46,6 +55,8 @@ export const PlanCheckoutModal = ({
       setQrData(null);
       setLoading(false);
       setPollingActive(false);
+      setPollingStatus("pendiente");
+      setCopied(false);
       setSelectedMethod("pagofacil");
 
       if (userProfile) {
@@ -96,6 +107,7 @@ export const PlanCheckoutModal = ({
   const handleGenerarQR = async () => {
     try {
       setLoading(true);
+      setPollingStatus("pendiente");
       const payload = {
         plan_id: plan.id,
         document_id: billingInfo.document_id.trim() || undefined,
@@ -121,31 +133,78 @@ export const PlanCheckoutModal = ({
     }
   };
 
+  const POLLING_INTERVAL_MS = 3000;
+  const POLLING_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes timeout
+
   const startPolling = (paymentNumber) => {
     stopPolling();
     setPollingActive(true);
+    setPollingStatus("pendiente");
+    pollingStartTimeRef.current = Date.now();
 
     pollingTimerRef.current = setInterval(async () => {
+      // Check 10 min timeout
+      if (Date.now() - pollingStartTimeRef.current > POLLING_TIMEOUT_MS) {
+        stopPolling();
+        setPollingStatus("expirado");
+        toast.warning("El código QR ha expirado (tiempo límite de 10 minutos superado).");
+        return;
+      }
+
       try {
         const res = await consultarPagoFacilEstado(paymentNumber);
-        if (res && res.pagado === true) {
-          stopPolling();
-          setStep("success");
-          toast.success("¡Pago completado exitosamente! Tu plan ha sido activado.");
+        if (res) {
+          const isPaid =
+            res.pagado === true ||
+            res.status === "completado" ||
+            res.estado === "completado";
+          const isExpired = res.status === "expirado" || res.estado === "expirado";
+          const isFailed = res.status === "fallido" || res.estado === "fallido";
 
-          setTimeout(() => {
-            if (onSuccess) {
-              onSuccess(res);
-            } else {
-              window.location.href = `/dashboard-suscriptor/planes/success?payment_number=${paymentNumber}&method=pagofacil`;
-            }
-          }, 2500);
+          if (isPaid) {
+            stopPolling();
+            setPollingStatus("completado");
+            setStep("success");
+            toast.success("¡Pago confirmado! Tu suscripción ha sido activada con éxito.");
+
+            setTimeout(() => {
+              if (onSuccess) {
+                onSuccess(res);
+              } else {
+                window.location.href = `/dashboard-suscriptor/planes/success?payment_number=${paymentNumber}&method=pagofacil`;
+              }
+            }, 2500);
+          } else if (isExpired || isFailed) {
+            stopPolling();
+            setPollingStatus(isExpired ? "expirado" : "fallido");
+            toast.error(
+              res.mensaje ||
+                (isExpired
+                  ? "El código QR ha expirado."
+                  : "La transacción bancaria ha fallado.")
+            );
+          }
         }
       } catch (err) {
         // Polling background silence to avoid interrupting user scanning
         console.debug("Consultando estado PagoFácil...", err.message);
       }
-    }, 3500);
+    }, POLLING_INTERVAL_MS);
+  };
+
+  const handleCopyPaymentNumber = async () => {
+    if (!qrData?.payment_number) return;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(qrData.payment_number);
+      }
+      setCopied(true);
+      toast.success("Número de pedido copiado al portapapeles");
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Error copiando código:", err);
+      toast.error("No se pudo copiar el número de pedido.");
+    }
   };
 
   const handleDownloadQR = () => {
@@ -168,7 +227,11 @@ export const PlanCheckoutModal = ({
   };
 
   const handleOpenBankingApp = () => {
-    const deepLinkUrl = qrData?.deep_link || qrData?.deepLink || qrData?.universal_url || qrData?.checkout_url;
+    const deepLinkUrl =
+      qrData?.deep_link ||
+      qrData?.deepLink ||
+      qrData?.universal_url ||
+      qrData?.checkout_url;
     if (deepLinkUrl) {
       window.open(deepLinkUrl, "_blank");
     } else {
@@ -179,6 +242,19 @@ export const PlanCheckoutModal = ({
   if (!isOpen || !plan) return null;
 
   const precioUSD = parseFloat(plan.precio_mensual) || 0;
+  const tcValor = Number(tipoCambio?.valor) || 7.0;
+  const montoRealCalculadoBOB = Number((precioUSD * tcValor).toFixed(2));
+  const montoQREstimado = Number((montoRealCalculadoBOB / 1000).toFixed(2));
+
+  // Step 2 amounts
+  const montoQR = Number(
+    qrData?.monto_qr ?? (qrData?.monto ? qrData.monto / 1000 : montoQREstimado)
+  ).toFixed(2);
+  const montoRealBOB = Number(
+    qrData?.monto_real_bob ?? qrData?.monto ?? montoRealCalculadoBOB
+  ).toFixed(2);
+  const tcFinal = Number(qrData?.tipo_cambio ?? tcValor).toFixed(2);
+  const esFallbackTC = qrData?.es_fallback_tc ?? tipoCambio?.es_fallback ?? false;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
@@ -192,7 +268,7 @@ export const PlanCheckoutModal = ({
                   stopPolling();
                   setStep("select");
                 }}
-                className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                 title="Volver a métodos de pago"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -226,7 +302,7 @@ export const PlanCheckoutModal = ({
               stopPolling();
               onClose();
             }}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             title="Cerrar modal"
           >
             <X className="w-5 h-5" />
@@ -245,7 +321,10 @@ export const PlanCheckoutModal = ({
                     Plan Seleccionado
                   </span>
                   <h4 className="text-base font-bold text-slate-900">{plan.nombre}</h4>
-                  <p className="text-xs text-slate-500">Facturación mensual recurrente</p>
+                  <p className="text-xs text-slate-500">
+                    USD ${precioUSD} / mes ≈ Bs. {montoRealCalculadoBOB.toFixed(2)} BOB{" "}
+                    <span className="text-slate-400 text-[10px]">(TC: {tcValor.toFixed(2)})</span>
+                  </p>
                 </div>
                 <div className="text-right">
                   <span className="text-2xl font-extrabold text-blue-600">${precioUSD}</span>
@@ -260,39 +339,60 @@ export const PlanCheckoutModal = ({
                 </label>
                 <div className="space-y-3">
                   {/* Option: PagoFácil QR */}
-                  <label
+                  <div
                     onClick={() => setSelectedMethod("pagofacil")}
-                    className={`flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
                       selectedMethod === "pagofacil"
                         ? "border-blue-600 bg-blue-50/50 shadow-md shadow-blue-500/5 ring-1 ring-blue-600/20"
                         : "border-slate-200 hover:border-slate-300 bg-white"
                     }`}
                   >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="pagofacil"
-                      checked={selectedMethod === "pagofacil"}
-                      onChange={() => setSelectedMethod("pagofacil")}
-                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <QrCode className="w-4 h-4 text-emerald-600" />
-                          <span className="text-sm font-bold text-slate-900">
-                            QR PagoFácil (Bolivia - Bs.)
+                    <div className="flex items-start gap-3.5">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="pagofacil"
+                        checked={selectedMethod === "pagofacil"}
+                        onChange={() => setSelectedMethod("pagofacil")}
+                        className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <QrCode className="w-4 h-4 text-emerald-600" />
+                            <span className="text-sm font-bold text-slate-900">
+                              QR PagoFácil (Bolivia - Bs.)
+                            </span>
+                          </div>
+                          <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            BOB (Bs.)
                           </span>
                         </div>
-                        <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                          BOB (Bs.)
-                        </span>
+                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                          Pago instantáneo con QR desde cualquier banca móvil boliviana (BCP, BNB, Banco Unión, Mercantil, Bisa, etc.).
+                        </p>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                        Pago instantáneo con QR desde cualquier banca móvil boliviana (BCP, BNB, Banco Unión, Mercantil, Bisa, etc.).
-                      </p>
                     </div>
-                  </label>
+
+                    {/* Notice / Badge: Modo Sandbox / Pruebas */}
+                    {selectedMethod === "pagofacil" && (
+                      <div className="mt-3 p-3 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
+                        <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-bold block text-[11px] uppercase tracking-wider text-amber-800">
+                            Modo Sandbox / Pruebas
+                          </span>
+                          <p className="mt-0.5 text-slate-700 leading-relaxed text-[11px]">
+                            Por política de testing, el código QR se generará por un valor simbólico de{" "}
+                            <strong className="text-amber-900 font-bold">
+                              Bs. {montoQREstimado.toFixed(2)}
+                            </strong>{" "}
+                            para evitar transacciones reales de alto valor.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Option: Stripe */}
                   <label
@@ -387,7 +487,7 @@ export const PlanCheckoutModal = ({
                     ) : (
                       <>
                         <QrCode className="w-4 h-4" />
-                        <span>Pagar con QR (Bolivia en Bs.)</span>
+                        <span>Pagar con QR Simple</span>
                       </>
                     )}
                   </button>
@@ -417,17 +517,48 @@ export const PlanCheckoutModal = ({
           {/* STEP 2: QR DISPLAY & POLLING */}
           {step === "qr" && qrData && (
             <div className="text-center space-y-4">
-              {/* Order Info */}
+              {/* Order Info & Amounts */}
               <div>
-                <p className="text-xs text-slate-500 font-medium">Escanea desde tu banca móvil</p>
-                <div className="mt-1 flex items-baseline justify-center gap-1.5">
-                  <span className="text-3xl font-black text-slate-900 tracking-tight">
-                    Bs. {Number(qrData.monto || 0).toFixed(2)}
-                  </span>
-                  <span className="text-xs font-bold text-emerald-700 uppercase">BOB</span>
+                {/* Code with Copy Button */}
+                <div className="inline-flex items-center justify-center gap-2 text-xs text-slate-600 bg-slate-50 border border-slate-200/80 rounded-xl py-1.5 px-3 mx-auto mb-2">
+                  <span>Código de Pago:</span>
+                  <span className="font-mono font-bold text-slate-900">{qrData.payment_number}</span>
+                  <button
+                    type="button"
+                    onClick={handleCopyPaymentNumber}
+                    className="p-1 text-slate-500 hover:text-blue-600 hover:bg-white rounded transition-colors cursor-pointer"
+                    title="Copiar al portapapeles"
+                    aria-label="Copiar al portapapeles"
+                  >
+                    {copied ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
+                  </button>
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Orden: <span className="font-mono font-semibold text-slate-700">{qrData.payment_number}</span>
+
+                {/* Highlighted Test Amount to Scan */}
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[11px] font-bold mb-1">
+                    <AlertTriangle className="w-3 h-3 text-amber-600" />
+                    <span>Monto de prueba a escanear</span>
+                  </div>
+                  <div className="flex items-baseline justify-center gap-1.5">
+                    <span className="text-3xl font-black text-slate-900 tracking-tight">
+                      Bs. {montoQR}
+                    </span>
+                    <span className="text-xs font-bold text-emerald-700 uppercase">BOB</span>
+                  </div>
+                </div>
+
+                {/* Real Subscription Amount & Applied Exchange Rate */}
+                <p className="text-xs text-slate-500 mt-1">
+                  Monto real de suscripción:{" "}
+                  <span className="font-semibold text-slate-700">Bs. {montoRealBOB} BOB</span> (${precioUSD} USD)
+                </p>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Tipo de cambio aplicado: 1 USD = {tcFinal} BOB {esFallbackTC ? "(Fallback)" : "(BCB)"}
                 </p>
               </div>
 
@@ -450,14 +581,43 @@ export const PlanCheckoutModal = ({
                 )}
               </div>
 
-              {/* Polling Status Indicator */}
-              <div className="bg-emerald-50 border border-emerald-200/80 rounded-2xl p-3 flex items-center justify-center gap-2 text-xs text-emerald-900 font-medium">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                </span>
-                <span>Esperando confirmación bancaria automática...</span>
-              </div>
+              {/* Polling Status / Timeout / Error Indicator */}
+              {pollingStatus === "expirado" || pollingStatus === "fallido" ? (
+                <div className="bg-red-50 border border-red-200/90 rounded-2xl p-4 text-center space-y-2.5">
+                  <div className="flex items-center justify-center gap-2 text-red-800 font-bold text-xs">
+                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                    <span>
+                      {pollingStatus === "fallido"
+                        ? "La transacción bancaria ha fallado"
+                        : "El código QR ha expirado"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    El tiempo límite ha expirado o la pasarela canceló la orden. Puedes generar un nuevo código QR para continuar.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleGenerarQR}
+                    disabled={loading}
+                    className="inline-flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow transition-colors cursor-pointer"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-3.5 h-3.5" />
+                    )}
+                    <span>Reintentar / Generar nuevo QR</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-emerald-50 border border-emerald-200/80 rounded-2xl p-3 flex items-center justify-center gap-2 text-xs text-emerald-900 font-medium">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                  </span>
+                  <span>Esperando confirmación bancaria automática...</span>
+                </div>
+              )}
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-2 pt-1">
@@ -482,9 +642,9 @@ export const PlanCheckoutModal = ({
                 )}
               </div>
 
-              {qrData.expiration_date && (
+              {(qrData.expiration_date || qrData.fecha_vencimiento) && (
                 <p className="text-[11px] text-slate-400">
-                  Válido hasta: {qrData.expiration_date}
+                  Válido hasta: {qrData.expiration_date || qrData.fecha_vencimiento}
                 </p>
               )}
             </div>
@@ -512,3 +672,4 @@ export const PlanCheckoutModal = ({
     </div>
   );
 };
+
