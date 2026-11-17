@@ -64,7 +64,7 @@ describe("SurveySaaS Mobile APK Download — Unit & UI Tests", () => {
     expect(downloadLink).toBeInTheDocument();
     expect(downloadLink).toHaveAttribute("href", "/downloads/surveysaas.apk");
     expect(downloadLink).toHaveAttribute("download", "SurveySaaS-App-v1.0.apk");
-    expect(screen.getByText("51.1 MB")).toBeInTheDocument();
+    expect(screen.getByText("51.6 MB")).toBeInTheDocument();
 
     // Key capabilities
     expect(screen.getByText("Modo Offline First")).toBeInTheDocument();
@@ -79,7 +79,7 @@ describe("SurveySaaS Mobile APK Download — Unit & UI Tests", () => {
 
     // Technical specifications
     expect(screen.getByText("1.0.0 (Release)")).toBeInTheDocument();
-    expect(screen.getByText("51.1 MB (.apk)")).toBeInTheDocument();
+    expect(screen.getByText("51.6 MB (.apk)")).toBeInTheDocument();
     expect(screen.getByText("Android 7.0+")).toBeInTheDocument();
   });
 
