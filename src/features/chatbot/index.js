@@ -1,2 +1,1 @@
-export * from "./ChatbotWidget"
-export * from "./RenderChatMessage"
+export { CopilotWidget as ChatbotWidget, CopilotWidget, default } from "../copilot";

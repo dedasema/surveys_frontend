@@ -520,3 +520,35 @@ export async function exportarRespuestasExcel(campanaId, nombreCampana = "campan
   document.body.removeChild(a)
   return true
 }
+
+// Copiloto Inteligente con arquitectura MCP para Empresas Suscriptoras
+export async function enviarMensajeCopilot(payload) {
+  const token = localStorage.getItem("token")
+  if (!token) throw new Error("No hay token de autenticación")
+
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  }
+
+  let res = await fetch(`${API_BASE_URL}/copilot/chat`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload),
+  })
+
+  if (!res.ok) {
+    res = await fetch(`${API_BASE_URL}/agente/copilot`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    })
+  }
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.detail || `Error al consultar con el Copiloto (${res.status})`)
+  }
+
+  return await res.json()
+}
