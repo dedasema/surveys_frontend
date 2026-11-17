@@ -303,6 +303,43 @@ export const iniciarStripeCheckout = (suscriptorId, planId) =>
     method: "POST",
   });
 
+// PagoFácil QR (Bolivia en Bs.)
+export const generarPagoFacilQR = async (payload) => {
+  return authFetch("/pagofacil/generar-qr", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  }).catch(async () => {
+    return authFetch("/subscription/pagofacil/generar-qr", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  });
+};
+
+export const consultarPagoFacilEstado = async (paymentNumber) => {
+  const token = localStorage.getItem("token");
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  let res = await fetch(`${API_BASE_URL}/pagofacil/consultar/${paymentNumber}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
+  });
+  if (!res.ok) {
+    res = await fetch(`${API_BASE_URL}/subscription/pagofacil/consultar/${paymentNumber}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...headers,
+      },
+    });
+  }
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || `Error al consultar estado (${res.status})`);
+  }
+  return await res.json();
+};
+
 // Auth
 export const getMe = () => authFetch("/auth/me");
 

@@ -11,12 +11,28 @@ export default function SuccessPage() {
   const navigate = useNavigate();
 
   const sessionId = searchParams.get("session_id");
+  const paymentNumber = searchParams.get("payment_number");
+  const method = searchParams.get("method");
 
   useEffect(() => {
-    // Si no hay session_id, es un error
+    // Si viene de PagoFácil QR
+    if (method === "pagofacil" || paymentNumber) {
+      setStatus("success");
+      setMessage(
+        paymentNumber
+          ? `¡Pago con QR PagoFácil (${paymentNumber}) confirmado con éxito! Tu plan ha sido activado.`
+          : "¡Pago con QR PagoFácil procesado con éxito! Tu plan ha sido activado."
+      );
+      setTimeout(() => {
+        navigate("/dashboard-suscriptor/planes");
+      }, 2500);
+      return;
+    }
+
+    // Si no hay session_id para Stripe, es un error
     if (!sessionId) {
       setStatus("error");
-      setMessage("No se proporcionó un session_id válido.");
+      setMessage("No se proporcionó un identificador de sesión válido.");
       return;
     }
 

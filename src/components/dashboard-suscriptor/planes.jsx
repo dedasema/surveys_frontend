@@ -13,16 +13,21 @@ import {
   Send,
   Users,
   Sparkles,
+  QrCode,
+  CreditCard,
 } from "lucide-react";
 import DashboardSuscriptorLayout from "./layout";
 import LoadingScreen from "../LoadingScreen";
+import { PlanCheckoutModal } from "../../features/pagofacil";
 
 const Planes = () => {
   const [planes, setPlanes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [suscriptorId, setSuscriptorId] = useState("");
+  const [userProfile, setUserProfile] = useState(null);
   const [suscripcionActual, setSuscripcionActual] = useState(null);
+  const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -44,7 +49,10 @@ const Planes = () => {
     (async () => {
       try {
         const user = await getMe();
-        setSuscriptorId(user.id);
+        if (user) {
+          setSuscriptorId(user.id);
+          setUserProfile(user);
+        }
         const subData = await getMiSuscripcion().catch(() => null);
         if (subData) {
           setSuscripcionActual(subData);
@@ -55,19 +63,29 @@ const Planes = () => {
     })();
   }, []);
 
-  const handleSuscripcion = async (planId) => {
+  const handleSuscripcion = async (plan) => {
     if (!suscriptorId) {
       toast.warning("No se ha identificado al suscriptor. Inicia sesión nuevamente.");
       return;
     }
-    try {
-      const { checkout_url } = await iniciarStripeCheckout(suscriptorId, planId);
-      if (checkout_url) window.location.href = checkout_url;
-      else toast.error("No se pudo iniciar el checkout.");
-    } catch (err) {
-      console.error(err);
-      toast.error("Error iniciando el checkout.");
+
+    const precio = parseFloat(plan.precio_mensual) || 0;
+
+    // Si es plan gratuito, suscripción directa
+    if (precio === 0) {
+      try {
+        const { checkout_url } = await iniciarStripeCheckout(suscriptorId, plan.id);
+        if (checkout_url) window.location.href = checkout_url;
+        else toast.error("No se pudo iniciar la activación del plan.");
+      } catch (err) {
+        console.error(err);
+        toast.error("Error al suscribirse al plan gratuito.");
+      }
+      return;
     }
+
+    // Para planes de pago, abrir el modal de selección de método de pago (PagoFácil QR vs Stripe)
+    setSelectedPlanForCheckout(plan);
   };
 
   const formatLimit = (val) => {
@@ -126,6 +144,17 @@ const Planes = () => {
                   </span>
                   {precio > 0 && <span className="text-sm font-medium text-slate-500">/mes</span>}
                 </div>
+
+                {precio > 0 && (
+                  <div className="flex items-center gap-1.5 flex-wrap mb-4">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                      <QrCode className="w-3 h-3 text-emerald-600" /> QR PagoFácil (Bs.)
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
+                      <CreditCard className="w-3 h-3 text-indigo-600" /> Stripe (USD)
+                    </span>
+                  </div>
+                )}
 
                 <p className="text-slate-600 text-xs sm:text-sm mb-5 leading-relaxed">
                   {plan.descripcion}
@@ -236,8 +265,8 @@ const Planes = () => {
                     </button>
                   ) : (
                     <button
-                      onClick={() => handleSuscripcion(plan.id)}
-                      className="w-full inline-flex items-center justify-center px-6 py-3.5 border border-transparent text-sm font-semibold rounded-2xl text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg shadow-blue-500/25 active:scale-[0.98]"
+                      onClick={() => handleSuscripcion(plan)}
+                      className="w-full inline-flex items-center justify-center px-6 py-3.5 border border-transparent text-sm font-semibold rounded-2xl text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg shadow-blue-500/25 active:scale-[0.98] cursor-pointer"
                     >
                       {precio === 0 ? "Comenzar Gratis" : "Actualizar a este Plan"}
                     </button>
@@ -247,6 +276,19 @@ const Planes = () => {
             );
           })}
         </div>
+
+        {/* Modal de Checkout / Pago con QR PagoFácil o Stripe */}
+        <PlanCheckoutModal
+          isOpen={!!selectedPlanForCheckout}
+          onClose={() => setSelectedPlanForCheckout(null)}
+          plan={selectedPlanForCheckout}
+          suscriptorId={suscriptorId}
+          userProfile={userProfile}
+          onSuccess={() => {
+            setSelectedPlanForCheckout(null);
+            window.location.href = "/dashboard-suscriptor/planes/success?method=pagofacil";
+          }}
+        />
       </div>
     </DashboardSuscriptorLayout>
   );

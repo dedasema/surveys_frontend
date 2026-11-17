@@ -122,16 +122,39 @@ function MarkdownText({ content, onLinkClick }) {
   );
 }
 
+const CHAT_STORAGE_KEY = 'landing_chat_messages';
+
 export const LandingChatbotWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(true);
   const [hasUnread, setHasUnread] = useState(true);
   const [inputMessage, setInputMessage] = useState('');
-  const [messages, setMessages] = useState([INITIAL_GREETING]);
+  const [messages, setMessages] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem(CHAT_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {
+      // Fallback to initial greeting
+    }
+    return [INITIAL_GREETING];
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+    } catch {
+      // Ignore sessionStorage errors
+    }
+  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -224,6 +247,11 @@ export const LandingChatbotWidget = () => {
   };
 
   const handleResetChat = () => {
+    try {
+      sessionStorage.removeItem(CHAT_STORAGE_KEY);
+    } catch {
+      // Ignore
+    }
     setMessages([
       {
         ...INITIAL_GREETING,
