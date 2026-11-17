@@ -23,6 +23,8 @@ import {
   Bot,
   MessageSquareText,
   Bell,
+  Smartphone,
+  Download,
 } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import {
@@ -254,6 +256,17 @@ const ROLE_STRATEGIES = {
           },
         ],
       },
+      {
+        title: "Aplicación Móvil",
+        items: [
+          {
+            title: "Descargar APK Móvil",
+            url: "/descargar-app",
+            icon: Smartphone,
+            isActive: pathname.includes("/descargar-app"),
+          },
+        ],
+      },
     ],
   },
   operator: {
@@ -292,6 +305,17 @@ const ROLE_STRATEGIES = {
             url: "/dashboard-operador/entregas",
             icon: PhoneCall,
             isActive: pathname.includes("/dashboard-operador/entregas"),
+          },
+        ],
+      },
+      {
+        title: "Herramientas de Campo",
+        items: [
+          {
+            title: "Descargar App Móvil",
+            url: "/descargar-app",
+            icon: Smartphone,
+            isActive: pathname.includes("/descargar-app"),
           },
         ],
       },

@@ -68,6 +68,19 @@ export default function PublicNavbar() {
               Precios
             </a>
             <Link
+              to="/descargar-app"
+              className={`inline-flex items-center gap-1.5 transition-colors font-medium text-sm ${
+                location.pathname === "/descargar-app"
+                  ? "text-blue-600 font-semibold"
+                  : "text-gray-600 hover:text-blue-600"
+              }`}
+            >
+              <span>App Móvil</span>
+              <span className="px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                APK
+              </span>
+            </Link>
+            <Link
               to="/sobre-nosotros"
               className={`transition-colors font-medium text-sm ${
                 location.pathname === "/sobre-nosotros"
@@ -157,6 +170,16 @@ export default function PublicNavbar() {
               >
                 Precios
               </a>
+              <Link
+                to="/descargar-app"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center justify-between text-gray-600 hover:text-blue-600 font-medium"
+              >
+                <span>Descargar App Móvil (Android)</span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                  APK
+                </span>
+              </Link>
               <Link
                 to="/sobre-nosotros"
                 onClick={() => setIsMenuOpen(false)}

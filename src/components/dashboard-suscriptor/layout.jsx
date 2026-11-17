@@ -20,6 +20,7 @@ import {
   Bot,
   MessageSquareText,
   Bell,
+  Smartphone,
 } from "lucide-react"
 import { useLocation } from "react-router-dom"
 import { getCurrentUser, getAvatarUrl } from "../../services/auth"
@@ -139,6 +140,12 @@ const DashboardSuscriptorLayout = ({ children }) => {
       items: [
         { title: "Auditoría", url: "/dashboard-suscriptor/auditoria", icon: ShieldAlert },
         { title: "Configuración", url: "/dashboard-suscriptor/configuracion", icon: Settings },
+      ],
+    },
+    {
+      title: "Aplicación Móvil",
+      items: [
+        { title: "Descargar App Móvil", url: "/descargar-app", icon: Smartphone },
       ],
     },
   ]

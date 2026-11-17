@@ -41,6 +41,7 @@ import AboutPage from './pages/AboutPage';
 import SupportPage from './pages/SupportPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsPage from './pages/TermsPage';
+import DownloadAppPage from './pages/DownloadAppPage';
 import ScrollToTop from './components/ScrollToTop';
 
 // Domain-Driven Feature Containers (Screaming Architecture)
@@ -81,6 +82,10 @@ function App() {
         <Route path="/privacy" element={<Navigate to="/privacidad" replace />} />
         <Route path="/terminos" element={<TermsPage />} />
         <Route path="/terms" element={<Navigate to="/terminos" replace />} />
+        <Route path="/descargar-app" element={<DownloadAppPage />} />
+        <Route path="/download-app" element={<Navigate to="/descargar-app" replace />} />
+        <Route path="/app" element={<Navigate to="/descargar-app" replace />} />
+        <Route path="/apk" element={<Navigate to="/descargar-app" replace />} />
         <Route path="/encuestas/:token" element={<EncuestaPage />} />
         <Route path="/encuestas/:token/adaptativa" element={<AdaptiveSurveyPage />} />
         <Route path="/email-sent" element={<EmailSentPage />} />

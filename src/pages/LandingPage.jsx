@@ -15,6 +15,9 @@ import {
   Sparkles,
   Mail,
   Smartphone,
+  Download,
+  WifiOff,
+  QrCode,
 } from "lucide-react"
 import { useAuth } from "../context/AuthContext";
 import PublicNavbar from "../components/PublicNavbar";
@@ -349,6 +352,107 @@ const LandingPage = () => {
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                   <span className="text-sm font-medium">Procesando en tiempo real</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN APP MÓVIL (APK ANDROID & MODO OFFLINE) */}
+      <section id="app-movil" className="py-20 px-4 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white scroll-mt-20 relative overflow-hidden">
+        {/* Glow effects */}
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Texto y CTA */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold backdrop-blur-md">
+                <Smartphone className="w-4 h-4 text-emerald-400" />
+                <span>Aplicación Android Oficial • APK v1.0.0</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+                Lleva tus encuestas a terreno con el{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400">
+                  Modo 100% Offline
+                </span>
+              </h2>
+
+              <p className="text-slate-300 text-base sm:text-lg leading-relaxed">
+                Diseñada para operadores de campo y censistas. Recolecta respuestas sin conexión a internet, digitaliza formularios físicos con OCR de cámara y graba respuestas de voz en alta fidelidad.
+              </p>
+
+              {/* Pills de características */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs">
+                  <div className="p-2 rounded-xl bg-teal-500/20 text-teal-300">
+                    <WifiOff className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white">Base SQLite Offline</h4>
+                    <p className="text-xs text-slate-400 mt-0.5">Sincronización automática al detectar red WiFi o datos móviles.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs">
+                  <div className="p-2 rounded-xl bg-blue-500/20 text-blue-300">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white">OCR de Formularios</h4>
+                    <p className="text-xs text-slate-400 mt-0.5">Escanea papel desde la cámara y digitaliza campos en segundos.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botones de Acción */}
+              <div className="pt-3 flex flex-wrap items-center gap-4">
+                <a
+                  href="/downloads/surveysaas.apk"
+                  download="SurveySaaS-App-v1.0.apk"
+                  className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm shadow-xl shadow-emerald-500/20 active:scale-[0.98] transition-all cursor-pointer group"
+                >
+                  <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+                  <span>Descargar APK (Android)</span>
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-white/20">51.1 MB</span>
+                </a>
+
+                <a
+                  href="/descargar-app"
+                  className="inline-flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-semibold text-sm transition-all"
+                >
+                  <span>Guía de instalación y QR</span>
+                  <ArrowRight className="w-4 h-4 text-slate-300" />
+                </a>
+              </div>
+            </div>
+
+            {/* Tarjeta Visual de Descarga con QR */}
+            <div className="lg:col-span-5 flex justify-center">
+              <div className="w-full max-w-sm bg-slate-900/90 rounded-3xl p-6 border border-slate-700/80 shadow-2xl backdrop-blur-md text-white text-center space-y-4">
+                <div className="inline-flex p-3 rounded-2xl bg-blue-500/20 border border-blue-400/30 text-blue-300 mx-auto">
+                  <QrCode className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold">Escanea desde tu Celular</h3>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Descarga directa a tu teléfono sin pasar por una computadora
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white rounded-2xl inline-block mx-auto shadow-md">
+                  <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fsurveysaas.com%2Fdownloads%2Fsurveysaas.apk&format=png&margin=10"
+                    alt="QR Descarga APK"
+                    className="w-40 h-40 rounded-lg object-contain"
+                  />
+                </div>
+
+                <div className="pt-2 text-xs text-slate-400">
+                  <span>Compatible con Android 7.0 o superior</span>
                 </div>
               </div>
             </div>
