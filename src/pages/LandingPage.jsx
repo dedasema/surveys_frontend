@@ -417,7 +417,7 @@ const LandingPage = () => {
                 >
                   <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
                   <span>Descargar APK (Android)</span>
-                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-white/20">51.6 MB</span>
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-white/20">52.3 MB</span>
                 </a>
 
                 <a

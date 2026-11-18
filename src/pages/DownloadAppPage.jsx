@@ -56,7 +56,7 @@ export default function DownloadAppPage() {
       step: "01",
       title: "Descargar archivo APK",
       desc: "Haz clic en 'Descargar APK' o escanea el código QR desde tu smartphone Android. La descarga del archivo surveysaas.apk comenzará automáticamente.",
-      tip: "El archivo pesa ~51.6 MB y contiene todas las librerías offline y modelos locales.",
+      tip: "El archivo pesa ~52.3 MB y contiene todas las librerías offline y modelos locales.",
     },
     {
       step: "02",
@@ -115,7 +115,7 @@ export default function DownloadAppPage() {
                     <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
                     <span>Descargar APK Android</span>
                     <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/20">
-                      51.6 MB
+                      52.3 MB
                     </span>
                   </a>
 
@@ -347,7 +347,7 @@ export default function DownloadAppPage() {
                 <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   Tamaño de Descarga
                 </span>
-                <p className="text-base font-bold text-slate-900 mt-1">51.6 MB (.apk)</p>
+                <p className="text-base font-bold text-slate-900 mt-1">52.3 MB (.apk)</p>
                 <span className="text-[10px] text-slate-500 font-medium">Incluye motor offline</span>
               </div>
 
