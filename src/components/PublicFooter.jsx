@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Mail, Globe } from "lucide-react";
+import { MapPin, Mail, Globe, Smartphone } from "lucide-react";
 import BrandLogo from "./BrandLogo";
 
 export default function PublicFooter() {
@@ -16,14 +16,20 @@ export default function PublicFooter() {
             </p>
 
             <div className="pt-2 space-y-2.5 text-sm text-gray-300">
-              <Link to="/sobre-nosotros#ubicacion" className="flex items-center gap-2.5 hover:text-white transition-colors group">
-                <MapPin className="h-4 w-4 text-blue-400 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                <span>Santa Cruz de la Sierra, Bolivia</span>
+              <Link to="/#ubicacion" className="flex items-start gap-2.5 hover:text-white transition-colors group">
+                <MapPin className="h-4 w-4 text-blue-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                <span>Manzana 40 - Plaza Empresarial, Av. San Martin, Santa Cruz de la Sierra</span>
               </Link>
               <div className="flex items-center gap-2.5">
                 <Mail className="h-4 w-4 text-blue-400 flex-shrink-0" />
-                <a href="mailto:contacto@desesoft.com" className="hover:text-white transition-colors">
-                  contacto@desesoft.com
+                <a href="mailto:dedasema734012@gmail.com" className="hover:text-white transition-colors">
+                  dedasema734012@gmail.com
+                </a>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Smartphone className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                <a href="tel:+59162795140" className="hover:text-white transition-colors">
+                  +591 62795140
                 </a>
               </div>
               <div className="flex items-center gap-2.5">

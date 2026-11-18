@@ -15,6 +15,7 @@ import {
   Sparkles,
   Mail,
   Smartphone,
+  MapPin,
   Download,
   WifiOff,
   QrCode,
@@ -744,15 +745,19 @@ const LandingPage = () => {
               <h3 className="text-xl font-semibold mb-6">Información de contacto</h3>
               <div className="space-y-4">
                 <div className="flex items-center">
-                  <Mail className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>contacto@surveysaas.com</span>
+                  <Mail className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0" />
+                  <a href="mailto:dedasema734012@gmail.com" className="hover:text-blue-600 transition-colors">
+                    dedasema734012@gmail.com
+                  </a>
                 </div>
                 <div className="flex items-center">
-                  <Smartphone className="h-5 w-5 text-blue-600 mr-3" />
-                  <span>+34 900 123 456</span>
+                  <Smartphone className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0" />
+                  <a href="tel:+59162795140" className="hover:text-blue-600 transition-colors">
+                    +591 62795140
+                  </a>
                 </div>
                 <div className="flex items-center">
-                  <MessageSquare className="h-5 w-5 text-blue-600 mr-3" />
+                  <MessageSquare className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0" />
                   <span>Soporte 24/7 en línea</span>
                 </div>
               </div>
@@ -778,11 +783,11 @@ const LandingPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email empresarial</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Correo electrónico</label>
                   <input
                     type="email"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="tu@empresa.com"
+                    placeholder="tu@gmail.com"
                   />
                 </div>
                 <div>
@@ -803,11 +808,83 @@ const LandingPage = () => {
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors cursor-pointer"
                 >
                   Enviar mensaje
                 </button>
               </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* UBICACIÓN */}
+      <section id="ubicacion" className="py-20 px-4 bg-slate-50 border-t border-gray-200 scroll-mt-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold mb-3">
+              <MapPin className="w-4 h-4 text-blue-600" />
+              <span>Sede Central Corporativa</span>
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">Nuestra Ubicación</h2>
+            <p className="text-gray-600 max-w-xl mx-auto text-base">
+              Visítanos en nuestras oficinas corporativas en la zona de negocios más moderna de Bolivia.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Info Card */}
+            <div className="lg:col-span-5 bg-white p-8 rounded-3xl shadow-sm border border-gray-200 space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 shadow-xs">
+                  <MapPin className="w-6 h-6" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-bold text-gray-900 text-xl leading-tight">
+                    Manzana 40 - Plaza Empresarial
+                  </h3>
+                  <p className="text-gray-600 text-sm font-medium">
+                    Av. San Martin, Santa Cruz de la Sierra
+                  </p>
+                  <span className="inline-block mt-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Santa Cruz, Bolivia
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-5 border-t border-gray-100 space-y-3.5 text-sm text-gray-600">
+                <div className="flex items-center gap-3">
+                  <Mail className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <a href="mailto:dedasema734012@gmail.com" className="hover:text-blue-600 transition-colors font-medium">
+                    dedasema734012@gmail.com
+                  </a>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Smartphone className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <a href="tel:+59162795140" className="hover:text-blue-600 transition-colors font-medium">
+                    +591 62795140
+                  </a>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs text-gray-500 leading-relaxed">
+                Estacionamiento para clientes disponible en torre empresarial. Atención previa cita o soporte técnico directo.
+              </div>
+            </div>
+
+            {/* Embedded Google Maps */}
+            <div className="lg:col-span-7 overflow-hidden rounded-3xl shadow-md border border-gray-200 bg-white">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2140.020440357915!2d-63.19898350970343!3d-17.756734352519935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x93f1e70cca02d2c7%3A0x51870ea50241886c!2sManzana%2040%20-%20Plaza%20Empresarial!5e0!3m2!1ses-419!2sbo!4v1794988673274!5m2!1ses-419!2sbo"
+                width="100%"
+                height="420"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                title="Ubicación Manzana 40 - Plaza Empresarial, Av. San Martin, Santa Cruz de la Sierra"
+                className="w-full h-80 sm:h-96"
+              ></iframe>
             </div>
           </div>
         </div>

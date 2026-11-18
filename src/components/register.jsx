@@ -14,6 +14,8 @@ const Register = () => {
     telefono: "",
     password: "",
   })
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState({})
@@ -55,6 +57,14 @@ const Register = () => {
       newErrors.password = "La contraseña es requerida"
     } else if (formData.password.length < 6) {
       newErrors.password = "La contraseña debe tener al menos 6 caracteres"
+    }
+
+    if (!acceptedTerms) {
+      newErrors.terms = "Debes aceptar los Términos y Condiciones"
+    }
+
+    if (!acceptedPrivacy) {
+      newErrors.privacy = "Debes aceptar la Política de Privacidad"
     }
 
     return newErrors
@@ -222,17 +232,81 @@ const Register = () => {
                 {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
               </div>
 
+              {/* Checkboxes: Términos y Condiciones / Política de Privacidad */}
+              <div className="space-y-3 pt-1 border-t border-gray-100">
+                <div className="flex items-start">
+                  <div className="flex items-center h-5">
+                    <input
+                      id="terms"
+                      name="terms"
+                      type="checkbox"
+                      checked={acceptedTerms}
+                      onChange={(e) => {
+                        setAcceptedTerms(e.target.checked);
+                        if (errors.terms) setErrors((prev) => ({ ...prev, terms: "" }));
+                      }}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer mt-0.5"
+                    />
+                  </div>
+                  <div className="ml-3 text-sm">
+                    <label htmlFor="terms" className="font-medium text-gray-700 cursor-pointer">
+                      Acepto los{" "}
+                      <Link
+                        to="/terms"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-500 underline font-semibold"
+                      >
+                        Términos y Condiciones
+                      </Link>
+                    </label>
+                  </div>
+                </div>
+                {errors.terms && <p className="text-xs text-red-600 ml-7">{errors.terms}</p>}
+
+                <div className="flex items-start">
+                  <div className="flex items-center h-5">
+                    <input
+                      id="privacy"
+                      name="privacy"
+                      type="checkbox"
+                      checked={acceptedPrivacy}
+                      onChange={(e) => {
+                        setAcceptedPrivacy(e.target.checked);
+                        if (errors.privacy) setErrors((prev) => ({ ...prev, privacy: "" }));
+                      }}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer mt-0.5"
+                    />
+                  </div>
+                  <div className="ml-3 text-sm">
+                    <label htmlFor="privacy" className="font-medium text-gray-700 cursor-pointer">
+                      Acepto la{" "}
+                      <Link
+                        to="/privacy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-500 underline font-semibold"
+                      >
+                        Política de Privacidad
+                      </Link>
+                    </label>
+                  </div>
+                </div>
+                {errors.privacy && <p className="text-xs text-red-600 ml-7">{errors.privacy}</p>}
+              </div>
+
               {/* Submit Button */}
               <div>
                 <button
                   type="submit"
-                  disabled={isLoading}
-                  className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  disabled={isLoading || !acceptedTerms || !acceptedPrivacy}
+                  className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
+                  title={!acceptedTerms || !acceptedPrivacy ? "Debes marcar ambas casillas para habilitar el registro" : "Crear cuenta"}
                 >
                   {isLoading ? (
                     <div className="flex items-center">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Creando cuenta...
+                      Creando cuenta y enviando correos...
                     </div>
                   ) : (
                     <div className="flex items-center">
@@ -241,6 +315,11 @@ const Register = () => {
                     </div>
                   )}
                 </button>
+                {(!acceptedTerms || !acceptedPrivacy) && (
+                  <p className="text-xs text-center text-gray-400 mt-2">
+                    * Debes aceptar los Términos y Condiciones y la Política de Privacidad para registrarte
+                  </p>
+                )}
               </div>
             </form>            {errors.general && (
               <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
