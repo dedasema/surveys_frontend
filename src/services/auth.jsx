@@ -35,6 +35,10 @@ export async function login(credentials) {
     const data = await response.json();
     console.log("Respuesta login:", data);
 
+    if (!response.ok) {
+      throw new Error(data.detail || "Credenciales inválidas");
+    }
+
     if (data.access_token) {
       localStorage.setItem("token", data.access_token);
     }

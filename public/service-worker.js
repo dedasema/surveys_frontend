@@ -233,9 +233,9 @@ self.addEventListener('fetch', event => {
 
             return networkResponse;
           })
-          .catch(() => {
+          .catch(async () => {
             // Si falla la red, devuelve el caché si existe
-            const cachedResponse = cache.match(event.request);
+            const cachedResponse = await cache.match(event.request);
             return cachedResponse || new Response('Offline', {
               status: 503,
               statusText: 'Offline',
