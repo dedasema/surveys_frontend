@@ -143,9 +143,7 @@ function App() {
         <Route path="/dashboard/anuncios" element={
           <PrivateRoute requiredType="admin"><AnunciosPage /></PrivateRoute>
         } />
-        <Route path="/dashboard/copilot" element={
-          <PrivateRoute requiredType="admin"><CopilotChatPage role="admin" /></PrivateRoute>
-        } />
+        <Route path="/dashboard/copilot" element={<Navigate to="/dashboard/metricas" replace />} />
 
         {/* Rutas protegidas - suscriptor */}
         <Route path="/dashboard-suscriptor/plantillas" element={

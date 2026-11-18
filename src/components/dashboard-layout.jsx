@@ -78,17 +78,6 @@ const DashboardLayout = ({ children, activeSection = "suscriptores" }) => {
       ],
     },
     {
-      title: "Inteligencia Artificial",
-      items: [
-        {
-          title: "Copiloto IA (MCP)",
-          url: "/dashboard/copilot",
-          icon: Sparkles,
-          isActive: activeSection === "copilot",
-        },
-      ],
-    },
-    {
       title: "Suscripciones y Negocio",
       items: [
         {

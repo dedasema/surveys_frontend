@@ -100,17 +100,6 @@ const ROLE_STRATEGIES = {
         ],
       },
       {
-        title: "Inteligencia Artificial",
-        items: [
-          {
-            title: "Copiloto IA",
-            url: "/dashboard/copilot",
-            icon: Sparkles,
-            isActive: pathname.includes("/dashboard/copilot"),
-          },
-        ],
-      },
-      {
         title: "Suscripciones y Pagos",
         items: [
           {

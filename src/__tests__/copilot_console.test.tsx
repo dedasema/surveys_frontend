@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor, act } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import CopilotChatPage from "../features/copilot/components/CopilotChatPage";
+import { AppLayout } from "../shared/layouts/AppLayout";
 import * as copilotService from "../features/copilot/services/copilotService";
 import { saveStoredSessions, getStoredSessions } from "../features/copilot/services/copilotStorage";
 
@@ -51,7 +52,7 @@ describe("Consola Central Copiloto IA (MCP & RAG) — Unit & UI Tests", () => {
   it("renders full ChatGPT-style console with session sidebar and starter prompts", () => {
     render(
       <MemoryRouter>
-        <CopilotChatPage role="admin" />
+        <CopilotChatPage role="suscriptor" />
       </MemoryRouter>
     );
 
@@ -179,5 +180,19 @@ describe("Consola Central Copiloto IA (MCP & RAG) — Unit & UI Tests", () => {
 
     expect(screen.getAllByText("Chat de prueba guardado").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Respuesta previa persistida")).toBeInTheDocument();
+  });
+
+  it("does not render Copiloto IA in the SuperAdmin (role='admin') sidebar navigation", () => {
+    render(
+      <MemoryRouter initialEntries={["/dashboard/metricas"]}>
+        <AppLayout role="admin">
+          <div>Admin Content</div>
+        </AppLayout>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("Panel Administrativo")).toBeInTheDocument();
+    expect(screen.queryByText("Copiloto IA")).not.toBeInTheDocument();
+    expect(screen.queryByText("Inteligencia Artificial")).not.toBeInTheDocument();
   });
 });
