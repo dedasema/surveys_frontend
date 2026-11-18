@@ -3,9 +3,10 @@
   "versionCode": 1,
   "apkUrl": "/downloads/surveysaas.apk",
   "fileName": "surveysaas.apk",
-  "fileSizeBytes": 54143191,
-  "sizeFormatted": "51.6 MB",
-  "updatedAt": "2026-11-17T11:49:40Z",
+  "fileSizeBytes": 54160055,
+  "sizeFormatted": "51.7 MB",
+  "sha256": "edfce25ac5f9ef8a1bef696f3aa4a34c73e3f954ff52d347c05c7dcd102253dd",
+  "updatedAt": "2026-11-17T20:47:00Z",
   "minAndroidVersion": "7.0 (API 24)",
   "features": [
     "Soporte completo para Encuestas Adaptativas y Multimodales",
