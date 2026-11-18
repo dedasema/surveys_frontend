@@ -63,7 +63,7 @@ describe("SurveySaaS Mobile APK Download — Unit & UI Tests", () => {
     const downloadLink = screen.getByRole("link", { name: /Descargar APK Android/i });
     expect(downloadLink).toBeInTheDocument();
     expect(downloadLink).toHaveAttribute("href", "/downloads/surveysaas.apk");
-    expect(downloadLink).toHaveAttribute("download", "SurveySaaS-App-v1.0.apk");
+    expect(downloadLink).toHaveAttribute("download", "surveysaas.apk");
     expect(screen.getByText("52.3 MB")).toBeInTheDocument();
 
     // Key capabilities
@@ -77,10 +77,21 @@ describe("SurveySaaS Mobile APK Download — Unit & UI Tests", () => {
     expect(screen.getByText("Permitir Fuentes Desconocidas")).toBeInTheDocument();
     expect(screen.getByText("Instalar y Comenzar a Encuestar")).toBeInTheDocument();
 
-    // Technical specifications
+    // Technical specifications & SHA-256 integrity
     expect(screen.getByText("1.0.0 (Release)")).toBeInTheDocument();
     expect(screen.getByText("52.3 MB (.apk)")).toBeInTheDocument();
     expect(screen.getByText("Android 7.0+")).toBeInTheDocument();
+    expect(screen.getByText("Fecha de Publicación")).toBeInTheDocument();
+    expect(screen.getByText("Integridad Criptográfica (SHA-256)")).toBeInTheDocument();
+    expect(
+      screen.getByText(/3c801817e73277894c4863d81d4d0744fb2e353e6e707723e7514e01010966a8/i)
+    ).toBeInTheDocument();
+
+    // Novedades / Changelog from version manifest
+    expect(screen.getByText(/Novedades de la versión 1.0.0/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Soporte completo para Encuestas Adaptativas y Multimodales/i)
+    ).toBeInTheDocument();
   });
 
   it("copies direct APK download link to clipboard on button click", async () => {
@@ -99,6 +110,25 @@ describe("SurveySaaS Mobile APK Download — Unit & UI Tests", () => {
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
       expect.stringContaining("/downloads/surveysaas.apk")
+    );
+  });
+
+  it("copies SHA-256 hash to clipboard on button click", async () => {
+    render(
+      <MemoryRouter initialEntries={["/descargar-app"]}>
+        <DownloadAppPage />
+      </MemoryRouter>
+    );
+
+    const copyHashBtn = screen.getByRole("button", { name: /Copiar Hash/i });
+    expect(copyHashBtn).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(copyHashBtn);
+    });
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      "3c801817e73277894c4863d81d4d0744fb2e353e6e707723e7514e01010966a8"
     );
   });
 

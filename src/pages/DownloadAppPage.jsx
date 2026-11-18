@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Smartphone,
@@ -23,15 +23,75 @@ import { toast } from "sonner";
 import PublicNavbar from "../components/PublicNavbar";
 import PublicFooter from "../components/PublicFooter";
 
+const DEFAULT_VERSION_DATA = {
+  version: "1.0.0",
+  versionCode: 1,
+  apkUrl: "/downloads/surveysaas.apk",
+  fileName: "surveysaas.apk",
+  fileSizeBytes: 54815255,
+  sizeFormatted: "52.3 MB",
+  sha256: "3c801817e73277894c4863d81d4d0744fb2e353e6e707723e7514e01010966a8",
+  updatedAt: "2026-11-17T21:38:00Z",
+  minAndroidVersion: "7.0 (API 24)",
+  features: [
+    "Soporte completo para Encuestas Adaptativas y Multimodales",
+    "Modo 100% Offline con cola de sincronización SQLite",
+    "Digitalización OCR de formularios en papel con cámara",
+    "Grabación y transcripción de respuestas por voz con IA",
+  ],
+};
+
 export default function DownloadAppPage() {
   const [copied, setCopied] = useState(false);
+  const [copiedHash, setCopiedHash] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+  const [versionData, setVersionData] = useState(DEFAULT_VERSION_DATA);
 
-  const apkUrl = "/downloads/surveysaas.apk";
+  useEffect(() => {
+    let isMounted = true;
+    const fetchVersionInfo = async () => {
+      try {
+        const res = await fetch("/downloads/version.json");
+        if (res.ok) {
+          const json = await res.json();
+          if (isMounted && json) {
+            setVersionData({
+              version: json.version || DEFAULT_VERSION_DATA.version,
+              versionCode: json.versionCode || json.version_code || DEFAULT_VERSION_DATA.versionCode,
+              apkUrl: json.apkUrl || json.download_url || DEFAULT_VERSION_DATA.apkUrl,
+              fileName: json.fileName || json.apk_filename || DEFAULT_VERSION_DATA.fileName,
+              fileSizeBytes: json.fileSizeBytes || json.file_size_bytes || DEFAULT_VERSION_DATA.fileSizeBytes,
+              sizeFormatted: json.sizeFormatted || json.file_size || DEFAULT_VERSION_DATA.sizeFormatted,
+              sha256: json.sha256 || DEFAULT_VERSION_DATA.sha256,
+              updatedAt: json.updatedAt || json.release_date || DEFAULT_VERSION_DATA.updatedAt,
+              minAndroidVersion: json.minAndroidVersion || "7.0 (API 24)",
+              features: Array.isArray(json.features)
+                ? json.features
+                : Array.isArray(json.changelog)
+                ? json.changelog
+                : Array.isArray(json.novedades)
+                ? json.novedades
+                : DEFAULT_VERSION_DATA.features,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("No se pudo cargar /downloads/version.json, usando metadatos por defecto:", err);
+      }
+    };
+
+    fetchVersionInfo();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const apkUrl = versionData.apkUrl;
+  const fileName = versionData.fileName;
   const fullApkUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}${apkUrl}`
-      : "https://surveysaas.com/downloads/surveysaas.apk";
+      : `https://surveysaas.com${apkUrl}`;
 
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(
     fullApkUrl
@@ -51,12 +111,40 @@ export default function DownloadAppPage() {
     }
   };
 
+  const handleCopySha256 = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(versionData.sha256);
+      }
+      setCopiedHash(true);
+      toast.success("Hash SHA-256 copiado al portapapeles");
+      setTimeout(() => setCopiedHash(false), 2200);
+    } catch (err) {
+      toast.error("No se pudo copiar el hash");
+    }
+  };
+
+  const formatReleaseDate = (dateStr) => {
+    if (!dateStr) return "17 de noviembre de 2026";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString("es-ES", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   const steps = [
     {
       step: "01",
       title: "Descargar archivo APK",
-      desc: "Haz clic en 'Descargar APK' o escanea el código QR desde tu smartphone Android. La descarga del archivo surveysaas.apk comenzará automáticamente.",
-      tip: "El archivo pesa ~52.3 MB y contiene todas las librerías offline y modelos locales.",
+      desc: `Haz clic en 'Descargar APK' o escanea el código QR desde tu smartphone Android. La descarga del archivo ${fileName} comenzará automáticamente.`,
+      tip: `El archivo pesa ~${versionData.sizeFormatted} y contiene todas las librerías offline y modelos locales.`,
     },
     {
       step: "02",
@@ -88,7 +176,7 @@ export default function DownloadAppPage() {
               <div className="lg:col-span-7 space-y-6">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/15 border border-blue-400/30 text-blue-300 text-xs font-semibold backdrop-blur-md">
                   <Smartphone className="w-4 h-4 text-emerald-400" />
-                  <span>SurveySaaS Mobile • Android APK v1.0.0 Oficial</span>
+                  <span>SurveySaaS Mobile • Android APK v{versionData.version} Oficial</span>
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
@@ -109,13 +197,13 @@ export default function DownloadAppPage() {
                 <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
                   <a
                     href={apkUrl}
-                    download="SurveySaaS-App-v1.0.apk"
+                    download={fileName}
                     className="inline-flex items-center justify-center gap-3 px-7 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-base shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-[0.98] transition-all cursor-pointer group"
                   >
                     <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
                     <span>Descargar APK Android</span>
                     <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/20">
-                      52.3 MB
+                      {versionData.sizeFormatted}
                     </span>
                   </a>
 
@@ -200,7 +288,7 @@ export default function DownloadAppPage() {
                   <div className="mt-4 pt-4 border-t border-slate-100 text-center">
                     <a
                       href={apkUrl}
-                      download="SurveySaaS-App-v1.0.apk"
+                      download={fileName}
                       className="text-xs font-bold text-blue-600 hover:text-blue-700 inline-flex items-center gap-1.5 transition-colors"
                     >
                       <span>¿Prefieres descarga directa? Pulsa aquí</span>
@@ -329,26 +417,39 @@ export default function DownloadAppPage() {
         {/* TECHNICAL DETAILS & SPECS */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
           <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <Layers className="w-5 h-5 text-blue-600" />
-              <span>Ficha Técnica de la Aplicación</span>
-            </h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-100 gap-4">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <Layers className="w-5 h-5 text-blue-600" />
+                <span>Ficha Técnica de la Aplicación</span>
+              </h2>
+              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">
+                Build Oficial y Firmado
+              </span>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                 <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   Versión Actual
                 </span>
-                <p className="text-base font-bold text-slate-900 mt-1">1.0.0 (Release)</p>
-                <span className="text-[10px] text-emerald-600 font-medium">Build Estable</span>
+                <p className="text-base font-bold text-slate-900 mt-1">{versionData.version} (Release)</p>
+                <span className="text-[10px] text-emerald-600 font-medium">Archivo: {fileName}</span>
               </div>
 
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                 <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   Tamaño de Descarga
                 </span>
-                <p className="text-base font-bold text-slate-900 mt-1">52.3 MB (.apk)</p>
+                <p className="text-base font-bold text-slate-900 mt-1">{versionData.sizeFormatted} (.apk)</p>
                 <span className="text-[10px] text-slate-500 font-medium">Incluye motor offline</span>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                  Fecha de Publicación
+                </span>
+                <p className="text-base font-bold text-slate-900 mt-1">{formatReleaseDate(versionData.updatedAt)}</p>
+                <span className="text-[10px] text-blue-600 font-medium">Lanzamiento oficial</span>
               </div>
 
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
@@ -356,17 +457,62 @@ export default function DownloadAppPage() {
                   Compatibilidad OS
                 </span>
                 <p className="text-base font-bold text-slate-900 mt-1">Android 7.0+</p>
-                <span className="text-[10px] text-slate-500 font-medium">API Level 24 a 34</span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                  Tecnología
-                </span>
-                <p className="text-base font-bold text-slate-900 mt-1">Flutter 3 & SQLite</p>
-                <span className="text-[10px] text-slate-500 font-medium">Desesoft Bolivia</span>
+                <span className="text-[10px] text-slate-500 font-medium">Flutter 3 & SQLite</span>
               </div>
             </div>
+
+            {/* SHA-256 Checksum Box */}
+            <div className="mt-6 p-4 rounded-2xl bg-slate-900 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1 overflow-hidden max-w-full">
+                <div className="flex items-center gap-2 text-xs text-slate-400 font-semibold uppercase tracking-wider">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>Integridad Criptográfica (SHA-256)</span>
+                </div>
+                <div className="font-mono text-xs text-emerald-300 break-all select-all">
+                  {versionData.sha256}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopySha256}
+                className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-colors cursor-pointer border border-white/10"
+              >
+                {copiedHash ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Copiado</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-slate-300" />
+                    <span>Copiar Hash</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Novedades / Changelog */}
+            {versionData.features && versionData.features.length > 0 && (
+              <div className="mt-8 pt-6 border-t border-slate-100">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-amber-500" />
+                  <h3 className="text-base font-bold text-slate-900">
+                    Novedades de la versión {versionData.version}
+                  </h3>
+                </div>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {versionData.features.map((feature, idx) => (
+                    <li
+                      key={idx}
+                      className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <span className="leading-relaxed">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2 text-xs text-slate-600">

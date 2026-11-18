@@ -552,3 +552,22 @@ export async function enviarMensajeCopilot(payload) {
 
   return await res.json()
 }
+
+// Enviar formulario de contacto / leads comerciales
+export async function enviarContacto(payload) {
+  const res = await fetch(`${API_BASE_URL}/contacto`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const rawText = await res.text().catch(() => "");
+    const errorMsg = parseApiErrorMessage(res.status, rawText);
+    throw new Error(errorMsg || `Error al enviar mensaje (${res.status})`);
+  }
+
+  return await res.json();
+}

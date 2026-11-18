@@ -23,9 +23,10 @@ import {
 import { useAuth } from "../context/AuthContext";
 import PublicNavbar from "../components/PublicNavbar";
 import PublicFooter from "../components/PublicFooter";
-import { obtenerPlanesPublicos } from "../services/api";
+import { obtenerPlanesPublicos, enviarContacto } from "../services/api";
 import { isTokenExpired, redirectBasedOnRole } from "../services/auth";
 import { LandingChatbotWidget } from "../features/landing-chatbot";
+import { toast } from "sonner";
 
 const DEFAULT_PLANES = [
   {
@@ -121,6 +122,48 @@ const LandingPage = () => {
       isMounted = false
     }
   }, [])
+
+  const [contactoForm, setContactoForm] = useState({
+    nombre: "",
+    email: "",
+    empresa: "",
+    mensaje: "",
+  });
+  const [isSubmittingContacto, setIsSubmittingContacto] = useState(false);
+
+  const handleContactoChange = (e) => {
+    const { name, value } = e.target;
+    setContactoForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleContactoSubmit = async (e) => {
+    e.preventDefault();
+    if (!contactoForm.nombre || !contactoForm.email || !contactoForm.mensaje) {
+      toast.error("Por favor completa los campos requeridos (nombre, correo y mensaje).");
+      return;
+    }
+
+    setIsSubmittingContacto(true);
+    try {
+      await enviarContacto({
+        nombre: contactoForm.nombre.trim(),
+        email: contactoForm.email.trim(),
+        empresa: contactoForm.empresa ? contactoForm.empresa.trim() : null,
+        mensaje: contactoForm.mensaje.trim(),
+      });
+      toast.success("¡Mensaje enviado con éxito! Nos pondremos en contacto contigo a la brevedad.");
+      setContactoForm({
+        nombre: "",
+        email: "",
+        empresa: "",
+        mensaje: "",
+      });
+    } catch (err) {
+      toast.error(err.message || "Error al enviar el mensaje. Inténtalo de nuevo.");
+    } finally {
+      setIsSubmittingContacto(false);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -786,11 +829,15 @@ const LandingPage = () => {
             </div>
 
             <div className="bg-gray-50 p-8 rounded-2xl">
-              <form className="space-y-6">
+              <form onSubmit={handleContactoSubmit} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Nombre completo</label>
                   <input
                     type="text"
+                    name="nombre"
+                    value={contactoForm.nombre}
+                    onChange={handleContactoChange}
+                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Tu nombre"
                   />
@@ -799,6 +846,10 @@ const LandingPage = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Correo electrónico</label>
                   <input
                     type="email"
+                    name="email"
+                    value={contactoForm.email}
+                    onChange={handleContactoChange}
+                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="tu@gmail.com"
                   />
@@ -807,23 +858,31 @@ const LandingPage = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Empresa</label>
                   <input
                     type="text"
+                    name="empresa"
+                    value={contactoForm.empresa}
+                    onChange={handleContactoChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Nombre de tu empresa"
+                    placeholder="Nombre de tu empresa (opcional)"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Mensaje</label>
                   <textarea
                     rows={4}
+                    name="mensaje"
+                    value={contactoForm.mensaje}
+                    onChange={handleContactoChange}
+                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Cuéntanos sobre tu proyecto..."
                   ></textarea>
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors cursor-pointer"
+                  disabled={isSubmittingContacto}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Enviar mensaje
+                  {isSubmittingContacto ? "Enviando..." : "Enviar mensaje"}
                 </button>
               </form>
             </div>

@@ -27,6 +27,7 @@ vi.mock("../services/auth", () => ({
 // Mock api
 vi.mock("../services/api", () => ({
   obtenerPlanesPublicos: vi.fn().mockResolvedValue([]),
+  enviarContacto: vi.fn().mockResolvedValue({ success: true, message: "OK" }),
 }));
 
 describe("Landing Page & Registration Updates — Unit & UI Tests", () => {
@@ -121,5 +122,38 @@ describe("Landing Page & Registration Updates — Unit & UI Tests", () => {
     const footerIframe = screen.getByTitle("Mapa Manzana 40 - Footer");
     expect(footerIframe).toBeInTheDocument();
     expect(footerIframe).toHaveAttribute("src", expect.stringContaining("Manzana%2040"));
+  });
+
+  it("submits contact form with nombre, email, empresa, and mensaje to enviarContacto", async () => {
+    const { enviarContacto } = await import("../services/api");
+    render(
+      <MemoryRouter>
+        <LandingPage />
+      </MemoryRouter>
+    );
+
+    const nameInput = screen.getByPlaceholderText("Tu nombre");
+    const emailInput = screen.getByPlaceholderText("tu@gmail.com");
+    const empresaInput = screen.getByPlaceholderText("Nombre de tu empresa (opcional)");
+    const mensajeInput = screen.getByPlaceholderText("Cuéntanos sobre tu proyecto...");
+    const submitBtn = screen.getByRole("button", { name: /Enviar mensaje/i });
+
+    fireEvent.change(nameInput, { target: { value: "Carlos Ramos" } });
+    fireEvent.change(emailInput, { target: { value: "carlos@gmail.com" } });
+    fireEvent.change(empresaInput, { target: { value: "Tech Corp" } });
+    fireEvent.change(mensajeInput, { target: { value: "Hola, queremos una demo corporativa" } });
+
+    await waitFor(() => {
+      fireEvent.click(submitBtn);
+    });
+
+    await waitFor(() => {
+      expect(enviarContacto).toHaveBeenCalledWith({
+        nombre: "Carlos Ramos",
+        email: "carlos@gmail.com",
+        empresa: "Tech Corp",
+        mensaje: "Hola, queremos una demo corporativa",
+      });
+    });
   });
 });

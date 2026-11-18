@@ -17,12 +17,14 @@ import {
 import { toast } from "sonner";
 import PublicNavbar from "../components/PublicNavbar";
 import PublicFooter from "../components/PublicFooter";
+import { enviarContacto } from "../services/api";
 
 export default function SupportPage() {
   const [openFaq, setOpenFaq] = useState(null);
   const [formData, setFormData] = useState({
     nombre: "",
     email: "",
+    empresa: "",
     categoria: "tecnica",
     asunto: "",
     mensaje: "",
@@ -62,7 +64,7 @@ export default function SupportPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nombre || !formData.email || !formData.mensaje) {
       toast.error("Por favor completa todos los campos requeridos.");
@@ -70,19 +72,34 @@ export default function SupportPage() {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const fullMessage = formData.asunto
+        ? `[${formData.categoria.toUpperCase()}] ${formData.asunto.trim()}: ${formData.mensaje.trim()}`
+        : `[${formData.categoria.toUpperCase()}] ${formData.mensaje.trim()}`;
+
+      await enviarContacto({
+        nombre: formData.nombre.trim(),
+        email: formData.email.trim(),
+        empresa: formData.empresa ? formData.empresa.trim() : null,
+        mensaje: fullMessage,
+      });
+
       toast.success(
         "¡Ticket de soporte recibido! Nuestro equipo en Santa Cruz, Bolivia te responderá a la brevedad."
       );
       setFormData({
         nombre: "",
         email: "",
+        empresa: "",
         categoria: "tecnica",
         asunto: "",
         mensaje: "",
       });
-    }, 600);
+    } catch (err) {
+      toast.error(err.message || "Error al enviar la solicitud de soporte. Inténtalo de nuevo.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -254,12 +271,25 @@ export default function SupportPage() {
                         onChange={handleInputChange}
                         required
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                        placeholder="tu@empresa.com"
+                        placeholder="tu@gmail.com"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
+                        Empresa (Opcional)
+                      </label>
+                      <input
+                        type="text"
+                        name="empresa"
+                        value={formData.empresa}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                        placeholder="Nombre de tu empresa"
+                      />
+                    </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
                         Categoría
@@ -310,7 +340,7 @@ export default function SupportPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-xs hover:shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-xs hover:shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Send className="h-4 w-4" />
                     <span>{isSubmitting ? "Enviando..." : "Enviar Solicitud de Soporte"}</span>
