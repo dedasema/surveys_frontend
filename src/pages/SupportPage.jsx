@@ -176,8 +176,8 @@ export default function SupportPage() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-sm text-gray-900">Correo Electrónico</h4>
-                      <a href="mailto:soporte@desesoft.com" className="text-blue-600 text-sm hover:underline">
-                        soporte@desesoft.com
+                      <a href="mailto:dedasema734012@gmail.com" className="text-blue-600 text-sm hover:underline">
+                        dedasema734012@gmail.com
                       </a>
                       <p className="text-xs text-gray-500 mt-0.5">Respuesta promedio en menos de 2 horas</p>
                     </div>
@@ -189,8 +189,10 @@ export default function SupportPage() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-sm text-gray-900">Teléfono / WhatsApp</h4>
-                      <p className="text-gray-700 text-sm font-medium">+591 3 345-6789</p>
-                      <p className="text-xs text-gray-500 mt-0.5">Atención en horario de oficina</p>
+                      <a href="tel:+59162795140" className="text-gray-700 text-sm font-medium hover:text-emerald-600 transition-colors">
+                        +591 62795140
+                      </a>
+                      <p className="text-xs text-gray-500 mt-0.5">Atención en horario de oficina y soporte 24/7</p>
                     </div>
                   </div>
 
@@ -210,9 +212,9 @@ export default function SupportPage() {
                       <MapPin className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-sm text-gray-900">Oficina Principal</h4>
-                      <p className="text-gray-700 text-sm">Santa Cruz de la Sierra, Bolivia</p>
-                      <p className="text-xs text-gray-500 mt-0.5">Desesoft SRL</p>
+                      <h4 className="font-semibold text-sm text-gray-900">Oficina Principal & Sede</h4>
+                      <p className="text-gray-700 text-sm">Manzana 40 - Plaza Empresarial, Av. San Martin, Santa Cruz de la Sierra</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Desesoft SRL &bull; Bolivia</p>
                     </div>
                   </div>
                 </div>

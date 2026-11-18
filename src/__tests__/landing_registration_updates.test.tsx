@@ -41,6 +41,10 @@ describe("Landing Page & Registration Updates — Unit & UI Tests", () => {
       </MemoryRouter>
     );
 
+    // Section title & address check
+    expect(screen.getByText("Información de contacto")).toBeInTheDocument();
+    expect(screen.getAllByText(/Manzana 40 - Plaza Empresarial/i).length).toBeGreaterThanOrEqual(1);
+
     // Email & Phone checks
     expect(screen.getAllByText("dedasema734012@gmail.com").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("+591 62795140").length).toBeGreaterThanOrEqual(1);

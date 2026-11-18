@@ -744,21 +744,34 @@ const LandingPage = () => {
             <div>
               <h3 className="text-xl font-semibold mb-6">Información de contacto</h3>
               <div className="space-y-4">
-                <div className="flex items-center">
-                  <Mail className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0" />
-                  <a href="mailto:dedasema734012@gmail.com" className="hover:text-blue-600 transition-colors">
-                    dedasema734012@gmail.com
-                  </a>
+                <div className="flex items-start">
+                  <MapPin className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-medium text-gray-900 block">Dirección:</span>
+                    <span className="text-gray-600">Manzana 40 - Plaza Empresarial, Av. San Martin, Santa Cruz de la Sierra</span>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <Smartphone className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0" />
-                  <a href="tel:+59162795140" className="hover:text-blue-600 transition-colors">
-                    +591 62795140
-                  </a>
+                <div className="flex items-start">
+                  <Mail className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-medium text-gray-900 block">Correo electrónico:</span>
+                    <a href="mailto:dedasema734012@gmail.com" className="text-blue-600 hover:underline">
+                      dedasema734012@gmail.com
+                    </a>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <Smartphone className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-medium text-gray-900 block">Celular / WhatsApp:</span>
+                    <a href="tel:+59162795140" className="text-blue-600 hover:underline">
+                      +591 62795140
+                    </a>
+                  </div>
                 </div>
                 <div className="flex items-center">
                   <MessageSquare className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0" />
-                  <span>Soporte 24/7 en línea</span>
+                  <span className="text-gray-700">Soporte 24/7 en línea</span>
                 </div>
               </div>
 
