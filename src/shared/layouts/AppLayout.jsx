@@ -41,7 +41,6 @@ import {
 } from "../../components/sidebar"
 import { useAuth } from "../../context/AuthContext"
 import { getCurrentUser } from "../../services/auth"
-import { ChatbotWidget } from "../../features/chatbot"
 import { NotificationBellPopover } from "../../features/notifications"
 import SystemAnnouncementsBanner from "../../components/SystemAnnouncementsBanner"
 
@@ -101,6 +100,17 @@ const ROLE_STRATEGIES = {
         ],
       },
       {
+        title: "Inteligencia Artificial",
+        items: [
+          {
+            title: "Copiloto IA",
+            url: "/dashboard/copilot",
+            icon: Sparkles,
+            isActive: pathname.includes("/dashboard/copilot"),
+          },
+        ],
+      },
+      {
         title: "Suscripciones y Pagos",
         items: [
           {
@@ -122,7 +132,7 @@ const ROLE_STRATEGIES = {
   suscriptor: {
     panelTitle: "Panel Suscriptor",
     profileUrl: "/dashboard-suscriptor/perfil-suscriptor",
-    hasChatbot: true,
+    hasChatbot: false,
     getMenu: (pathname) => [
       {
         title: "Panel Principal",
@@ -204,10 +214,10 @@ const ROLE_STRATEGIES = {
             isActive: pathname.includes("/dashboard-suscriptor/agente-logs"),
           },
           {
-            title: "Asistente RAG",
-            url: "/dashboard-suscriptor/asistente-rag",
-            icon: MessageSquareText,
-            isActive: pathname.includes("/dashboard-suscriptor/asistente-rag"),
+            title: "Copiloto IA (MCP)",
+            url: "/dashboard-suscriptor/copilot",
+            icon: Sparkles,
+            isActive: pathname.includes("/dashboard-suscriptor/copilot") || pathname.includes("/dashboard-suscriptor/asistente-rag"),
           },
         ],
       },
@@ -272,8 +282,19 @@ const ROLE_STRATEGIES = {
   operator: {
     panelTitle: "Panel Operador",
     profileUrl: "/dashboard-operador/perfil-operador",
-    hasChatbot: true,
+    hasChatbot: false,
     getMenu: (pathname) => [
+      {
+        title: "Inteligencia Artificial",
+        items: [
+          {
+            title: "Copiloto IA",
+            url: "/dashboard-operador/copilot",
+            icon: Sparkles,
+            isActive: pathname.includes("/dashboard-operador/copilot"),
+          },
+        ],
+      },
       {
         title: "Panel Principal",
         items: [
@@ -480,9 +501,6 @@ export const AppLayout = ({ children, role = "suscriptor" }) => {
 
         {/* Content View */}
         <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
-
-        {/* Chatbot Widget */}
-        {strategy.hasChatbot && <ChatbotWidget currentSection={currentSection} />}
       </div>
     </div>
   )

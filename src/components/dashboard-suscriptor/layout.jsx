@@ -40,7 +40,6 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "../sidebar"
-import ChatbotWidget from "../ChatbotWidget"
 import SystemAnnouncementsBanner from "../SystemAnnouncementsBanner"
 
 /* ───────── Utilidades ───────── */
@@ -117,7 +116,7 @@ const DashboardSuscriptorLayout = ({ children }) => {
         { title: "Revisión de Fraude", url: "/dashboard-suscriptor/fraude", icon: ShieldAlert },
         { title: "Análisis Predictivo", url: "/dashboard-suscriptor/predictivo", icon: TrendingUp },
         { title: "Log del Agente IA", url: "/dashboard-suscriptor/agente-logs", icon: Bot },
-        { title: "Asistente RAG", url: "/dashboard-suscriptor/asistente-rag", icon: MessageSquareText },
+        { title: "Copiloto IA (MCP)", url: "/dashboard-suscriptor/copilot", icon: Sparkles },
       ],
     },
     {
@@ -252,9 +251,6 @@ const DashboardSuscriptorLayout = ({ children }) => {
 
         {/* Contenido */}
         <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
-
-        {/* ───────── Chatbot Copilot (Gemini) ───────── */}
-        <ChatbotWidget activeSection={currentSection} />
       </div>
     </div>
   )

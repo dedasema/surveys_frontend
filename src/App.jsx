@@ -59,6 +59,7 @@ import { PredictiveContainer } from './features/predictive';
 import { AgentLogsContainer } from './features/agent-logs';
 import { RagAssistantContainer } from './features/rag-assistant';
 import { NotificationsPage } from './features/notifications';
+import { CopilotChatPage } from './features/copilot';
 import AdaptiveSurveyPage from './pages/AdaptiveSurveyPage';
 
 function App() {
@@ -142,6 +143,9 @@ function App() {
         <Route path="/dashboard/anuncios" element={
           <PrivateRoute requiredType="admin"><AnunciosPage /></PrivateRoute>
         } />
+        <Route path="/dashboard/copilot" element={
+          <PrivateRoute requiredType="admin"><CopilotChatPage role="admin" /></PrivateRoute>
+        } />
 
         {/* Rutas protegidas - suscriptor */}
         <Route path="/dashboard-suscriptor/plantillas" element={
@@ -201,6 +205,9 @@ function App() {
         <Route path="/dashboard-suscriptor/asistente-rag" element={
           <PrivateRoute requiredType="suscriptor"><RagAssistantContainer role="suscriptor" /></PrivateRoute>
         } />
+        <Route path="/dashboard-suscriptor/copilot" element={
+          <PrivateRoute requiredType="suscriptor"><CopilotChatPage role="suscriptor" /></PrivateRoute>
+        } />
         <Route path="/dashboard-suscriptor/notificaciones" element={
           <PrivateRoute requiredType="suscriptor"><NotificationsPage role="suscriptor" /></PrivateRoute>
         } />
@@ -219,6 +226,9 @@ function App() {
         } />
         <Route path="/dashboard-operador/notificaciones" element={
           <PrivateRoute requiredType="operator"><NotificationsPage role="operator" /></PrivateRoute>
+        } />
+        <Route path="/dashboard-operador/copilot" element={
+          <PrivateRoute requiredType="operator"><CopilotChatPage role="operator" /></PrivateRoute>
         } />
         <Route path="/dashboard-operador/perfil-operador" element={
           <PrivateRoute requiredType="operator"><PerfilOperador /></PrivateRoute>

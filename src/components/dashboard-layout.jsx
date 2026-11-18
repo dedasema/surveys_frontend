@@ -7,6 +7,7 @@ import {
   ShieldAlert,
   Building2,
   Megaphone,
+  Sparkles,
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import {
@@ -73,6 +74,17 @@ const DashboardLayout = ({ children, activeSection = "suscriptores" }) => {
           url: "/dashboard/suscriptores",
           icon: Building2,
           isActive: activeSection === "suscriptores",
+        },
+      ],
+    },
+    {
+      title: "Inteligencia Artificial",
+      items: [
+        {
+          title: "Copiloto IA (MCP)",
+          url: "/dashboard/copilot",
+          icon: Sparkles,
+          isActive: activeSection === "copilot",
         },
       ],
     },

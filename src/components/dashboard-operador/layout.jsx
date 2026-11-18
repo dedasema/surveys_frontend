@@ -6,6 +6,7 @@ import {
   User,
   Send,
   Smartphone,
+  Sparkles,
 } from "lucide-react"
 import { getCurrentUser, getAvatarUrl } from "../../services/auth"
 import { useAuth } from "../../context/AuthContext"
@@ -22,7 +23,6 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "../sidebar"
-import ChatbotWidget from "../ChatbotWidget"
 import SystemAnnouncementsBanner from "../SystemAnnouncementsBanner"
 
 const DashboardOperadorLayout = ({ children, activeSection = "plantillas" }) => {
@@ -77,6 +77,12 @@ const DashboardOperadorLayout = ({ children, activeSection = "plantillas" }) => 
         { title: "Plantillas", url: "/dashboard-operador/plantillas", icon: FileText },
         { title: "Destinatarios", url: "/dashboard-operador/destinatarios", icon: Users },
         { title: "Entregas", url: "/dashboard-operador/entregas", icon: Send },
+      ],
+    },
+    {
+      title: "Inteligencia Artificial",
+      items: [
+        { title: "Copiloto IA", url: "/dashboard-operador/copilot", icon: Sparkles },
       ],
     },
     {
@@ -184,9 +190,6 @@ const DashboardOperadorLayout = ({ children, activeSection = "plantillas" }) => 
 
         {/* Content */}
         <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
-
-        {/* ──────────────── Chatbot Copilot (Gemini) ──────────────── */}
-        <ChatbotWidget activeSection={activeSection} />
       </div>
     </div>
   )

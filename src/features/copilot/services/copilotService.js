@@ -4,11 +4,13 @@ const API_BASE_URL =
 const getToken = () => localStorage.getItem("token");
 
 /**
- * Envía un mensaje al Copiloto Inteligente con arquitectura MCP para empresas suscriptoras.
+ * Envía un mensaje al Copiloto Inteligente con arquitectura MCP para empresas suscriptoras y administradores.
  * Endpoint principal: POST /copilot/chat
  * Alias secundario: POST /agente/copilot
+ * @param {import('../types').CopilotChatPayload} params
+ * @returns {Promise<import('../types').CopilotChatResponse>}
  */
-export async function sendCopilotMessage({ message, history = [], campana_id = null }) {
+export async function sendCopilotMessage({ message, history = [], campana_id = null, session_id = null }) {
   const token = getToken();
 
   const payload = {
@@ -18,6 +20,7 @@ export async function sendCopilotMessage({ message, history = [], campana_id = n
       text: m.text,
     })),
     ...(campana_id ? { campana_id } : {}),
+    ...(session_id ? { session_id } : {}),
   };
 
   const headers = {
@@ -51,6 +54,7 @@ export async function sendCopilotMessage({ message, history = [], campana_id = n
           context: {
             route: typeof window !== "undefined" ? window.location.pathname : "",
             campana_id,
+            session_id,
           },
         }),
       });
@@ -65,9 +69,11 @@ export async function sendCopilotMessage({ message, history = [], campana_id = n
 
     const data = await res.json();
     return {
-      answer: data.answer || "No se obtuvo respuesta del Copiloto.",
+      answer: data.answer || data.respuesta || "No se obtuvo respuesta del Copiloto.",
       tools_used: data.tools_used || [],
       suggested_actions: data.suggested_actions || [],
+      fuentes_citadas: data.fuentes_citadas || [],
+      session_id: data.session_id || session_id,
     };
   } catch (err) {
     console.error("Error en sendCopilotMessage:", err);
