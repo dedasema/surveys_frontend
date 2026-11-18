@@ -15,11 +15,31 @@ export default function PublicFooter() {
               Plataforma SaaS integral de recolección multicanal, digitalización con OCR y análisis inteligente de encuestas con IA.
             </p>
 
-            <div className="pt-2 space-y-2.5 text-sm text-gray-300">
-              <Link to="/#ubicacion" className="flex items-start gap-2.5 hover:text-white transition-colors group">
-                <MapPin className="h-4 w-4 text-blue-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
-                <span>Manzana 40 - Plaza Empresarial, Av. San Martin, Santa Cruz de la Sierra</span>
-              </Link>
+            <div className="pt-2 space-y-3 text-sm text-gray-300">
+              <div className="space-y-2">
+                <div className="flex items-start gap-2.5 text-gray-200">
+                  <MapPin className="h-4 w-4 text-blue-400 flex-shrink-0 mt-1" />
+                  <div>
+                    <span className="font-semibold text-white block">Dirección:</span>
+                    <span className="text-gray-300">Manzana 40 - Plaza Empresarial, Av. San Martin, Santa Cruz de la Sierra</span>
+                  </div>
+                </div>
+
+                {/* Mapa Incrustado */}
+                <div className="mt-2 rounded-xl overflow-hidden border border-gray-800 shadow-md h-40 max-w-sm">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2140.020440357915!2d-63.19898350970343!3d-17.756734352519935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x93f1e70cca02d2c7%3A0x51870ea50241886c!2sManzana%2040%20-%20Plaza%20Empresarial!5e0!3m2!1ses-419!2sbo!4v1794988673274!5m2!1ses-419!2sbo"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    title="Mapa Manzana 40 - Footer"
+                  />
+                </div>
+              </div>
+
               <div className="flex items-center gap-2.5">
                 <Mail className="h-4 w-4 text-blue-400 flex-shrink-0" />
                 <a href="mailto:dedasema734012@gmail.com" className="hover:text-white transition-colors">

@@ -87,8 +87,8 @@ export default function AboutPage() {
                     <div className="flex items-start gap-3">
                       <MapPin className="h-5 w-5 text-yellow-300 flex-shrink-0 mt-0.5" />
                       <div>
-                        <strong className="text-white block">Ubicación:</strong>
-                        <span>Santa Cruz de la Sierra, Bolivia</span>
+                        <strong className="text-white block">Ubicación & Sede:</strong>
+                        <span>Manzana 40 - Plaza Empresarial, Av. San Martin, Santa Cruz de la Sierra, Bolivia</span>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -111,6 +111,20 @@ export default function AboutPage() {
                     <span>Comprometidos con el desarrollo tecnológico</span>
                     <span className="bg-white/20 px-3 py-1 rounded-full text-white font-semibold">100% Cloud</span>
                   </div>
+                </div>
+
+                {/* Mapa Corporativo */}
+                <div className="mt-6 rounded-2xl overflow-hidden border border-gray-200 shadow-lg h-52">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2140.020440357915!2d-63.19898350970343!3d-17.756734352519935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x93f1e70cca02d2c7%3A0x51870ea50241886c!2sManzana%2040%20-%20Plaza%20Empresarial!5e0!3m2!1ses-419!2sbo!4v1794988673274!5m2!1ses-419!2sbo"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    title="Ubicación Manzana 40 - Sobre Nosotros"
+                  />
                 </div>
               </div>
             </div>

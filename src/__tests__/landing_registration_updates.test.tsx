@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import LandingPage from "../pages/LandingPage";
 import Register from "../components/register";
+import PublicFooter from "../components/PublicFooter";
 import * as authService from "../services/auth";
 
 // Mock AuthContext
@@ -102,5 +103,19 @@ describe("Landing Page & Registration Updates — Unit & UI Tests", () => {
     expect(termsCheck).toBeChecked();
     expect(privacyCheck).toBeChecked();
     expect(submitBtn).not.toBeDisabled();
+  });
+
+  it("renders address and embedded Google Maps iframe directly in PublicFooter", () => {
+    render(
+      <MemoryRouter>
+        <PublicFooter />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("Dirección:")).toBeInTheDocument();
+    expect(screen.getByText(/Manzana 40 - Plaza Empresarial/i)).toBeInTheDocument();
+    const footerIframe = screen.getByTitle("Mapa Manzana 40 - Footer");
+    expect(footerIframe).toBeInTheDocument();
+    expect(footerIframe).toHaveAttribute("src", expect.stringContaining("Manzana%2040"));
   });
 });
