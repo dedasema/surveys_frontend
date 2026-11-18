@@ -361,6 +361,15 @@ export const getAvatarUrl = (foto_url) => {
   ) {
     return foto_url;
   }
+  if (foto_url.startsWith("s3://")) {
+    const withoutPrefix = foto_url.replace("s3://", "");
+    const firstSlash = withoutPrefix.indexOf("/");
+    if (firstSlash !== -1) {
+      const bucket = withoutPrefix.substring(0, firstSlash);
+      const key = withoutPrefix.substring(firstSlash + 1);
+      return `https://${bucket}.s3.amazonaws.com/${key}`;
+    }
+  }
   const cleanPath = foto_url.startsWith("/") ? foto_url : `/${foto_url}`;
   return `${API_URL}${cleanPath}`;
 };

@@ -38,11 +38,23 @@ export default function AvatarUpload({
       setUploading(true);
       toast.loading("Subiendo foto de perfil...", { id: "upload-avatar" });
       const res = await subirFotoPerfil(file);
+      const newUrl = res?.foto_url || res?.url;
 
-      if (res?.foto_url) {
+      if (newUrl) {
         toast.success("Foto de perfil actualizada exitosamente", { id: "upload-avatar" });
+        try {
+          const userStr = localStorage.getItem("user");
+          if (userStr) {
+            const userObj = JSON.parse(userStr);
+            userObj.foto_url = newUrl;
+            localStorage.setItem("user", JSON.stringify(userObj));
+            window.dispatchEvent(new Event("userProfileUpdated"));
+          }
+        } catch (e) {
+          console.error("Error actualizando user en storage:", e);
+        }
         if (onAvatarUpdated) {
-          onAvatarUpdated(res.foto_url);
+          onAvatarUpdated(newUrl);
         }
       } else {
         toast.error("No se pudo obtener la URL de la imagen", { id: "upload-avatar" });
