@@ -17,10 +17,10 @@ export interface ToolExecutionRecord {
 }
 
 export interface CitedSource {
-  id: string | number;
-  tipo: "respuesta" | "documento" | "transcripcion";
-  canal: "gmail" | "ocr" | "voz" | "web";
-  campana: string;
+  id?: string | number;
+  tipo?: "respuesta" | "documento" | "transcripcion";
+  canal?: "gmail" | "ocr" | "voz" | "audio" | "web";
+  campana?: string;
   fragmento: string;
   similitud_score?: number;
   fecha?: string;
@@ -52,4 +52,23 @@ export interface CopilotSession {
   updatedAt: string;
   campanaId?: string | null;
   messages: ChatMessage[];
+  message_count?: number;
+}
+
+export interface BackendCopilotSession {
+  id: string;
+  title: string;
+  campana_id?: string | null;
+  created_at: string;
+  updated_at: string;
+  message_count?: number;
+}
+
+export interface BackendCopilotMessage {
+  id: string;
+  sender: "user" | "assistant" | "system";
+  text: string;
+  tools_used?: ToolExecutionRecord[];
+  fuentes_citadas?: CitedSource[];
+  created_at: string;
 }

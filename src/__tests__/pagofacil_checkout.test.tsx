@@ -407,5 +407,59 @@ describe("PagoFácil QR Checkout — Unit & Integration Tests", () => {
 
     expect(api.consultarPagoFacilEstado).not.toHaveBeenCalled();
   });
+
+  it("handles scheduled downgrade without showing QR when backend returns status 'programado'", async () => {
+    vi.mocked(api.generarPagoFacilQR).mockResolvedValue({
+      status: "programado",
+      monto_real_bob: 0.0,
+      qr_base64: null,
+      mensaje:
+        "Tu plan actual 'Profesional' se mantendrá activo hasta el 30/11/2026. El cambio a 'Básico' entrará en vigencia al finalizar tu ciclo sin costos adicionales hoy.",
+    });
+
+    render(
+      <PlanCheckoutModal
+        isOpen={true}
+        onClose={vi.fn()}
+        plan={{ id: 1, nombre: "Básico", precio_mensual: "9.99" }}
+        suscriptorId="sub-123"
+      />
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Pagar con QR/i }));
+    });
+
+    expect(screen.getByText("¡Cambio de Plan Registrado!")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Tu plan actual 'Profesional' se mantendrá activo hasta el 30\/11\/2026/i)
+    ).toBeInTheDocument();
+    expect(screen.getByText("Bs. 0.00 BOB")).toBeInTheDocument();
+    expect(screen.getByText("Entendido / Volver a Planes")).toBeInTheDocument();
+  });
+
+  it("displays alert error message when downgrade is rejected due to resource limits (400 Bad Request)", async () => {
+    vi.mocked(api.generarPagoFacilQR).mockRejectedValue(
+      new Error("No puedes bajar de plan porque tienes 4 operadores activos y el plan básico permite máximo 1.")
+    );
+
+    render(
+      <PlanCheckoutModal
+        isOpen={true}
+        onClose={vi.fn()}
+        plan={{ id: 1, nombre: "Básico", precio_mensual: "9.99" }}
+        suscriptorId="sub-123"
+      />
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Pagar con QR/i }));
+    });
+
+    expect(screen.getByText("No es posible cambiar a este plan")).toBeInTheDocument();
+    expect(
+      screen.getByText(/No puedes bajar de plan porque tienes 4 operadores activos/i)
+    ).toBeInTheDocument();
+  });
 });
 

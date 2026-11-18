@@ -4,6 +4,129 @@ const API_BASE_URL =
 const getToken = () => localStorage.getItem("token");
 
 /**
+ * Obtiene la lista de sesiones del Copiloto Inteligente desde el backend.
+ * Endpoint: GET /copilot/sessions
+ * @returns {Promise<Array<{id: string, title: string, campana_id: string|null, created_at: string, updated_at: string, message_count: number}>>}
+ */
+export async function getCopilotSessions() {
+  const token = getToken();
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/copilot/sessions`, {
+      method: "GET",
+      headers,
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Error al obtener sesiones (${res.status})`);
+    }
+    return await res.json();
+  } catch (err) {
+    console.error("Error en getCopilotSessions:", err);
+    throw err;
+  }
+}
+
+/**
+ * Crea una nueva sesión en el backend.
+ * Endpoint: POST /copilot/sessions
+ * @param {{ title?: string, campana_id?: string|null }} params
+ * @returns {Promise<Object>}
+ */
+export async function createCopilotSession({ title = "Nueva conversación", campana_id = null } = {}) {
+  const token = getToken();
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  const payload = {
+    title: title || "Nueva conversación",
+    campana_id: campana_id || null,
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/copilot/sessions`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Error al crear sesión (${res.status})`);
+    }
+    return await res.json();
+  } catch (err) {
+    console.error("Error en createCopilotSession:", err);
+    throw err;
+  }
+}
+
+/**
+ * Obtiene los mensajes cronológicos de una sesión dada.
+ * Endpoint: GET /copilot/sessions/{session_id}/messages
+ * @param {string} sessionId
+ * @returns {Promise<Array<Object>>}
+ */
+export async function getCopilotSessionMessages(sessionId) {
+  if (!sessionId) return [];
+  const token = getToken();
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/copilot/sessions/${sessionId}/messages`, {
+      method: "GET",
+      headers,
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Error al obtener mensajes (${res.status})`);
+    }
+    return await res.json();
+  } catch (err) {
+    console.error(`Error en getCopilotSessionMessages para ${sessionId}:`, err);
+    throw err;
+  }
+}
+
+/**
+ * Elimina una sesión del backend.
+ * Endpoint: DELETE /copilot/sessions/{session_id}
+ * @param {string} sessionId
+ * @returns {Promise<Object>}
+ */
+export async function deleteCopilotSession(sessionId) {
+  if (!sessionId) return { success: false };
+  const token = getToken();
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/copilot/sessions/${sessionId}`, {
+      method: "DELETE",
+      headers,
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Error al eliminar sesión (${res.status})`);
+    }
+    return await res.json();
+  } catch (err) {
+    console.error(`Error en deleteCopilotSession para ${sessionId}:`, err);
+    throw err;
+  }
+}
+
+/**
  * Envía un mensaje al Copiloto Inteligente con arquitectura MCP para empresas suscriptoras y administradores.
  * Endpoint principal: POST /copilot/chat
  * Alias secundario: POST /agente/copilot
@@ -15,12 +138,16 @@ export async function sendCopilotMessage({ message, history = [], campana_id = n
 
   const payload = {
     message: message.trim(),
-    history: history.slice(-6).map((m) => ({
-      sender: m.sender === "user" ? "user" : "assistant",
-      text: m.text,
-    })),
-    ...(campana_id ? { campana_id } : {}),
     ...(session_id ? { session_id } : {}),
+    ...(campana_id ? { campana_id } : {}),
+    ...(history && history.length
+      ? {
+          history: history.slice(-6).map((m) => ({
+            sender: m.sender === "user" ? "user" : "assistant",
+            text: m.text,
+          })),
+        }
+      : {}),
   };
 
   const headers = {

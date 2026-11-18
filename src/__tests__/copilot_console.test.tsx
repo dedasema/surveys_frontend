@@ -27,6 +27,19 @@ vi.mock("../services/auth", () => ({
 // Mock copilotService
 vi.mock("../features/copilot/services/copilotService", () => ({
   sendCopilotMessage: vi.fn(),
+  getCopilotSessions: vi.fn().mockResolvedValue([]),
+  createCopilotSession: vi.fn().mockImplementation(({ title, campana_id }) =>
+    Promise.resolve({
+      id: `session-mock-${Date.now()}`,
+      title: title || "Nueva conversación",
+      campana_id: campana_id || null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      message_count: 0,
+    })
+  ),
+  getCopilotSessionMessages: vi.fn().mockResolvedValue([]),
+  deleteCopilotSession: vi.fn().mockResolvedValue({ success: true }),
 }));
 
 describe("Consola Central Copiloto IA (MCP & RAG) — Unit & UI Tests", () => {
@@ -57,7 +70,7 @@ describe("Consola Central Copiloto IA (MCP & RAG) — Unit & UI Tests", () => {
     expect(screen.getByText(/Análisis semántico RAG/i)).toBeInTheDocument();
   });
 
-  it("creates a new conversation session when clicking '+ Nueva conversación'", () => {
+  it("creates a new conversation session when clicking '+ Nueva conversación'", async () => {
     render(
       <MemoryRouter>
         <CopilotChatPage role="suscriptor" />
@@ -65,10 +78,14 @@ describe("Consola Central Copiloto IA (MCP & RAG) — Unit & UI Tests", () => {
     );
 
     const newChatBtn = screen.getByRole("button", { name: /Nueva conversación/i });
-    fireEvent.click(newChatBtn);
+    await act(async () => {
+      fireEvent.click(newChatBtn);
+    });
 
-    const stored = getStoredSessions();
-    expect(stored.length).toBeGreaterThanOrEqual(2);
+    await waitFor(() => {
+      const stored = getStoredSessions();
+      expect(stored.length).toBeGreaterThanOrEqual(2);
+    });
   });
 
   it("sends message, renders Markdown, executes MCP tools, and displays RAG citations", async () => {

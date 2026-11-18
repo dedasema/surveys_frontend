@@ -29,7 +29,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "../../../shared/layouts/AppLayout";
-import { sendCopilotMessage } from "../services/copilotService";
+import {
+  sendCopilotMessage,
+  getCopilotSessions,
+  createCopilotSession,
+  getCopilotSessionMessages,
+  deleteCopilotSession,
+} from "../services/copilotService";
 import {
   getStoredSessions,
   saveStoredSessions,
@@ -106,8 +112,22 @@ export default function CopilotChatPage({ role = "suscriptor" }) {
     searchParams.get("campana_id") ||
     (location.pathname.includes("/campanas/") ? location.pathname.split("/campanas/")[1]?.split("/")[0] : null);
 
-  const [sessions, setSessions] = useState([]);
-  const [activeSession, setActiveSession] = useState(null);
+  const [sessions, setSessions] = useState(() => {
+    let stored = getStoredSessions();
+    if (stored.length === 0) {
+      const initial = createNewSession("Bienvenida al Copiloto", explicitCampanaId);
+      initial.messages = [INITIAL_BOT_GREETING];
+      saveStoredSessions([initial]);
+      stored = [initial];
+    }
+    return stored;
+  });
+
+  const [activeSession, setActiveSession] = useState(() => {
+    const stored = getStoredSessions();
+    const activeId = getActiveSessionId();
+    return stored.find((s) => s.id === activeId) || stored[0] || null;
+  });
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchFilter, setSearchFilter] = useState("");
   const [inputText, setInputText] = useState("");
@@ -118,21 +138,99 @@ export default function CopilotChatPage({ role = "suscriptor" }) {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // Inicializar sesiones desde almacenamiento local
-  useEffect(() => {
-    let stored = getStoredSessions();
-    if (stored.length === 0) {
-      const initial = createNewSession("Bienvenida al Copiloto", explicitCampanaId);
-      initial.messages = [INITIAL_BOT_GREETING];
-      saveStoredSessions([initial]);
-      stored = [initial];
+  // Inicializar sesiones desde el backend con fallback a almacenamiento local
+  const loadSessionMessages = async (sessionId, sessionRef = null) => {
+    try {
+      const messagesData = await getCopilotSessionMessages(sessionId);
+      if (Array.isArray(messagesData) && messagesData.length > 0) {
+        const formatted = messagesData.map((m) => ({
+          id: m.id || `msg-${Date.now()}-${Math.random()}`,
+          sender: m.sender === "user" ? "user" : "assistant",
+          text: m.text,
+          timestamp: m.created_at
+            ? new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+            : "Ahora",
+          tools_used: m.tools_used || [],
+          fuentes_citadas: m.fuentes_citadas || [],
+          suggested_actions: m.suggested_actions || [],
+        }));
+
+        setActiveSession((prev) => {
+          if (prev && prev.id === sessionId) {
+            return { ...prev, messages: formatted };
+          }
+          return prev;
+        });
+
+        setSessions((prevSessions) =>
+          prevSessions.map((s) => (s.id === sessionId ? { ...s, messages: formatted } : s))
+        );
+        return;
+      }
+    } catch (err) {
+      console.warn(`[Copilot] Usando mensajes locales para sesión ${sessionId}:`, err);
     }
 
-    setSessions(stored);
-    const activeId = getActiveSessionId();
-    const found = stored.find((s) => s.id === activeId) || stored[0];
-    setActiveSession(found);
-    setActiveSessionId(found?.id || null);
+    // Si no tiene mensajes o falló la carga remota, asegurar mensaje inicial si está vacía
+    setActiveSession((prev) => {
+      if (prev && prev.id === sessionId && (!prev.messages || prev.messages.length === 0)) {
+        return { ...prev, messages: [INITIAL_BOT_GREETING] };
+      }
+      return prev;
+    });
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSessions() {
+      try {
+        const backendSessions = await getCopilotSessions();
+        if (isMounted && Array.isArray(backendSessions) && backendSessions.length > 0) {
+          const mapped = backendSessions.map((bs) => ({
+            id: bs.id,
+            title: bs.title || "Conversación",
+            createdAt: bs.created_at,
+            updatedAt: bs.updated_at,
+            campanaId: bs.campana_id,
+            message_count: bs.message_count || 0,
+            messages: [],
+          }));
+          setSessions(mapped);
+          saveStoredSessions(mapped);
+
+          const lastActiveId = getActiveSessionId();
+          const target = mapped.find((s) => s.id === lastActiveId) || mapped[0];
+          setActiveSession(target);
+          setActiveSessionId(target.id);
+          loadSessionMessages(target.id, target);
+          return;
+        }
+      } catch (err) {
+        console.warn("[Copilot] Error al cargar sesiones del backend, fallback local:", err);
+      }
+
+      if (isMounted) {
+        let stored = getStoredSessions();
+        if (stored.length === 0) {
+          const initial = createNewSession("Bienvenida al Copiloto", explicitCampanaId);
+          initial.messages = [INITIAL_BOT_GREETING];
+          saveStoredSessions([initial]);
+          stored = [initial];
+        }
+
+        setSessions(stored);
+        const activeId = getActiveSessionId();
+        const found = stored.find((s) => s.id === activeId) || stored[0];
+        setActiveSession(found);
+        setActiveSessionId(found?.id || null);
+      }
+    }
+
+    loadSessions();
+    return () => {
+      isMounted = false;
+    };
   }, [explicitCampanaId]);
 
   // Scroll automático al fondo cuando cambian mensajes
@@ -151,31 +249,75 @@ export default function CopilotChatPage({ role = "suscriptor" }) {
   const handleSelectSession = (session) => {
     setActiveSession(session);
     setActiveSessionId(session.id);
+    if (!session.messages || session.messages.length === 0) {
+      loadSessionMessages(session.id, session);
+    }
   };
 
-  const handleNewSession = () => {
-    const created = createNewSession("Nueva consulta", explicitCampanaId);
-    created.messages = [
-      {
-        ...INITIAL_BOT_GREETING,
-        id: `greeting-${Date.now()}`,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      },
-    ];
-    const updated = [created, ...sessions];
+  const handleNewSession = async () => {
+    let newSession = null;
+    try {
+      const created = await createCopilotSession({
+        title: "Nueva conversación",
+        campana_id: explicitCampanaId || null,
+      });
+      if (created && created.id) {
+        newSession = {
+          id: created.id,
+          title: created.title || "Nueva conversación",
+          createdAt: created.created_at || new Date().toISOString(),
+          updatedAt: created.updated_at || new Date().toISOString(),
+          campanaId: created.campana_id || explicitCampanaId || null,
+          messages: [
+            {
+              ...INITIAL_BOT_GREETING,
+              id: `greeting-${Date.now()}`,
+              timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            },
+          ],
+          message_count: 0,
+        };
+      }
+    } catch (err) {
+      console.warn("[Copilot] Error creando sesión en backend, creando localmente:", err);
+    }
+
+    if (!newSession) {
+      newSession = createNewSession("Nueva consulta", explicitCampanaId);
+      newSession.messages = [
+        {
+          ...INITIAL_BOT_GREETING,
+          id: `greeting-${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ];
+    }
+
+    const updated = [newSession, ...sessions.filter((s) => s.id !== newSession.id)];
     setSessions(updated);
-    setActiveSession(created);
+    setActiveSession(newSession);
+    setActiveSessionId(newSession.id);
     saveStoredSessions(updated);
     toast.success("Nueva conversación iniciada");
   };
 
-  const handleDeleteSession = (sessionId, e) => {
+  const handleDeleteSession = async (sessionId, e) => {
     e.stopPropagation();
+    try {
+      await deleteCopilotSession(sessionId);
+    } catch (err) {
+      console.warn("[Copilot] Error eliminando sesión remota:", err);
+    }
+
     const remaining = deleteStoredSession(sessionId);
     setSessions(remaining);
     if (activeSession?.id === sessionId) {
       if (remaining.length > 0) {
         setActiveSession(remaining[0]);
+        setActiveSessionId(remaining[0].id);
+        if (!remaining[0].messages || remaining[0].messages.length === 0) {
+          loadSessionMessages(remaining[0].id, remaining[0]);
+        }
       } else {
         handleNewSession();
       }
@@ -234,8 +376,10 @@ export default function CopilotChatPage({ role = "suscriptor" }) {
           text: m.text,
         })),
         campana_id: activeSession.campanaId || explicitCampanaId || null,
-        session_id: activeSession.id,
+        session_id: activeSession.id && !activeSession.id.startsWith("session-") ? activeSession.id : undefined,
       });
+
+      const actualSessionId = response.session_id || activeSession.id;
 
       const botMessage = {
         id: `bot-${Date.now()}`,
@@ -249,11 +393,13 @@ export default function CopilotChatPage({ role = "suscriptor" }) {
 
       const finalSession = {
         ...updatedSession,
+        id: actualSessionId,
         messages: [...nextMessages, botMessage],
         updatedAt: new Date().toISOString(),
       };
 
       setActiveSession(finalSession);
+      setActiveSessionId(actualSessionId);
       const finalSessions = sessions.map((s) => (s.id === activeSession.id ? finalSession : s));
       setSessions(finalSessions);
       saveStoredSessions(finalSessions);
@@ -292,6 +438,7 @@ export default function CopilotChatPage({ role = "suscriptor" }) {
       case "ocr":
         return <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200"><FileText className="w-3 h-3" /> OCR Papel</span>;
       case "voz":
+      case "audio":
         return <span className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200"><Mic className="w-3 h-3" /> Audio IA</span>;
       default:
         return <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200"><BookOpen className="w-3 h-3" /> Encuesta Web</span>;

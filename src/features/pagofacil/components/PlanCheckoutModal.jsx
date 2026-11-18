@@ -31,9 +31,10 @@ export const PlanCheckoutModal = ({
   onSuccess = null,
 }) => {
   const [selectedMethod, setSelectedMethod] = useState("pagofacil"); // 'stripe' | 'pagofacil'
-  const [step, setStep] = useState("select"); // 'select' | 'qr' | 'success'
+  const [step, setStep] = useState("select"); // 'select' | 'qr' | 'success' | 'scheduled'
   const [loading, setLoading] = useState(false);
   const [qrData, setQrData] = useState(null);
+  const [downgradeError, setDowngradeError] = useState(null);
   const [pollingActive, setPollingActive] = useState(false);
   const [pollingStatus, setPollingStatus] = useState("pendiente"); // 'pendiente' | 'completado' | 'expirado' | 'fallido'
   const [copied, setCopied] = useState(false);
@@ -53,6 +54,7 @@ export const PlanCheckoutModal = ({
     if (isOpen) {
       setStep("select");
       setQrData(null);
+      setDowngradeError(null);
       setLoading(false);
       setPollingActive(false);
       setPollingStatus("pendiente");
@@ -108,6 +110,7 @@ export const PlanCheckoutModal = ({
     try {
       setLoading(true);
       setPollingStatus("pendiente");
+      setDowngradeError(null);
       const payload = {
         plan_id: plan.id,
         document_id: billingInfo.document_id.trim() || undefined,
@@ -118,6 +121,15 @@ export const PlanCheckoutModal = ({
 
       const data = await generarPagoFacilQR(payload);
 
+      // 1. Manejar caso de Downgrade programado (201 Created con status="programado", qr_base64=null)
+      if (data && (data.status === "programado" || data.estado === "programado" || (data.qr_base64 === null && data.mensaje))) {
+        setQrData(data);
+        setStep("scheduled");
+        toast.success(data.mensaje || "Cambio de plan programado con éxito.");
+        return;
+      }
+
+      // 2. Manejar Upgrade o Renovación con generación de QR exitosa
       if (data && (data.success || data.qr_base64 || data.payment_number)) {
         setQrData(data);
         setStep("qr");
@@ -127,7 +139,9 @@ export const PlanCheckoutModal = ({
       }
     } catch (err) {
       console.error("Error generando QR PagoFácil:", err);
-      toast.error(err.message || "Error al generar el código QR.");
+      const errorMsg = err.message || "Error al generar el código QR o procesar el cambio de plan.";
+      setDowngradeError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -279,6 +293,8 @@ export const PlanCheckoutModal = ({
                 <QrCode className="w-5 h-5 text-blue-300" />
               ) : step === "success" ? (
                 <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              ) : step === "scheduled" ? (
+                <Clock className="w-5 h-5 text-indigo-300" />
               ) : (
                 <ShieldCheck className="w-5 h-5 text-blue-300" />
               )}
@@ -289,6 +305,8 @@ export const PlanCheckoutModal = ({
                   ? "Pagar con QR PagoFácil"
                   : step === "success"
                   ? "¡Pago Confirmado!"
+                  : step === "scheduled"
+                  ? "Cambio de Plan Programado"
                   : "Finalizar Suscripción"}
               </h3>
               <p className="text-xs text-blue-200">
@@ -314,6 +332,17 @@ export const PlanCheckoutModal = ({
           {/* STEP 1: PAYMENT METHOD SELECTOR */}
           {step === "select" && (
             <div className="space-y-5">
+              {/* Alerta de restricción de Downgrade si excedió recursos */}
+              {downgradeError && (
+                <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 flex items-start gap-3 text-amber-900 text-xs animate-shake">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <h5 className="font-bold text-amber-900">No es posible cambiar a este plan</h5>
+                    <p className="leading-relaxed text-amber-800">{downgradeError}</p>
+                  </div>
+                </div>
+              )}
+
               {/* Plan Summary Card */}
               <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between">
                 <div>
@@ -664,6 +693,53 @@ export const PlanCheckoutModal = ({
               </div>
               <div className="bg-slate-50 rounded-2xl p-3 border border-slate-200 text-xs text-slate-500">
                 Redirigiendo a tu panel de suscripción...
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: SCHEDULED DOWNGRADE CONFIRMATION */}
+          {step === "scheduled" && (
+            <div className="text-center py-6 px-2 space-y-5 animate-scale-up">
+              <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/20">
+                <Clock className="w-9 h-9 text-indigo-600 animate-pulse" />
+              </div>
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Cambio Diferido Programado</span>
+                </div>
+                <h4 className="text-xl font-bold text-slate-900">¡Cambio de Plan Registrado!</h4>
+                <p className="text-sm text-slate-600 leading-relaxed max-w-md mx-auto pt-1">
+                  {qrData?.mensaje ||
+                    `Tu plan actual se mantendrá activo hasta el fin del ciclo. El cambio a ${plan.nombre} entrará en vigencia al finalizar tu período sin costos adicionales hoy.`}
+                </p>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left max-w-md mx-auto space-y-2 text-xs text-slate-600">
+                <div className="flex justify-between items-center text-slate-700 font-semibold">
+                  <span>Nuevo Plan Programado:</span>
+                  <span className="text-indigo-600 font-bold">{plan.nombre}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Costo a cobrar hoy:</span>
+                  <span className="text-emerald-600 font-bold">Bs. 0.00 BOB</span>
+                </div>
+                <p className="text-[11px] text-slate-400 pt-1 border-t border-slate-200">
+                  No se requiere realizar ningún pago QR en este momento. La plataforma aplicará la transición automáticamente al cierre de tu ciclo actual.
+                </p>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onSuccess?.(qrData);
+                  }}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md transition-colors cursor-pointer"
+                >
+                  Entendido / Volver a Planes
+                </button>
               </div>
             </div>
           )}
