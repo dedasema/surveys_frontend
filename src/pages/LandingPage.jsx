@@ -1,7 +1,7 @@
 
 
 import { useState, useEffect, useRef } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import {
   FileText,
   Brain,
@@ -20,6 +20,8 @@ import {
   Download,
   WifiOff,
   QrCode,
+  LifeBuoy,
+  ExternalLink,
 } from "lucide-react"
 import { useAuth } from "../context/AuthContext";
 import PublicNavbar from "../components/PublicNavbar";
@@ -29,27 +31,32 @@ import { isTokenExpired, redirectBasedOnRole } from "../services/auth";
 import { LandingChatbotWidget } from "../features/landing-chatbot";
 import { toast } from "sonner";
 
+const corporateUrl =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_CORPORATE_URL) ||
+  (typeof process !== "undefined" && (process.env?.VITE_CORPORATE_URL || process.env?.REACT_APP_CORPORATE_URL)) ||
+  "";
+
 const DEFAULT_PLANES = [
   {
     id: 1,
     nombre: "Gratuito",
     precio_mensual: "0.00",
-    descripcion: "Plan básico gratuito de prueba para comenzar",
+    descripcion: "Plan básico de entrada para digitalizar y recolectar datos",
     max_plantillas: 3,
     max_campanas: 2,
     max_entregas: 100,
     max_operadores: 1,
     permite_email: true,
-    permite_audio_voz: true,
+    permite_audio_voz: false,
     permite_papel: true,
     permite_ia_analisis: false,
-    caracteristicas: "3 Plantillas de Encuestas;100 Respuestas / mes;1 Operador de Equipo;Canal Email y Enlaces Web;Prueba de OCR e IA",
+    caracteristicas: "2 Campañas;100 Entregas;1 Operador;Sin análisis de IA",
   },
   {
     id: 2,
     nombre: "Profesional",
     precio_mensual: "29.99",
-    descripcion: "Plan profesional con funciones avanzadas e IA",
+    descripcion: "Para equipos en crecimiento que requieren analítica y transcripción",
     max_plantillas: 50,
     max_campanas: 50,
     max_entregas: 5000,
@@ -58,13 +65,13 @@ const DEFAULT_PLANES = [
     permite_audio_voz: true,
     permite_papel: true,
     permite_ia_analisis: true,
-    caracteristicas: "50 Plantillas de Encuestas;5.000 Respuestas / mes;5 Operadores de Equipo;OCR Papel con IA;Grabación de Voz con Transcripción;Análisis Avanzado con IA",
+    caracteristicas: "50 Campañas;5.000 Entregas;5 Operadores;Análisis de IA",
   },
   {
     id: 3,
     nombre: "Enterprise",
     precio_mensual: "99.99",
-    descripcion: "Plan empresarial ilimitado para organizaciones",
+    descripcion: "Solución completa para organizaciones con altos volúmenes y soporte prioritario",
     max_plantillas: -1,
     max_campanas: -1,
     max_entregas: -1,
@@ -73,7 +80,7 @@ const DEFAULT_PLANES = [
     permite_audio_voz: true,
     permite_papel: true,
     permite_ia_analisis: true,
-    caracteristicas: "Plantillas Ilimitadas;Respuestas Ilimitadas;Operadores Ilimitados;OCR Papel y Grabación de Voz;API y Exportación Completa;Soporte Prioritario y SLA",
+    caracteristicas: "Campañas Ilimitadas;Entregas Ilimitadas;Operadores Ilimitados;IA completa, exportación y API",
   },
 ]
 
@@ -614,8 +621,9 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* PRECIOS */}
-      <section id="precios" className="py-20 px-4 bg-gray-50 scroll-mt-20">
+      {/* PLANES Y PRECIOS */}
+      <section id="planes" className="py-20 px-4 bg-gray-50 scroll-mt-20 relative">
+        <span id="precios" className="absolute -top-20 left-0" aria-hidden="true" />
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center bg-blue-100 text-blue-800 px-3.5 py-1 rounded-full text-sm font-medium mb-3">
@@ -751,31 +759,53 @@ const LandingPage = () => {
                     )}
                   </div>
 
-                  <a
-                    href={
-                      isAuthenticated
-                        ? user?.tipo === "admin"
-                          ? "/dashboard/planes"
-                          : "/dashboard-suscriptor/planes"
-                        : "/register"
+                  {(() => {
+                    const isEnterprise = plan.nombre?.toLowerCase().includes("enterprise");
+                    if (isEnterprise) {
+                      return (
+                        <Link
+                          to="/soporte?tipo=comercial"
+                          className="w-full py-3.5 px-4 rounded-xl font-bold text-center transition-all block shadow-xs bg-slate-900 hover:bg-black text-white hover:shadow-md"
+                        >
+                          Contactar equipo comercial
+                        </Link>
+                      );
                     }
-                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-center transition-all block shadow-xs ${
-                      isPopular
-                        ? "bg-white hover:bg-gray-50 text-blue-700 hover:shadow-md"
-                        : precioNum === 0
-                        ? "bg-gray-100 hover:bg-gray-200 text-gray-900"
-                        : "bg-blue-600 hover:bg-blue-700 text-white"
-                    }`}
-                  >
-                    {isAuthenticated
-                      ? "Ver Planes en Dashboard"
-                      : precioNum === 0
-                      ? "Comenzar gratis"
-                      : "Comenzar prueba"}
-                  </a>
+                    return (
+                      <a
+                        href={
+                          isAuthenticated
+                            ? user?.tipo === "admin"
+                              ? "/dashboard/planes"
+                              : "/dashboard-suscriptor/planes"
+                            : "/register"
+                        }
+                        className={`w-full py-3.5 px-4 rounded-xl font-bold text-center transition-all block shadow-xs ${
+                          isPopular
+                            ? "bg-white hover:bg-gray-50 text-blue-700 hover:shadow-md"
+                            : precioNum === 0
+                            ? "bg-gray-100 hover:bg-gray-200 text-gray-900"
+                            : "bg-blue-600 hover:bg-blue-700 text-white"
+                        }`}
+                      >
+                        {isAuthenticated
+                          ? "Ver Planes en Dashboard"
+                          : precioNum === 0
+                          ? "Comenzar gratis"
+                          : "Comenzar prueba"}
+                      </a>
+                    );
+                  })()}
                 </div>
               )
             })}
+          </div>
+
+          {/* NOTA DE COMPLEMENTOS POR CONSUMO */}
+          <div className="mt-12 text-center">
+            <p className="text-sm text-gray-600 font-medium bg-white/80 inline-block px-6 py-3 rounded-2xl border border-gray-200/80 shadow-xs">
+              Complementos por consumo (paquetes de envíos, OCR y transcripción): consúltalos con nuestro equipo comercial.
+            </p>
           </div>
         </div>
       </section>
@@ -845,21 +875,45 @@ const LandingPage = () => {
               <h3 className="text-xl font-semibold mb-6">Información de contacto</h3>
               <div className="space-y-4">
                 <div className="flex items-start">
-                  <MapPin className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-medium text-gray-900 block">Dirección:</span>
-                    <span className="text-gray-600">Manzana 40 - Plaza Empresarial, Av. San Martin, Santa Cruz de la Sierra</span>
-                  </div>
-                </div>
-                <div className="flex items-start">
                   <Mail className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-medium text-gray-900 block">Correo electrónico:</span>
-                    <a href="mailto:dedasema734012@gmail.com" className="text-blue-600 hover:underline">
+                    <span className="font-medium text-gray-900 block">Correo de soporte y contacto:</span>
+                    <a href="mailto:soporte@desesoft.com" className="text-blue-600 hover:underline block font-medium">
+                      soporte@desesoft.com
+                    </a>
+                    <a href="mailto:dedasema734012@gmail.com" className="text-gray-500 hover:underline text-xs">
                       dedasema734012@gmail.com
                     </a>
                   </div>
                 </div>
+
+                <div className="flex items-start">
+                  <LifeBuoy className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-medium text-gray-900 block">Centro de soporte:</span>
+                    <Link to="/soporte" className="text-blue-600 hover:underline font-semibold inline-flex items-center gap-1">
+                      Ir a la página de Soporte &rarr;
+                    </Link>
+                  </div>
+                </div>
+
+                {corporateUrl && (
+                  <div className="flex items-start">
+                    <ExternalLink className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-medium text-gray-900 block">Sitio corporativo:</span>
+                      <a
+                        href={corporateUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline font-semibold inline-flex items-center gap-1"
+                      >
+                        Conoce a Desesoft &rarr;
+                      </a>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-start">
                   <Smartphone className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
                   <div>
@@ -869,6 +923,7 @@ const LandingPage = () => {
                     </a>
                   </div>
                 </div>
+
                 <div className="flex items-center">
                   <MessageSquare className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0" />
                   <span className="text-gray-700">Soporte 24/7 en línea</span>
@@ -878,9 +933,9 @@ const LandingPage = () => {
               <div className="mt-8">
                 <h4 className="font-semibold mb-4">Horarios de atención</h4>
                 <div className="text-gray-600 space-y-1">
-                  <div>Lunes - Viernes: 9:00 - 18:00</div>
+                  <div>Lunes - Viernes: 9:00 - 18:00 (GMT-4)</div>
                   <div>Sábados: 10:00 - 14:00</div>
-                  <div>Soporte técnico 24/7</div>
+                  <div>Soporte técnico y solicitudes 24/7</div>
                 </div>
               </div>
             </div>
@@ -942,78 +997,6 @@ const LandingPage = () => {
                   {isSubmittingContacto ? "Enviando..." : "Enviar mensaje"}
                 </button>
               </form>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* UBICACIÓN */}
-      <section id="ubicacion" className="py-20 px-4 bg-slate-50 border-t border-gray-200 scroll-mt-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold mb-3">
-              <MapPin className="w-4 h-4 text-blue-600" />
-              <span>Sede Central Corporativa</span>
-            </div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">Nuestra Ubicación</h2>
-            <p className="text-gray-600 max-w-xl mx-auto text-base">
-              Visítanos en nuestras oficinas corporativas en la zona de negocios más moderna de Bolivia.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Info Card */}
-            <div className="lg:col-span-5 bg-white p-8 rounded-3xl shadow-sm border border-gray-200 space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 shadow-xs">
-                  <MapPin className="w-6 h-6" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="font-bold text-gray-900 text-xl leading-tight">
-                    Manzana 40 - Plaza Empresarial
-                  </h3>
-                  <p className="text-gray-600 text-sm font-medium">
-                    Av. San Martin, Santa Cruz de la Sierra
-                  </p>
-                  <span className="inline-block mt-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    Santa Cruz, Bolivia
-                  </span>
-                </div>
-              </div>
-
-              <div className="pt-5 border-t border-gray-100 space-y-3.5 text-sm text-gray-600">
-                <div className="flex items-center gap-3">
-                  <Mail className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                  <a href="mailto:dedasema734012@gmail.com" className="hover:text-blue-600 transition-colors font-medium">
-                    dedasema734012@gmail.com
-                  </a>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Smartphone className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                  <a href="tel:+59162795140" className="hover:text-blue-600 transition-colors font-medium">
-                    +591 62795140
-                  </a>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs text-gray-500 leading-relaxed">
-                Estacionamiento para clientes disponible en torre empresarial. Atención previa cita o soporte técnico directo.
-              </div>
-            </div>
-
-            {/* Embedded Google Maps */}
-            <div className="lg:col-span-7 overflow-hidden rounded-3xl shadow-md border border-gray-200 bg-white">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2140.020440357915!2d-63.19898350970343!3d-17.756734352519935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x93f1e70cca02d2c7%3A0x51870ea50241886c!2sManzana%2040%20-%20Plaza%20Empresarial!5e0!3m2!1ses-419!2sbo!4v1794988673274!5m2!1ses-419!2sbo"
-                width="100%"
-                height="420"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="strict-origin-when-cross-origin"
-                title="Ubicación Manzana 40 - Plaza Empresarial, Av. San Martin, Santa Cruz de la Sierra"
-                className="w-full h-80 sm:h-96"
-              ></iframe>
             </div>
           </div>
         </div>

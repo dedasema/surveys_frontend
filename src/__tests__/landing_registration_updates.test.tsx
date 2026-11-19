@@ -57,21 +57,24 @@ describe("Landing Page & Registration Updates — Unit & UI Tests", () => {
     expect(screen.getAllByPlaceholderText("tu@gmail.com").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders Manzana 40 Plaza Empresarial location and Google Maps iframe in Landing Page", () => {
+  it("renders contact section with support and corporate links without map iframe in Landing Page", () => {
     render(
       <MemoryRouter>
         <LandingPage />
       </MemoryRouter>
     );
 
-    // Location heading & address
-    expect(screen.getAllByText(/Manzana 40 - Plaza Empresarial/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/Av\. San Martin, Santa Cruz de la Sierra/i).length).toBeGreaterThanOrEqual(1);
+    // Section title & support contact check
+    expect(screen.getByText("Información de contacto")).toBeInTheDocument();
+    expect(screen.getByText(/soporte@desesoft.com/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Ir a la página de Soporte/i })).toHaveAttribute("href", "/soporte");
 
-    // Map iframe check
-    const iframe = screen.getByTitle(/Ubicación Manzana 40/i);
-    expect(iframe).toBeInTheDocument();
-    expect(iframe).toHaveAttribute("src", expect.stringContaining("Manzana%2040"));
+    // Corporate link
+    const corporateLinks = screen.getAllByRole("link", { name: /Conoce a Desesoft/i });
+    expect(corporateLinks.length).toBeGreaterThanOrEqual(1);
+
+    // Map iframe should NOT be inside landing page main content
+    expect(screen.queryByTitle(/Ubicación Manzana 40 - Plaza Empresarial/i)).not.toBeInTheDocument();
   });
 
   it("enforces both Terms and Privacy checkboxes before enabling Register button", () => {
