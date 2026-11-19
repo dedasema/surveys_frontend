@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
-import { Sparkles, ArrowRight, CheckCircle2, RotateCcw, Loader2, MessageSquare, Mic } from 'lucide-react';
+import { Sparkles, ArrowRight, CheckCircle2, RotateCcw, Loader2, MessageSquare, Mic, ShieldCheck } from 'lucide-react';
 import { AdaptiveQuestion, AnswerHistoryEntry, AdaptiveSurveyStepResult } from './types';
 import AudioRecorder from '../audio-response/AudioRecorder';
+
+const corporateUrl =
+  ((import.meta as any)?.env?.VITE_CORPORATE_URL) ||
+  (typeof process !== 'undefined' && ((process as any).env?.VITE_CORPORATE_URL || (process as any).env?.REACT_APP_CORPORATE_URL)) ||
+  'https://desesoft.vercel.app';
 
 export interface SurveyWizardProps {
   surveyId: string | number;
@@ -37,6 +42,8 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
   );
   const [error, setError] = useState<string | null>(null);
   const [showVoiceInput, setShowVoiceInput] = useState(false);
+  const [consentAccepted, setConsentAccepted] = useState(false);
+  const [consentConfirmed, setConsentConfirmed] = useState(false);
 
   const stepNumber = history.length + 1;
 
@@ -61,17 +68,23 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
 
     try {
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://surveys-backend-83d9.onrender.com';
-      const endpoint = token
+      const rawEndpoint = token
         ? `${API_BASE_URL}/encuestas/${token}/responder`
         : `${API_BASE_URL}/encuestas/${surveyId}/responder`;
+      const url = new URL(rawEndpoint);
+      url.searchParams.set('consentimiento_aceptado', 'true');
 
-      const response = await fetch(endpoint, {
+      const response = await fetch(url.toString(), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Consentimiento-Aceptado': 'true',
+        },
         body: JSON.stringify({
           pregunta_id: currentQuestion.id,
           respuesta: currentAnswer,
           historial: updatedHistory,
+          consentimiento_aceptado: true,
         }),
       });
 
@@ -257,67 +270,132 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
   }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white border border-gray-200/80 rounded-3xl shadow-xl p-8 space-y-8">
-      {/* Header del Wizard con progreso dinámico */}
-      <div className="flex items-center justify-between border-b border-gray-100 pb-5">
-        <div className="flex items-center gap-2">
-          <span className="px-3 py-1 bg-blue-100 text-blue-800 font-bold text-xs rounded-full uppercase tracking-wider">
-            Pregunta {stepNumber}
-          </span>
-          {currentQuestion.es_generativa && (
-            <span className="px-3 py-1 bg-purple-100 text-purple-800 font-bold text-xs rounded-full flex items-center gap-1.5 shadow-xs">
-              <Sparkles className="h-3.5 w-3.5 text-purple-600" />
-              Seguimiento IA (RF17b)
-            </span>
-          )}
-        </div>
-        <span className="text-xs text-gray-400 font-medium">Encuesta Adaptativa</span>
-      </div>
+    <div className="space-y-6">
+      <div className="max-w-2xl mx-auto bg-white border border-gray-200/80 rounded-3xl shadow-xl p-8 space-y-8">
+        {!consentConfirmed ? (
+          <div className="text-center space-y-6 py-4">
+            <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto">
+              <ShieldCheck className="w-8 h-8" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-gray-900">Consentimiento de Participación</h2>
+              <p className="text-gray-600 text-sm leading-relaxed max-w-lg mx-auto">
+                Antes de iniciar esta encuesta adaptativa, te informamos que tus respuestas serán procesadas
+                de forma confidencial y segura conforme a nuestra{" "}
+                <a
+                  href="/privacidad"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline font-medium hover:text-blue-700"
+                >
+                  Política de Privacidad
+                </a>.
+              </p>
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs text-left max-w-lg mx-auto">
+                <strong>Aviso de interacción por voz e IA:</strong> Esta encuesta puede incluir preguntas con captura de voz y análisis adaptativo mediante Inteligencia Artificial (Google Gemini). Al continuar, autorizas su procesamiento.
+              </div>
+            </div>
 
-      {/* Enunciado de la Pregunta */}
-      <div className="space-y-2">
-        <h3 className="text-xl md:text-2xl font-bold text-gray-900 leading-snug">
-          {currentQuestion.texto}
-        </h3>
-        {currentQuestion.descripcion && (
-          <p className="text-sm text-gray-500 leading-relaxed">{currentQuestion.descripcion}</p>
+            <div className="flex items-start gap-3 text-left p-4 bg-gray-50 rounded-xl border border-gray-200 max-w-lg mx-auto">
+              <input
+                type="checkbox"
+                id="adaptive-consent-check"
+                checked={consentAccepted}
+                onChange={(e) => setConsentAccepted(e.target.checked)}
+                className="mt-1 h-5 w-5 text-blue-600 focus:ring-blue-500 rounded border-gray-300 cursor-pointer"
+              />
+              <label htmlFor="adaptive-consent-check" className="text-sm text-gray-700 cursor-pointer select-none">
+                He leído y acepto los términos de tratamiento de datos y autorizo mi participación en esta encuesta.
+              </label>
+            </div>
+
+            <button
+              type="button"
+              disabled={!consentAccepted}
+              onClick={() => setConsentConfirmed(true)}
+              className="w-full max-w-lg mx-auto bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+            >
+              <CheckCircle2 className="w-5 h-5" />
+              <span>Comenzar Encuesta</span>
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Header del Wizard con progreso dinámico */}
+            <div className="flex items-center justify-between border-b border-gray-100 pb-5">
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 bg-blue-100 text-blue-800 font-bold text-xs rounded-full uppercase tracking-wider">
+                  Pregunta {stepNumber}
+                </span>
+                {currentQuestion.es_generativa && (
+                  <span className="px-3 py-1 bg-purple-100 text-purple-800 font-bold text-xs rounded-full flex items-center gap-1.5 shadow-xs">
+                    <Sparkles className="h-3.5 w-3.5 text-purple-600" />
+                    Seguimiento IA (RF17b)
+                  </span>
+                )}
+              </div>
+              <span className="text-xs text-gray-400 font-medium">Encuesta Adaptativa</span>
+            </div>
+
+            {/* Enunciado de la Pregunta */}
+            <div className="space-y-2">
+              <h3 className="text-xl md:text-2xl font-bold text-gray-900 leading-snug">
+                {currentQuestion.texto}
+              </h3>
+              {currentQuestion.descripcion && (
+                <p className="text-sm text-gray-500 leading-relaxed">{currentQuestion.descripcion}</p>
+              )}
+            </div>
+
+            {/* Campo de Respuesta (Polimórfico) */}
+            <div className="pt-2">{renderQuestionInput()}</div>
+
+            {/* Mensaje de Error si aplica */}
+            {error && (
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium rounded-xl">
+                {error}
+              </div>
+            )}
+
+            {/* Footer de Navegación */}
+            <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+              <span className="text-xs text-gray-400">
+                {history.length} respuesta(s) registradas
+              </span>
+
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={isLoadingNext}
+                className="px-7 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center gap-2"
+              >
+                {isLoadingNext ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Analizando con Gemini...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Siguiente</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+            </div>
+          </>
         )}
       </div>
 
-      {/* Campo de Respuesta (Polimórfico) */}
-      <div className="pt-2">{renderQuestionInput()}</div>
-
-      {/* Mensaje de Error si aplica */}
-      {error && (
-        <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium rounded-xl">
-          {error}
-        </div>
-      )}
-
-      {/* Footer de Navegación */}
-      <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
-        <span className="text-xs text-gray-400">
-          {history.length} respuesta(s) registradas
-        </span>
-
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={isLoadingNext}
-          className="px-7 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center gap-2"
+      {/* Firma de Marca (A7) */}
+      <div className="text-center py-4 text-xs text-gray-500">
+        <a
+          href={corporateUrl || "/"}
+          target={corporateUrl ? "_blank" : undefined}
+          rel={corporateUrl ? "noopener noreferrer" : undefined}
+          className="hover:text-blue-600 hover:underline transition-colors inline-flex items-center gap-1.5 font-medium"
         >
-          {isLoadingNext ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Analizando con Gemini...</span>
-            </>
-          ) : (
-            <>
-              <span>Siguiente</span>
-              <ArrowRight className="h-4 w-4" />
-            </>
-          )}
-        </button>
+          Impulsado por Desesoft — SurveySaaS
+        </a>
       </div>
     </div>
   );

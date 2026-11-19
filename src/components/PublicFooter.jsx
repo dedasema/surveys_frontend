@@ -42,6 +42,18 @@ export default function PublicFooter() {
                     title="Mapa Manzana 40 - Footer"
                   />
                 </div>
+
+                <div className="pt-1">
+                  <a
+                    href={corporateUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                  >
+                    <span>Conoce a Desesoft (desesoft.vercel.app)</span>
+                    <span aria-hidden="true">&rarr;</span>
+                  </a>
+                </div>
               </div>
 
               <div className="flex items-center gap-2.5">

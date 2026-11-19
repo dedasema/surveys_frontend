@@ -1,8 +1,13 @@
 import { useState, useEffect, useCallback } from "react"
-import { Volume2, Mic, MicOff, Sparkles, Loader2, FileText, Download, PhoneCall } from "lucide-react"
+import { Volume2, Mic, MicOff, Sparkles, Loader2, FileText, Download, PhoneCall, ShieldCheck, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "https://surveys-backend-83d9.onrender.com"
+
+const corporateUrl =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_CORPORATE_URL) ||
+  (typeof process !== "undefined" && (process.env?.VITE_CORPORATE_URL || process.env?.REACT_APP_CORPORATE_URL)) ||
+  "";
 
 export default function EncuestaPublica({ token }) {
   const [encuestaData, setEncuestaData] = useState(null)
@@ -13,6 +18,8 @@ export default function EncuestaPublica({ token }) {
   const [respuestas, setRespuestas] = useState({})
   const [validationErrors, setValidationErrors] = useState({})
   const [showProgress, setShowProgress] = useState(false)
+  const [consentAccepted, setConsentAccepted] = useState(false)
+  const [consentConfirmed, setConsentConfirmed] = useState(false)
 
   // Voice Assistance States
   const [listeningPreguntaId, setListeningPreguntaId] = useState(null)
@@ -321,10 +328,14 @@ export default function EncuestaPublica({ token }) {
 
       const respuestasArray = prepararRespuestas()
 
-      const response = await fetch(`${API_BASE_URL}/encuestas/responder/${token}`, {
+      const url = new URL(`${API_BASE_URL}/encuestas/responder/${token}`)
+      url.searchParams.set("consentimiento_aceptado", "true")
+
+      const response = await fetch(url.toString(), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-Consentimiento-Aceptado": "true",
         },
         body: JSON.stringify(respuestasArray),
       })
@@ -600,6 +611,13 @@ export default function EncuestaPublica({ token }) {
 
   const isPapel = encuestaData?.campana?.canal_id === 4 || encuestaData?.campana?.canal_id === "4"
   const isAudio = encuestaData?.campana?.canal_id === 5 || encuestaData?.campana?.canal_id === "5"
+  const hasVoiceQuestions = Boolean(
+    isAudio ||
+    encuestaData?.plantilla?.permite_audio_voz ||
+    encuestaData?.plantilla?.preguntas?.some(
+      (p) => p.tipo_pregunta_id === 5 || p.tipo === "voz" || p.tipo === "audio" || p.permite_audio
+    )
+  )
 
   const descargarFormularioPdf = async () => {
     try {
@@ -769,130 +787,197 @@ export default function EncuestaPublica({ token }) {
               </div>
             )}
 
-            <div className="space-y-8">
-              {encuestaData.plantilla.preguntas.map((pregunta, index) => {
-                const isListening = listeningPreguntaId === pregunta.id
-                const isInterpreting = isInterpretingPreguntaId === pregunta.id
-                const isSpeaking = isSpeakingPreguntaId === pregunta.id
-
-                return (
-                  <div key={pregunta.id} className="bg-gray-50 rounded-xl p-6 border border-gray-200 relative">
-                    <div className="flex items-start justify-between gap-4 mb-6">
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-8 h-8 bg-slate-700 text-white rounded-lg flex items-center justify-center text-sm font-bold">
-                          {index + 1}
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900 leading-relaxed">
-                            {pregunta.texto}
-                            {pregunta.obligatorio && <span className="text-red-500 ml-2">*</span>}
-                          </h3>
-                          {pregunta.obligatorio && <p className="text-sm text-gray-500 mt-1">Campo requerido</p>}
-                        </div>
-                      </div>
-
-                      {/* Controles de Voz por Pregunta */}
-                      <div className="flex items-center gap-2 shrink-0">
-                        {/* Botón Escuchar Lectura (Text-to-Speech) */}
-                        <button
-                          type="button"
-                          onClick={() => dictarPregunta(pregunta)}
-                          title="Escuchar pregunta"
-                          className={`p-2.5 rounded-xl border transition-all duration-200 ${
-                            isSpeaking
-                              ? "bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-300"
-                              : "bg-white text-slate-600 border-gray-200 hover:bg-blue-50 hover:text-blue-600"
-                          }`}
-                        >
-                          <Volume2 className={`w-4 h-4 ${isSpeaking ? "animate-pulse" : ""}`} />
-                        </button>
-
-                        {/* Botón Hablar / Grabar Micrófono (Speech-to-Text) */}
-                        {speechSupported && (
-                          <button
-                            type="button"
-                            onClick={() => iniciarReconocimientoVoz(pregunta)}
-                            disabled={isInterpreting}
-                            title={isListening ? "Detener grabación" : "Responder con voz"}
-                            className={`p-2.5 rounded-xl border transition-all duration-200 relative ${
-                              isListening
-                                ? "bg-red-600 text-white border-red-600 shadow-lg ring-4 ring-red-100"
-                                : "bg-white text-slate-600 border-gray-200 hover:bg-red-50 hover:text-red-600"
-                            }`}
-                          >
-                            {isListening ? (
-                              <>
-                                <MicOff className="w-4 h-4" />
-                                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                                </span>
-                              </>
-                            ) : (
-                              <Mic className="w-4 h-4" />
-                            )}
-                          </button>
-                        )}
-                      </div>
+            {!consentConfirmed ? (
+              <div className="bg-gray-50/80 rounded-2xl p-8 border border-gray-200 text-center max-w-xl mx-auto space-y-6">
+                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto">
+                  <ShieldCheck className="w-8 h-8" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Consentimiento de Participación</h2>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Antes de comenzar a responder, te informamos que tus respuestas serán tratadas de forma
+                    confidencial y segura para fines estadísticos de acuerdo con nuestra{" "}
+                    <a
+                      href="/privacidad"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline font-medium hover:text-blue-700"
+                    >
+                      Política de Privacidad
+                    </a>.
+                  </p>
+                  {hasVoiceQuestions && (
+                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs text-left">
+                      <strong>Aviso de grabación de audio:</strong> Esta encuesta incluye preguntas con soporte o
+                      requerimiento de voz. Al utilizar el micrófono, autorizas expresamente la captura y
+                      transcripción de audio asistida por Inteligencia Artificial.
                     </div>
+                  )}
+                </div>
 
-                    {/* Estado de Interpretación por Voz de Gemini */}
-                    {isInterpreting && (
-                      <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg flex items-center gap-3 text-indigo-700 text-sm font-medium animate-pulse">
-                        <Sparkles className="w-4 h-4 text-indigo-600 animate-spin" />
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Gemini IA interpretando tu respuesta por voz...</span>
+                <div className="flex items-start gap-3 text-left p-4 bg-white rounded-xl border border-gray-200 shadow-xs">
+                  <input
+                    type="checkbox"
+                    id="consent-check"
+                    checked={consentAccepted}
+                    onChange={(e) => setConsentAccepted(e.target.checked)}
+                    className="mt-1 h-5 w-5 text-blue-600 focus:ring-blue-500 rounded border-gray-300 cursor-pointer"
+                  />
+                  <label htmlFor="consent-check" className="text-sm text-gray-700 cursor-pointer select-none">
+                    He leído y acepto la política de privacidad y autorizo el tratamiento de mis respuestas para los fines de esta encuesta.
+                  </label>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={!consentAccepted}
+                  onClick={() => setConsentConfirmed(true)}
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+                >
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span>Comenzar Encuesta</span>
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-8">
+                  {encuestaData.plantilla.preguntas.map((pregunta, index) => {
+                    const isListening = listeningPreguntaId === pregunta.id
+                    const isInterpreting = isInterpretingPreguntaId === pregunta.id
+                    const isSpeaking = isSpeakingPreguntaId === pregunta.id
+
+                    return (
+                      <div key={pregunta.id} className="bg-gray-50 rounded-xl p-6 border border-gray-200 relative">
+                        <div className="flex items-start justify-between gap-4 mb-6">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-8 h-8 bg-slate-700 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-900 leading-relaxed">
+                                {pregunta.texto}
+                                {pregunta.obligatorio && <span className="text-red-500 ml-2">*</span>}
+                              </h3>
+                              {pregunta.obligatorio && <p className="text-sm text-gray-500 mt-1">Campo requerido</p>}
+                            </div>
+                          </div>
+
+                          {/* Controles de Voz por Pregunta */}
+                          <div className="flex items-center gap-2 shrink-0">
+                            {/* Botón Escuchar Lectura (Text-to-Speech) */}
+                            <button
+                              type="button"
+                              onClick={() => dictarPregunta(pregunta)}
+                              title="Escuchar pregunta"
+                              className={`p-2.5 rounded-xl border transition-all duration-200 ${
+                                isSpeaking
+                                  ? "bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-300"
+                                  : "bg-white text-slate-600 border-gray-200 hover:bg-blue-50 hover:text-blue-600"
+                              }`}
+                            >
+                              <Volume2 className={`w-4 h-4 ${isSpeaking ? "animate-pulse" : ""}`} />
+                            </button>
+
+                            {/* Botón Hablar / Grabar Micrófono (Speech-to-Text) */}
+                            {speechSupported && (
+                              <button
+                                type="button"
+                                onClick={() => iniciarReconocimientoVoz(pregunta)}
+                                disabled={isInterpreting}
+                                title={isListening ? "Detener grabación" : "Responder con voz"}
+                                className={`p-2.5 rounded-xl border transition-all duration-200 relative ${
+                                  isListening
+                                    ? "bg-red-600 text-white border-red-600 shadow-lg ring-4 ring-red-100"
+                                    : "bg-white text-slate-600 border-gray-200 hover:bg-red-50 hover:text-red-600"
+                                }`}
+                              >
+                                {isListening ? (
+                                  <>
+                                    <MicOff className="w-4 h-4" />
+                                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                    </span>
+                                  </>
+                                ) : (
+                                  <Mic className="w-4 h-4" />
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Estado de Interpretación por Voz de Gemini */}
+                        {isInterpreting && (
+                          <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg flex items-center gap-3 text-indigo-700 text-sm font-medium animate-pulse">
+                            <Sparkles className="w-4 h-4 text-indigo-600 animate-spin" />
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Gemini IA interpretando tu respuesta por voz...</span>
+                          </div>
+                        )}
+
+                        {/* Estado de Escucha de voz */}
+                        {isListening && (
+                          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700 text-sm font-medium">
+                            <span className="relative flex h-3 w-3">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                            </span>
+                            <span>Escuchando tu voz... Hablá claramente al micrófono</span>
+                          </div>
+                        )}
+
+                        {renderPregunta(pregunta, index)}
                       </div>
+                    )
+                  })}
+                </div>
+
+                {/* Submit Button */}
+                <div className="pt-8 mt-8 border-t border-gray-200">
+                  <button
+                    onClick={enviarRespuestas}
+                    disabled={submitting}
+                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-4 px-8 rounded-lg transition-all duration-200 flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl disabled:shadow-none"
+                  >
+                    {submitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                        Enviando respuestas...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                          />
+                        </svg>
+                        Enviar respuestas
+                      </>
                     )}
-
-                    {/* Estado de Escucha de voz */}
-                    {isListening && (
-                      <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700 text-sm font-medium">
-                        <span className="relative flex h-3 w-3">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
-                        </span>
-                        <span>Escuchando tu voz... Hablá claramente al micrófono</span>
-                      </div>
-                    )}
-
-                    {renderPregunta(pregunta, index)}
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Submit Button */}
-            <div className="pt-8 mt-8 border-t border-gray-200">
-              <button
-                onClick={enviarRespuestas}
-                disabled={submitting}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-4 px-8 rounded-lg transition-all duration-200 flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl disabled:shadow-none"
-              >
-                {submitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                    Enviando respuestas...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                      />
-                    </svg>
-                    Enviar respuestas
-                  </>
-                )}
-              </button>
-              <p className="text-center text-sm text-gray-500 mt-4">
-                Sus respuestas serán procesadas de forma segura y confidencial
-              </p>
-            </div>
+                  </button>
+                  <p className="text-center text-sm text-gray-500 mt-4">
+                    Sus respuestas serán procesadas de forma segura y confidencial
+                  </p>
+                </div>
+              </>
+            )}
           </div>
+        </div>
+
+        {/* Firma de Marca (A7) */}
+        <div className="text-center py-6 text-sm text-gray-500">
+          <a
+            href={corporateUrl || "/"}
+            target={corporateUrl ? "_blank" : undefined}
+            rel={corporateUrl ? "noopener noreferrer" : undefined}
+            className="hover:text-blue-600 hover:underline transition-colors inline-flex items-center gap-1.5 font-medium"
+          >
+            Impulsado por Desesoft — SurveySaaS
+          </a>
         </div>
       </div>
     </div>

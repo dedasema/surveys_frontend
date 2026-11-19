@@ -143,22 +143,23 @@ describe("Landing Page & Registration Updates — Unit & UI Tests", () => {
     const mensajeInput = screen.getByPlaceholderText("Cuéntanos sobre tu proyecto...");
     const submitBtn = screen.getByRole("button", { name: /Enviar mensaje/i });
 
-    fireEvent.change(nameInput, { target: { value: "Carlos Ramos" } });
-    fireEvent.change(contactEmailInput, { target: { value: "carlos@gmail.com" } });
-    fireEvent.change(empresaInput, { target: { value: "Tech Corp" } });
-    fireEvent.change(mensajeInput, { target: { value: "Hola, queremos una demo corporativa" } });
+    fireEvent.change(nameInput, { target: { name: "nombre", value: "Carlos Ramos" } });
+    fireEvent.change(contactEmailInput, { target: { name: "email", value: "carlos@gmail.com" } });
+    fireEvent.change(empresaInput, { target: { name: "empresa", value: "Tech Corp" } });
+    fireEvent.change(mensajeInput, { target: { name: "mensaje", value: "Hola, queremos una demo corporativa" } });
+
+    const form = submitBtn.closest("form")!;
+    fireEvent.submit(form);
 
     await waitFor(() => {
-      fireEvent.click(submitBtn);
-    });
-
-    await waitFor(() => {
-      expect(enviarContacto).toHaveBeenCalledWith({
-        nombre: "Carlos Ramos",
-        email: "carlos@gmail.com",
-        empresa: "Tech Corp",
-        mensaje: "Hola, queremos una demo corporativa",
-      });
+      expect(enviarContacto).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nombre: "Carlos Ramos",
+          email: "carlos@gmail.com",
+          empresa: "Tech Corp",
+          mensaje: "Hola, queremos una demo corporativa",
+        })
+      );
     });
   });
 

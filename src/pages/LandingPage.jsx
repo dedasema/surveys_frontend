@@ -160,6 +160,8 @@ const LandingPage = () => {
         nombre: contactoForm.nombre.trim(),
         email: contactoForm.email.trim(),
         empresa: contactoForm.empresa ? contactoForm.empresa.trim() : null,
+        origen: "producto",
+        tipo: "comercial",
         mensaje: contactoForm.mensaje.trim(),
       });
       toast.success("¡Mensaje enviado con éxito! Nos pondremos en contacto contigo a la brevedad.");

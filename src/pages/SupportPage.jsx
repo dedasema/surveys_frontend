@@ -97,10 +97,19 @@ export default function SupportPage() {
         ? `[${formData.categoria.toUpperCase()}] ${formData.asunto.trim()}: ${formData.mensaje.trim()}`
         : `[${formData.categoria.toUpperCase()}] ${formData.mensaje.trim()}`;
 
+      const tipoMapeado =
+        formData.categoria === "derechos_datos"
+          ? "derechos sobre datos"
+          : formData.categoria === "comercial"
+          ? "comercial"
+          : "soporte técnico";
+
       await enviarContacto({
         nombre: formData.nombre.trim(),
         email: formData.email.trim(),
         empresa: formData.empresa ? formData.empresa.trim() : null,
+        origen: "producto",
+        tipo: tipoMapeado,
         mensaje: fullMessage,
       });
 

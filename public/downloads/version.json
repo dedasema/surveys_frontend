@@ -1,12 +1,20 @@
 {
   "version": "1.0.0",
+  "tamano": "52.3 MB",
+  "sha256": "e297c8c5d6b0f210083227cf85ebf318dcac8cb7b53da205450cf2d56e9482d0",
+  "fecha": "2026-11-18",
+  "novedades": [
+    "Soporte completo para Encuestas Adaptativas y Multimodales",
+    "Modo 100% Offline con cola de sincronización SQLite",
+    "Digitalización OCR de formularios en papel con cámara",
+    "Grabación y transcripción de respuestas por voz con IA"
+  ],
   "versionCode": 1,
   "apkUrl": "/downloads/surveysaas.apk",
   "fileName": "surveysaas.apk",
-  "fileSizeBytes": 54815255,
+  "fileSizeBytes": 54815315,
   "sizeFormatted": "52.3 MB",
-  "sha256": "3c801817e73277894c4863d81d4d0744fb2e353e6e707723e7514e01010966a8",
-  "updatedAt": "2026-11-17T21:38:00Z",
+  "updatedAt": "2026-11-18T21:38:00Z",
   "minAndroidVersion": "7.0 (API 24)",
   "features": [
     "Soporte completo para Encuestas Adaptativas y Multimodales",
