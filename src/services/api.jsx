@@ -571,3 +571,29 @@ export async function enviarContacto(payload) {
 
   return await res.json();
 }
+
+// Solicitar demo personalizada desde la landing page
+export async function solicitarDemo(email, nombre = "", empresa = "") {
+  try {
+    const res = await fetch(`${API_BASE_URL}/solicitar-demo`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, nombre, empresa }),
+    });
+
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    // Si /solicitar-demo aún no está disponible en el backend, aplicamos fallback
+  }
+
+  return await enviarContacto({
+    nombre: nombre || "Solicitante de Demo",
+    email,
+    empresa: empresa || null,
+    mensaje: "🚀 Solicitud de demo personalizada enviada desde el banner de la Landing Page.",
+  });
+}

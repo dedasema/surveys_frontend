@@ -28,6 +28,7 @@ vi.mock("../services/auth", () => ({
 vi.mock("../services/api", () => ({
   obtenerPlanesPublicos: vi.fn().mockResolvedValue([]),
   enviarContacto: vi.fn().mockResolvedValue({ success: true, message: "OK" }),
+  solicitarDemo: vi.fn().mockResolvedValue({ success: true, message: "Demo solicitada" }),
 }));
 
 describe("Landing Page & Registration Updates — Unit & UI Tests", () => {
@@ -53,7 +54,7 @@ describe("Landing Page & Registration Updates — Unit & UI Tests", () => {
     // Contact form checks
     expect(screen.getByText("Correo electrónico")).toBeInTheDocument();
     expect(screen.queryByText("Email empresarial")).not.toBeInTheDocument();
-    expect(screen.getByPlaceholderText("tu@gmail.com")).toBeInTheDocument();
+    expect(screen.getAllByPlaceholderText("tu@gmail.com").length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders Manzana 40 Plaza Empresarial location and Google Maps iframe in Landing Page", () => {
@@ -133,13 +134,14 @@ describe("Landing Page & Registration Updates — Unit & UI Tests", () => {
     );
 
     const nameInput = screen.getByPlaceholderText("Tu nombre");
-    const emailInput = screen.getByPlaceholderText("tu@gmail.com");
+    const emailInputs = screen.getAllByPlaceholderText("tu@gmail.com");
+    const contactEmailInput = emailInputs[emailInputs.length - 1];
     const empresaInput = screen.getByPlaceholderText("Nombre de tu empresa (opcional)");
     const mensajeInput = screen.getByPlaceholderText("Cuéntanos sobre tu proyecto...");
     const submitBtn = screen.getByRole("button", { name: /Enviar mensaje/i });
 
     fireEvent.change(nameInput, { target: { value: "Carlos Ramos" } });
-    fireEvent.change(emailInput, { target: { value: "carlos@gmail.com" } });
+    fireEvent.change(contactEmailInput, { target: { value: "carlos@gmail.com" } });
     fireEvent.change(empresaInput, { target: { value: "Tech Corp" } });
     fireEvent.change(mensajeInput, { target: { value: "Hola, queremos una demo corporativa" } });
 
@@ -154,6 +156,36 @@ describe("Landing Page & Registration Updates — Unit & UI Tests", () => {
         empresa: "Tech Corp",
         mensaje: "Hola, queremos una demo corporativa",
       });
+    });
+  });
+
+  it("pre-fills email in Register component when accessed with ?email= query param", () => {
+    render(
+      <MemoryRouter initialEntries={["/register?email=prospecto@gmail.com"]}>
+        <Register />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByLabelText(/Correo electrónico/i);
+    expect(emailInput).toHaveValue("prospecto@gmail.com");
+  });
+
+  it("calls solicitarDemo when clicking Solicitar demo personalizada with entered email", async () => {
+    const { solicitarDemo } = await import("../services/api");
+    render(
+      <MemoryRouter>
+        <LandingPage />
+      </MemoryRouter>
+    );
+
+    const ctaEmailInput = screen.getAllByPlaceholderText("tu@gmail.com")[0];
+    const demoBtn = screen.getByRole("button", { name: /Solicitar demo personalizada/i });
+
+    fireEvent.change(ctaEmailInput, { target: { value: "demo@empresa.com" } });
+    fireEvent.click(demoBtn);
+
+    await waitFor(() => {
+      expect(solicitarDemo).toHaveBeenCalledWith("demo@empresa.com");
     });
   });
 });

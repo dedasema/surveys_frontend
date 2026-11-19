@@ -1,16 +1,22 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Eye, EyeOff, Mail, Lock, User, Building, ArrowRight } from "lucide-react"
 import { toast } from "sonner"
 import { requestRegistration } from "../services/auth"
-import { useNavigate, Link } from "react-router-dom"
+import { useNavigate, useLocation, Link } from "react-router-dom"
 import BrandLogo from "./BrandLogo"
 import PublicNavbar from "./PublicNavbar"
 import PublicFooter from "./PublicFooter"
 
 const Register = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  // Leer email prellenado desde query params (?email=...) o react-router state
+  const queryEmail = new URLSearchParams(location.search).get("email") || location.state?.email || ""
+
   const [formData, setFormData] = useState({
     nombre: "",
-    email: "",
+    email: queryEmail,
     telefono: "",
     password: "",
   })
@@ -19,7 +25,12 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState({})
-  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (queryEmail && !formData.email) {
+      setFormData((prev) => ({ ...prev, email: queryEmail }))
+    }
+  }, [queryEmail])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target

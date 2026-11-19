@@ -1,6 +1,7 @@
 
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   FileText,
   Brain,
@@ -23,7 +24,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import PublicNavbar from "../components/PublicNavbar";
 import PublicFooter from "../components/PublicFooter";
-import { obtenerPlanesPublicos, enviarContacto } from "../services/api";
+import { obtenerPlanesPublicos, enviarContacto, solicitarDemo } from "../services/api";
 import { isTokenExpired, redirectBasedOnRole } from "../services/auth";
 import { LandingChatbotWidget } from "../features/landing-chatbot";
 import { toast } from "sonner";
@@ -77,8 +78,11 @@ const DEFAULT_PLANES = [
 ]
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+  const ctaEmailInputRef = useRef(null);
   const [email, setEmail] = useState("")
   const [planes, setPlanes] = useState(DEFAULT_PLANES)
+  const [isSubmittingDemo, setIsSubmittingDemo] = useState(false);
   const { isAuthenticated, user } = useAuth();
 
   const isUserLoggedIn =
@@ -165,12 +169,61 @@ const LandingPage = () => {
     }
   };
 
+  // Redirigir a registro con email prellenado
+  const handleStartRegistration = (userEmail) => {
+    if (isUserLoggedIn) {
+      navigate(targetDashboard);
+      return;
+    }
+    const cleanEmail = userEmail ? userEmail.trim() : "";
+    if (cleanEmail) {
+      navigate(`/register?email=${encodeURIComponent(cleanEmail)}`);
+    } else {
+      navigate("/register");
+    }
+  };
+
   const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle form submission
-    console.log("Email submitted:", email)
-    setEmail("")
-  }
+    e.preventDefault();
+    handleStartRegistration(email);
+  };
+
+  const handleComenzarGratis = (e) => {
+    e.preventDefault();
+    handleStartRegistration(email);
+  };
+
+  const handleSolicitarDemo = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const cleanEmail = email ? email.trim() : "";
+
+    if (!cleanEmail) {
+      toast.info("Por favor ingresa tu correo electrónico en el campo superior para solicitar la demo.");
+      if (ctaEmailInputRef.current) {
+        ctaEmailInputRef.current.focus();
+      }
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(cleanEmail)) {
+      toast.error("Por favor ingresa un correo electrónico válido.");
+      if (ctaEmailInputRef.current) {
+        ctaEmailInputRef.current.focus();
+      }
+      return;
+    }
+
+    setIsSubmittingDemo(true);
+    try {
+      await solicitarDemo(cleanEmail);
+      toast.success("¡Solicitud de demo enviada con éxito! Nos pondremos en contacto contigo a la brevedad.");
+      setEmail("");
+    } catch (err) {
+      toast.error(err.message || "Error al enviar la solicitud de demo. Por favor intenta de nuevo.");
+    } finally {
+      setIsSubmittingDemo(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col justify-between">
@@ -740,35 +793,39 @@ const LandingPage = () => {
           <form onSubmit={handleSubmit} className="max-w-md mx-auto mb-8">
             <div className="flex gap-4">
               <input
+                ref={ctaEmailInputRef}
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@empresa.com"
-                className="flex-1 px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500"
+                placeholder="tu@gmail.com"
+                className="flex-1 px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500 bg-white shadow-xs focus:ring-2 focus:ring-yellow-400 outline-none"
                 required
               />
               <button
                 type="submit"
-                className="bg-yellow-400 hover:bg-yellow-300 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors"
+                className="bg-yellow-400 hover:bg-yellow-300 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors cursor-pointer shadow-sm hover:shadow"
               >
                 Comenzar
               </button>
             </div>
           </form>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href={isUserLoggedIn ? targetDashboard : "/register"}
-              className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center shadow-md"
+            <button
+              type="button"
+              onClick={handleComenzarGratis}
+              className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center shadow-md cursor-pointer"
             >
               {isUserLoggedIn ? "Ir a mi dashboard" : "Comenzar prueba gratuita"}
               <ArrowRight className="ml-2 h-5 w-5" />
-            </a>
-            <a
-              href="#contacto"
-              className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors inline-flex items-center justify-center"
+            </button>
+            <button
+              type="button"
+              onClick={handleSolicitarDemo}
+              disabled={isSubmittingDemo}
+              className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors inline-flex items-center justify-center cursor-pointer disabled:opacity-50"
             >
-              Solicitar demo personalizada
-            </a>
+              {isSubmittingDemo ? "Enviando solicitud..." : "Solicitar demo personalizada"}
+            </button>
           </div>
         </div>
       </section>
