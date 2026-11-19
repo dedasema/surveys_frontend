@@ -114,6 +114,7 @@ function App() {
         <Route path="/encuestas/:token/adaptativa" element={<AdaptiveSurveyPage />} />
         <Route path="/email-sent" element={<EmailSentPage />} />
         <Route path="/verify-registration" element={<VerifyRegistrationPage />} />
+        <Route path="/verificar-registro" element={<VerifyRegistrationPage />} />
 
         {/* Ruta pública para cancelación y éxito */}
         <Route path="/dashboard-suscriptor/planes/cancel" element={<CancelPage />} />
