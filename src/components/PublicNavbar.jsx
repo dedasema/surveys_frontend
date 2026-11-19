@@ -85,6 +85,16 @@ export default function PublicNavbar() {
                 APK
               </span>
             </Link>
+            <Link
+              to="/manual"
+              className={`transition-colors font-medium text-sm ${
+                location.pathname.startsWith("/manual")
+                  ? "text-blue-600 font-semibold"
+                  : "text-gray-600 hover:text-blue-600"
+              }`}
+            >
+              Manual
+            </Link>
             {corporateUrl && (
               <a
                 href={corporateUrl}
@@ -184,6 +194,13 @@ export default function PublicNavbar() {
                 <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
                   APK
                 </span>
+              </Link>
+              <Link
+                to="/manual"
+                onClick={() => setIsMenuOpen(false)}
+                className="text-gray-600 hover:text-blue-600 font-medium"
+              >
+                Manual de Usuario
               </Link>
               {corporateUrl && (
                 <a

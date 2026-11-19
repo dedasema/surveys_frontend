@@ -22,6 +22,8 @@ import {
   QrCode,
   LifeBuoy,
   ExternalLink,
+  BookOpen,
+  Building2,
 } from "lucide-react"
 import { useAuth } from "../context/AuthContext";
 import PublicNavbar from "../components/PublicNavbar";
@@ -619,6 +621,143 @@ const LandingPage = () => {
                 <p className="text-sm text-gray-500">Líder de Experiencia de Cliente, InnovaTech</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* MANUAL DE USUARIO */}
+      <section id="manual" className="py-20 px-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white scroll-mt-20 relative overflow-hidden">
+        {/* Glow de fondo decorativo */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 border border-blue-400/30 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
+              <BookOpen className="h-4 w-4" />
+              Documentación y Guías Oficiales
+            </div>
+            <h2 className="text-3xl lg:text-5xl font-black mb-4 tracking-tight">
+              Manual de Usuario del Sistema
+            </h2>
+            <p className="text-lg text-slate-300 leading-relaxed">
+              Guía paso a paso ilustrada con capturas reales para aprender a dominar la creación de encuestas, recolección en terreno y analítica inteligente.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            {/* Tarjeta 1: Empresa / Suscriptor */}
+            <div className="bg-slate-800/80 border border-slate-700/80 hover:border-blue-500/50 p-8 rounded-3xl transition-all hover:shadow-2xl hover:shadow-blue-500/10 flex flex-col justify-between group">
+              <div className="space-y-6">
+                <div className="w-14 h-14 rounded-2xl bg-blue-600/20 text-blue-400 flex items-center justify-center border border-blue-500/30 group-hover:scale-110 transition-transform">
+                  <Building2 className="w-7 h-7" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-blue-400">Guía de Plataforma</span>
+                  <h3 className="text-2xl font-bold text-white mt-1">Para la Empresa (Suscriptor)</h3>
+                  <p className="text-slate-300 text-sm mt-2 leading-relaxed">
+                    Aprende a gestionar el panel web centralizado, configurar plantillas con IA, despachar campañas multicanal y supervisar operadores.
+                  </p>
+                </div>
+
+                <ul className="space-y-2.5 text-xs text-slate-300">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Diseño de plantillas: preguntas de voz, opción múltiple y papel</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Carga masiva de destinatarios desde archivos Excel (.xlsx)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Clusters semánticos con IA, detección de fraude y analítica</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Copiloto inteligente con RAG y herramientas MCP</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="pt-8">
+                <Link
+                  to="/manual"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md group-hover:shadow-lg"
+                >
+                  <span>Ver Manual de la Empresa</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Tarjeta 2: Operador de Campo */}
+            <div className="bg-slate-800/80 border border-slate-700/80 hover:border-emerald-500/50 p-8 rounded-3xl transition-all hover:shadow-2xl hover:shadow-emerald-500/10 flex flex-col justify-between group">
+              <div className="space-y-6">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 group-hover:scale-110 transition-transform">
+                  <Smartphone className="w-7 h-7" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Guía de Campo</span>
+                  <h3 className="text-2xl font-bold text-white mt-1">Para el Operador de Campo</h3>
+                  <p className="text-slate-300 text-sm mt-2 leading-relaxed">
+                    Instrucciones para instalar la app móvil Android, aplicar encuestas presenciales 100% offline y digitalizar formularios con OCR.
+                  </p>
+                </div>
+
+                <ul className="space-y-2.5 text-xs text-slate-300">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Instalación del APK oficial con verificación de hash SHA-256</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Modo 100% Offline con cola de sincronización automática</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Captura y transcripción de respuestas por voz con IA</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Digitalización fotográfica instantánea de hojas con OCR</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="pt-8">
+                <Link
+                  to="/manual"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md group-hover:shadow-lg"
+                >
+                  <span>Ver Manual del Operador</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Banner inferior con previsualización */}
+          <div className="bg-slate-800/40 border border-slate-700/60 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-blue-500/20 text-blue-400 rounded-2xl border border-blue-500/30 shrink-0">
+                <BookOpen className="w-8 h-8" />
+              </div>
+              <div>
+                <h4 className="text-lg font-bold text-white">¿Necesitas la documentación completa para tu equipo?</h4>
+                <p className="text-slate-400 text-xs sm:text-sm mt-1">
+                  Accede al manual interactivo, imprime copias físicas o descárgalo en PDF desde cualquier dispositivo.
+                </p>
+              </div>
+            </div>
+
+            <Link
+              to="/manual-usuario"
+              className="inline-flex items-center justify-center gap-2 bg-white text-slate-900 hover:bg-slate-100 px-6 py-3.5 rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg shrink-0 w-full sm:w-auto"
+            >
+              <span>Explorar Manual Completo</span>
+              <ArrowRight className="w-4 h-4 text-slate-900" />
+            </Link>
           </div>
         </div>
       </section>

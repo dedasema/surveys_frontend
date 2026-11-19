@@ -156,6 +156,11 @@ export default function PublicFooter() {
                 </Link>
               </li>
               <li>
+                <Link to="/manual" className="hover:text-blue-400 transition-colors">
+                  Manual de Usuario
+                </Link>
+              </li>
+              <li>
                 <Link to="/soporte#faqs" className="hover:text-blue-400 transition-colors">
                   Preguntas Frecuentes
                 </Link>

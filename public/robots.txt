@@ -1,3 +1,8 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /dashboard/
+Disallow: /dashboard-suscriptor/
+Disallow: /dashboard-operador/
+
+Sitemap: https://dgqv4314frd93.cloudfront.net/sitemap.xml
