@@ -26,6 +26,8 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env.REACT_APP_API_URL': JSON.stringify(apiUrl),
       'process.env.REACT_APP_SENTRY_DSN': JSON.stringify(env.REACT_APP_SENTRY_DSN || env.VITE_SENTRY_DSN || ''),
+      'process.env.VITE_CORPORATE_URL': JSON.stringify(env.VITE_CORPORATE_URL || ''),
+      'process.env.REACT_APP_CORPORATE_URL': JSON.stringify(env.VITE_CORPORATE_URL || ''),
       'process.env.PUBLIC_URL': JSON.stringify(''),
       'process.env.NODE_ENV': JSON.stringify(mode),
     },

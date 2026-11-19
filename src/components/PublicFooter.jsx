@@ -4,6 +4,10 @@ import { MapPin, Mail, Globe, Smartphone } from "lucide-react";
 import BrandLogo from "./BrandLogo";
 
 export default function PublicFooter() {
+  const corporateUrl =
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_CORPORATE_URL) ||
+    (typeof process !== "undefined" && (process.env?.VITE_CORPORATE_URL || process.env?.REACT_APP_CORPORATE_URL)) ||
+    "";
   return (
     <footer className="bg-gray-950 text-white pt-16 pb-12 px-4 border-t border-gray-800">
       <div className="max-w-7xl mx-auto">
@@ -96,23 +100,32 @@ export default function PublicFooter() {
 
           {/* Col 3: Empresa */}
           <div>
-            <h4 className="text-sm font-bold uppercase tracking-wider text-gray-200 mb-4">Desesoft</h4>
+            <h4 className="text-sm font-bold uppercase tracking-wider text-gray-200 mb-4">Empresa</h4>
             <ul className="space-y-2.5 text-sm text-gray-400">
-              <li>
-                <Link to="/sobre-nosotros" className="hover:text-blue-400 transition-colors">
-                  Sobre Nosotros
-                </Link>
-              </li>
-              <li>
-                <Link to="/sobre-nosotros#mision" className="hover:text-blue-400 transition-colors">
-                  Misión y Visión
-                </Link>
-              </li>
-              <li>
-                <Link to="/sobre-nosotros#ubicacion" className="hover:text-blue-400 transition-colors">
-                  Ubicación
-                </Link>
-              </li>
+              {corporateUrl && (
+                <li>
+                  <a
+                    href={corporateUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    Empresa
+                  </a>
+                </li>
+              )}
+              {corporateUrl && (
+                <li>
+                  <a
+                    href={corporateUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    Conoce a Desesoft
+                  </a>
+                </li>
+              )}
               <li>
                 <a href="/#contacto" className="hover:text-blue-400 transition-colors">
                   Contacto Comercial
@@ -151,8 +164,21 @@ export default function PublicFooter() {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800/80 pt-8 mt-4 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
-          <div className="flex items-center gap-1">
-            <span>&copy; {new Date().getFullYear()} Desesoft. Todos los derechos reservados. Creado en Santa Cruz, Bolivia.</span>
+          <div className="flex flex-col sm:flex-row items-center gap-1.5 text-center sm:text-left">
+            <span>&copy; {new Date().getFullYear()} SurveySaaS. Todos los derechos reservados.</span>
+            <span className="hidden sm:inline">&bull;</span>
+            {corporateUrl ? (
+              <a
+                href={corporateUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-blue-400 font-medium transition-colors"
+              >
+                Un producto de Desesoft S.R.L.
+              </a>
+            ) : (
+              <span className="text-gray-400 font-medium">Un producto de Desesoft S.R.L.</span>
+            )}
           </div>
 
           <div className="flex items-center space-x-6">

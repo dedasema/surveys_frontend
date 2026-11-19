@@ -8,6 +8,11 @@ import { isTokenExpired, redirectBasedOnRole } from "../services/auth";
 export default function PublicNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+
+  const corporateUrl =
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_CORPORATE_URL) ||
+    (typeof process !== "undefined" && (process.env?.VITE_CORPORATE_URL || process.env?.REACT_APP_CORPORATE_URL)) ||
+    "";
   const isHome = location.pathname === "/";
   const { isAuthenticated, user } = useAuth();
 
@@ -80,16 +85,16 @@ export default function PublicNavbar() {
                 APK
               </span>
             </Link>
-            <Link
-              to="/sobre-nosotros"
-              className={`transition-colors font-medium text-sm ${
-                location.pathname === "/sobre-nosotros"
-                  ? "text-blue-600 font-semibold"
-                  : "text-gray-600 hover:text-blue-600"
-              }`}
-            >
-              Desesoft
-            </Link>
+            {corporateUrl && (
+              <a
+                href={corporateUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors font-medium text-sm text-gray-600 hover:text-blue-600"
+              >
+                Empresa
+              </a>
+            )}
             <Link
               to="/soporte"
               className={`transition-colors font-medium text-sm ${
@@ -180,13 +185,17 @@ export default function PublicNavbar() {
                   APK
                 </span>
               </Link>
-              <Link
-                to="/sobre-nosotros"
-                onClick={() => setIsMenuOpen(false)}
-                className="text-gray-600 hover:text-blue-600 font-medium"
-              >
-                Sobre Desesoft
-              </Link>
+              {corporateUrl && (
+                <a
+                  href={corporateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-gray-600 hover:text-blue-600 font-medium"
+                >
+                  Empresa
+                </a>
+              )}
               <Link
                 to="/soporte"
                 onClick={() => setIsMenuOpen(false)}

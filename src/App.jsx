@@ -62,6 +62,29 @@ import { NotificationsPage } from './features/notifications';
 import { CopilotChatPage } from './features/copilot';
 import AdaptiveSurveyPage from './pages/AdaptiveSurveyPage';
 
+function CorporateRedirect() {
+  const corporateUrl =
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_CORPORATE_URL) ||
+    (typeof process !== "undefined" && (process.env?.VITE_CORPORATE_URL || process.env?.REACT_APP_CORPORATE_URL)) ||
+    "";
+
+  React.useEffect(() => {
+    if (corporateUrl && corporateUrl.trim() !== "") {
+      window.location.replace(corporateUrl);
+    }
+  }, [corporateUrl]);
+
+  if (!corporateUrl || corporateUrl.trim() === "") {
+    return <Navigate to="/" replace />;
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-600">
+      <p>Redirigiendo a Desesoft...</p>
+    </div>
+  );
+}
+
 function App() {
   return (
     <Router>
@@ -74,7 +97,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/sobre-nosotros" element={<AboutPage />} />
+        <Route path="/sobre-nosotros" element={<CorporateRedirect />} />
         <Route path="/about" element={<Navigate to="/sobre-nosotros" replace />} />
         <Route path="/soporte" element={<SupportPage />} />
         <Route path="/support" element={<Navigate to="/soporte" replace />} />
