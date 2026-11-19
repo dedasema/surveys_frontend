@@ -34,7 +34,7 @@ import { toast } from "sonner";
 const corporateUrl =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_CORPORATE_URL) ||
   (typeof process !== "undefined" && (process.env?.VITE_CORPORATE_URL || process.env?.REACT_APP_CORPORATE_URL)) ||
-  "";
+  "https://desesoft.vercel.app";
 
 const DEFAULT_PLANES = [
   {
