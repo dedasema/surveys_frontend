@@ -186,7 +186,7 @@ const LandingPage = () => {
     }
     const cleanEmail = userEmail ? userEmail.trim() : "";
     if (cleanEmail) {
-      navigate(`/register?email=${encodeURIComponent(cleanEmail)}`);
+      navigate(`/register?email=${encodeURIComponent(cleanEmail)}`, { state: { email: cleanEmail } });
     } else {
       navigate("/register");
     }
@@ -829,7 +829,7 @@ const LandingPage = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@gmail.com"
+                placeholder="tu@empresa.com"
                 className="flex-1 px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500 bg-white shadow-xs focus:ring-2 focus:ring-yellow-400 outline-none"
                 required
               />

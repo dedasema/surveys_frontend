@@ -7,6 +7,15 @@ import Register from "../components/register";
 import PublicFooter from "../components/PublicFooter";
 import * as authService from "../services/auth";
 
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
 // Mock AuthContext
 vi.mock("../context/AuthContext", () => ({
   useAuth: () => ({
@@ -137,8 +146,7 @@ describe("Landing Page & Registration Updates — Unit & UI Tests", () => {
     );
 
     const nameInput = screen.getByPlaceholderText("Tu nombre");
-    const emailInputs = screen.getAllByPlaceholderText("tu@gmail.com");
-    const contactEmailInput = emailInputs[emailInputs.length - 1];
+    const contactEmailInput = screen.getByPlaceholderText("tu@gmail.com");
     const empresaInput = screen.getByPlaceholderText("Nombre de tu empresa (opcional)");
     const mensajeInput = screen.getByPlaceholderText("Cuéntanos sobre tu proyecto...");
     const submitBtn = screen.getByRole("button", { name: /Enviar mensaje/i });
@@ -182,7 +190,7 @@ describe("Landing Page & Registration Updates — Unit & UI Tests", () => {
       </MemoryRouter>
     );
 
-    const ctaEmailInput = screen.getAllByPlaceholderText("tu@gmail.com")[0];
+    const ctaEmailInput = screen.getByPlaceholderText("tu@empresa.com");
     const demoBtn = screen.getByRole("button", { name: /Solicitar demo personalizada/i });
 
     fireEvent.change(ctaEmailInput, { target: { value: "demo@empresa.com" } });
@@ -190,6 +198,31 @@ describe("Landing Page & Registration Updates — Unit & UI Tests", () => {
 
     await waitFor(() => {
       expect(solicitarDemo).toHaveBeenCalledWith("demo@empresa.com");
+    });
+  });
+
+  it("both Comenzar and Comenzar prueba gratuita redirect to /register passing entered email", () => {
+    render(
+      <MemoryRouter>
+        <LandingPage />
+      </MemoryRouter>
+    );
+
+    const ctaEmailInput = screen.getByPlaceholderText("tu@empresa.com");
+    fireEvent.change(ctaEmailInput, { target: { value: "test@empresa.com" } });
+
+    const comenzarBtn = screen.getByRole("button", { name: /^Comenzar$/i });
+    fireEvent.click(comenzarBtn);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/register?email=test%40empresa.com", {
+      state: { email: "test@empresa.com" },
+    });
+
+    const comenzarGratisBtn = screen.getByRole("button", { name: /Comenzar prueba gratuita/i });
+    fireEvent.click(comenzarGratisBtn);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/register?email=test%40empresa.com", {
+      state: { email: "test@empresa.com" },
     });
   });
 });
