@@ -5,6 +5,10 @@ import App from './App';
 import { AuthProvider } from './context/AuthContext'; 
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import { setupOfflineListeners, syncData } from './services/offlineSync';
+import { initSentry } from './services/sentry';
+
+// Inicializar Sentry (observabilidad y monitoreo)
+initSentry();
 
 // Configurar detectores de eventos offline/online
 setupOfflineListeners();
