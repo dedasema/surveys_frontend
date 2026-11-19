@@ -57,7 +57,7 @@ const DEFAULT_PLANES = [
     permite_audio_voz: true,
     permite_papel: true,
     permite_ia_analisis: true,
-    caracteristicas: "50 Plantillas de Encuestas;5.000 Respuestas / mes;5 Operadores de Equipo;OCR Papel con IA;Audio / Voz con IA;Análisis Avanzado con IA",
+    caracteristicas: "50 Plantillas de Encuestas;5.000 Respuestas / mes;5 Operadores de Equipo;OCR Papel con IA;Grabación de Voz con Transcripción;Análisis Avanzado con IA",
   },
   {
     id: 3,
@@ -72,7 +72,7 @@ const DEFAULT_PLANES = [
     permite_audio_voz: true,
     permite_papel: true,
     permite_ia_analisis: true,
-    caracteristicas: "Plantillas Ilimitadas;Respuestas Ilimitadas;Operadores Ilimitados;OCR Papel y Asistente de Voz;API y Exportación Completa;Soporte Prioritario y SLA",
+    caracteristicas: "Plantillas Ilimitadas;Respuestas Ilimitadas;Operadores Ilimitados;OCR Papel y Grabación de Voz;API y Exportación Completa;Soporte Prioritario y SLA",
   },
 ]
 
@@ -278,7 +278,7 @@ const LandingPage = () => {
               <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-center">
                   <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  Asistente Inteligente por Voz e IA
+                  Encuestas por grabación de voz con transcripción automática
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
@@ -535,7 +535,7 @@ const LandingPage = () => {
                 ))}
               </div>
               <p className="text-gray-600 mb-6 italic">
-                "La integración multicanal es fantástica. Podemos llegar a nuestros clientes por correo, enlaces web y llamadas de voz automatizadas con IA desde un único panel."
+                "La integración multicanal es fantástica. Podemos llegar a nuestros clientes por correo, enlaces web y encuestas por grabación de voz con transcripción automática desde un único panel."
               </p>
               <div>
                 <h4 className="font-semibold text-gray-900">Carlos Rodríguez</h4>
@@ -679,7 +679,7 @@ const LandingPage = () => {
                                 isPopular ? "text-yellow-300" : "text-emerald-500"
                               }`}
                             />
-                            <span className={isPopular ? "text-blue-50" : "text-gray-700"}>Encuestas por Voz e IA</span>
+                            <span className={isPopular ? "text-blue-50" : "text-gray-700"}>Grabación de Voz con Transcripción</span>
                           </div>
                         )}
                         {plan.permite_papel && (

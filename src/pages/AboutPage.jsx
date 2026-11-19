@@ -55,7 +55,7 @@ export default function AboutPage() {
                   Fundada en Santa Cruz de la Sierra, <strong>Desesoft</strong> nació con la convicción de que las empresas de Bolivia y Latinoamérica merecen software empresarial de clase mundial, sin intermediarios costosos ni tecnologías obsoletas.
                 </p>
                 <p className="text-gray-600 leading-relaxed">
-                  Con <strong>SurveySaaS</strong>, resolvimos el desafío de integrar en una sola plataforma la recolección de campo física (encuestas en papel con reconocimiento OCR de ultra precisión), digital (correos y enlaces interactivos) y conversacional (llamadas telefónicas y asistentes de voz con IA).
+                  Con <strong>SurveySaaS</strong>, resolvimos el desafío de integrar en una sola plataforma la recolección de campo física (encuestas en papel con reconocimiento OCR de ultra precisión), digital (correos y enlaces interactivos) y conversacional (encuestas por grabación de voz con transcripción automática).
                 </p>
 
                 <div className="grid grid-cols-2 gap-4 pt-4">

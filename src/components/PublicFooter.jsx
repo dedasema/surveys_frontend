@@ -75,7 +75,7 @@ export default function PublicFooter() {
               </li>
               <li>
                 <a href="/#funcionalidades" className="hover:text-blue-400 transition-colors">
-                  Asistente de Voz e IA
+                  Grabación de Voz y Transcripción
                 </a>
               </li>
               <li>

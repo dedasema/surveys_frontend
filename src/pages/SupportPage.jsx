@@ -38,9 +38,9 @@ export default function SupportPage() {
         "Nuestra plataforma te permite imprimir formularios estandarizados con códigos de referencia. Una vez completados a mano por los encuestados, puedes escanearlos o tomarles una fotografía; nuestro motor de OCR con visión artificial extraerá automáticamente las respuestas y las centralizará en tu panel.",
     },
     {
-      pregunta: "¿Qué incluye el Asistente de Voz e Inteligencia Artificial?",
+      pregunta: "¿Qué incluye la grabación de respuestas por voz con transcripción automática?",
       respuesta:
-        "Permite realizar o recibir llamadas telefónicas automatizadas donde un agente de IA interactúa en lenguaje natural con el encuestado, transcribe las respuestas en tiempo real y realiza un análisis de sentimientos de cada interacción.",
+        "Permite registrar entrevistas y notas orales en campo o vía web. Nuestro motor de inteligencia artificial transcribe automáticamente las grabaciones a texto en tiempo real y realiza un análisis cualitativo y de sentimientos de cada respuesta.",
     },
     {
       pregunta: "¿Cuáles son los métodos de pago disponibles en Bolivia e internacionalmente?",
@@ -132,7 +132,7 @@ export default function SupportPage() {
               </div>
               <h3 className="font-bold text-lg mb-2">Canales y Distribución</h3>
               <p className="text-gray-600 text-sm mb-4">
-                Configuración de correos masivos, enlaces personalizados y asistentes de voz.
+                Configuración de correos masivos, enlaces personalizados y grabación de voz.
               </p>
               <a href="#faqs" className="text-blue-600 text-sm font-semibold hover:underline">
                 Ver preguntas sobre canales &rarr;
@@ -302,7 +302,7 @@ export default function SupportPage() {
                       >
                         <option value="tecnica">Soporte Técnico / Errores</option>
                         <option value="ocr">OCR y Digitalización de Papel</option>
-                        <option value="ia">Asistente de Voz e IA</option>
+                        <option value="ia">Grabación de Voz y Transcripción</option>
                         <option value="facturacion">Planes y Facturación</option>
                         <option value="otro">Consulta General</option>
                       </select>
