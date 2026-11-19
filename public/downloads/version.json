@@ -1,25 +1,26 @@
 {
   "version": "1.0.0",
-  "tamano": "52.3 MB",
-  "sha256": "e297c8c5d6b0f210083227cf85ebf318dcac8cb7b53da205450cf2d56e9482d0",
-  "fecha": "2026-11-18",
-  "novedades": [
-    "Soporte completo para Encuestas Adaptativas y Multimodales",
-    "Modo 100% Offline con cola de sincronización SQLite",
-    "Digitalización OCR de formularios en papel con cámara",
-    "Grabación y transcripción de respuestas por voz con IA"
-  ],
   "versionCode": 1,
+  "tamano_mb": 52.3,
+  "sizeFormatted": "52.3 MB",
+  "fileSizeBytes": 54815315,
+  "sha256": "b6fa6c2aab63ccd9050717ac112e34438a198520230f64c1a13dfe033a255940",
+  "fecha": "2026-11-19",
+  "updatedAt": "2026-11-19T10:00:00Z",
+  "android_minimo": "Android 7.0 (API 24)",
+  "minAndroidVersion": "7.0 (API 24)",
   "apkUrl": "/downloads/surveysaas.apk",
   "fileName": "surveysaas.apk",
-  "fileSizeBytes": 54815315,
-  "sizeFormatted": "52.3 MB",
-  "updatedAt": "2026-11-18T21:38:00Z",
-  "minAndroidVersion": "7.0 (API 24)",
+  "novedades": [
+    "Soporte completo para Encuestas Adaptativas y Multimodales",
+    "Modo 100% Offline con cola de sincronización SQLite y UUID estable",
+    "Digitalización OCR de formularios en papel con cámara",
+    "Grabación y transcripción de respuestas por voz con IA en WAV"
+  ],
   "features": [
     "Soporte completo para Encuestas Adaptativas y Multimodales",
-    "Modo 100% Offline con cola de sincronización SQLite",
+    "Modo 100% Offline con cola de sincronización SQLite y UUID estable",
     "Digitalización OCR de formularios en papel con cámara",
-    "Grabación y transcripción de respuestas por voz con IA"
+    "Grabación y transcripción de respuestas por voz con IA en WAV"
   ]
 }
