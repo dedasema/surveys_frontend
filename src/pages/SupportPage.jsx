@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   HelpCircle,
   Mail,
@@ -13,6 +14,7 @@ import {
   ChevronDown,
   ChevronUp,
   LifeBuoy,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import PublicNavbar from "../components/PublicNavbar";
@@ -20,6 +22,7 @@ import PublicFooter from "../components/PublicFooter";
 import { enviarContacto } from "../services/api";
 
 export default function SupportPage() {
+  const [searchParams] = useSearchParams();
   const [openFaq, setOpenFaq] = useState(null);
   const [formData, setFormData] = useState({
     nombre: "",
@@ -31,31 +34,48 @@ export default function SupportPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    const tipoParam = searchParams.get("tipo");
+    if (tipoParam) {
+      const normalized = tipoParam.toLowerCase();
+      if (normalized === "comercial") {
+        setFormData((prev) => ({ ...prev, categoria: "comercial" }));
+      } else if (normalized.includes("derecho") || normalized.includes("datos")) {
+        setFormData((prev) => ({ ...prev, categoria: "derechos_datos" }));
+      }
+    }
+  }, [searchParams]);
+
   const faqs = [
     {
-      pregunta: "¿Cómo funciona la digitalización de encuestas en papel con OCR?",
+      pregunta: "¿Cómo crear una campaña de encuestas?",
       respuesta:
-        "Nuestra plataforma te permite imprimir formularios estandarizados con códigos de referencia. Una vez completados a mano por los encuestados, puedes escanearlos o tomarles una fotografía; nuestro motor de OCR con visión artificial extraerá automáticamente las respuestas y las centralizará en tu panel.",
+        "Inicia sesión en tu cuenta de suscriptor, dirígete al módulo de Campañas y haz clic en 'Nueva Campaña'. Podrás elegir una plantilla prediseñada o crear preguntas desde cero (texto, opción múltiple, grabación de voz o cuestionario imprimible para OCR), definir las fechas de vigencia y seleccionar los canales de entrega.",
     },
     {
-      pregunta: "¿Qué incluye la grabación de respuestas por voz con transcripción automática?",
+      pregunta: "¿Cómo se envían las encuestas a los participantes?",
       respuesta:
-        "Permite registrar entrevistas y notas orales en campo o vía web. Nuestro motor de inteligencia artificial transcribe automáticamente las grabaciones a texto en tiempo real y realiza un análisis cualitativo y de sentimientos de cada respuesta.",
+        "SurveySaaS permite distribución multicanal: puedes enviar enlaces directos por correo electrónico a tus listas de destinatarios, compartir un enlace público web o QR para responder desde cualquier navegador, o imprimir hojas físicas con códigos QR para captura en campo mediante nuestra app móvil.",
     },
     {
-      pregunta: "¿Cuáles son los métodos de pago disponibles en Bolivia e internacionalmente?",
+      pregunta: "¿Cómo funciona el plan gratuito?",
       respuesta:
-        "Aceptamos transferencias bancarias locales en Bolivia, pagos QR y tarjetas de crédito/débito internacionales mediante pasarelas de pago seguras con facturación disponible por parte de Desesoft SRL.",
+        "El plan Gratuito te permite comenzar sin costo ni tarjeta de crédito. Incluye hasta 2 campañas activas, 100 respuestas o entregas mensuales, 1 operador de equipo y acceso a recolección por correo y web. Es ideal para probar la plataforma y realizar proyectos pequeños.",
     },
     {
-      pregunta: "¿Puedo cambiar de plan o cancelar en cualquier momento?",
+      pregunta: "¿Cómo descargar la aplicación móvil offline?",
       respuesta:
-        "Sí. Puedes actualizar tu plan (Upgrade) o cancelar tu suscripción en cualquier momento desde tu panel de suscriptor sin penalidades ni contratos forzosos.",
+        "Puedes acceder a la sección /descargar-app desde tu dispositivo Android o escanear el código QR que se encuentra en esa página para descargar directamente el archivo APK de SurveySaaS Móvil. La app permite recolectar respuestas sin conexión a internet y sincronizarlas automáticamente cuando recuperes señal.",
     },
     {
-      pregunta: "¿Qué nivel de seguridad y privacidad tienen los datos de mis encuestas?",
+      pregunta: "¿Cómo ejercer mis derechos sobre mis datos personales?",
       respuesta:
-        "Toda la información se transmite bajo protocolos encriptados TLS/SSL y se almacena en bases de datos con aislamiento por organización. Desesoft no comercializa ni comparte tus datos ni los de tus encuestados bajo ninguna circunstancia.",
+        "Puedes ejercer tus derechos de acceso, rectificación, objeción y eliminación (ARCO) completando el formulario de esta misma página seleccionando el tipo 'Derechos sobre mis datos' o escribiendo directamente a nuestro correo oficial. Atendemos todas las solicitudes en un plazo máximo de 10 días hábiles.",
+    },
+    {
+      pregunta: "¿Cómo contactar al equipo de soporte técnico?",
+      respuesta:
+        "Puedes enviar un ticket usando el formulario de esta página seleccionando 'Soporte técnico', o escribir directamente a soporte@desesoft.com. Nuestro equipo en Santa Cruz de la Sierra (Bolivia) atiende solicitudes de lunes a viernes de 9:00 a 18:00 y monitorea incidencias críticas de forma continua.",
     },
   ];
 
@@ -292,19 +312,17 @@ export default function SupportPage() {
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                        Categoría
+                        Tipo de Solicitud *
                       </label>
                       <select
                         name="categoria"
                         value={formData.categoria}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all outline-none"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all outline-none font-medium"
                       >
-                        <option value="tecnica">Soporte Técnico / Errores</option>
-                        <option value="ocr">OCR y Digitalización de Papel</option>
-                        <option value="ia">Grabación de Voz y Transcripción</option>
-                        <option value="facturacion">Planes y Facturación</option>
-                        <option value="otro">Consulta General</option>
+                        <option value="tecnica">Soporte técnico</option>
+                        <option value="comercial">Comercial</option>
+                        <option value="derechos_datos">Derechos sobre mis datos</option>
                       </select>
                     </div>
                     <div>
@@ -321,6 +339,15 @@ export default function SupportPage() {
                       />
                     </div>
                   </div>
+
+                  {formData.categoria === "derechos_datos" && (
+                    <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-sm flex items-start gap-3 shadow-xs">
+                      <ShieldCheck className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <p className="leading-relaxed">
+                        Atendemos solicitudes de acceso, rectificación, objeción y eliminación de tus datos en un plazo máximo de 10 días hábiles.
+                      </p>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
