@@ -123,7 +123,6 @@ const DashboardSuscriptorLayout = ({ children }) => {
       title: "Equipo",
       items: [
         { title: "Operadores", url: "/dashboard-suscriptor/operadores", icon: UserCog },
-        { title: "Roles y Permisos", url: "/dashboard-suscriptor/roles", icon: ShieldCheck },
       ],
     },
     {

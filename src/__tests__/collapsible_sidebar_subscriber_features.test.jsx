@@ -117,7 +117,7 @@ describe('Universal Collapsible Sidebar (AppLayout)', () => {
     expect(localStorage.getItem('sidebar_collapsed')).toBe('false');
   });
 
-  it('contains "Roles y Permisos" and "Auditoría" in suscriptor navigation', () => {
+  it('contains "Operadores" and "Auditoría" in suscriptor navigation without "Roles y Permisos"', () => {
     render(
       <MemoryRouter initialEntries={['/dashboard-suscriptor/dashboard']}>
         <AppLayout role="suscriptor">
@@ -126,7 +126,8 @@ describe('Universal Collapsible Sidebar (AppLayout)', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Roles y Permisos')).toBeInTheDocument();
+    expect(screen.queryByText('Roles y Permisos')).not.toBeInTheDocument();
+    expect(screen.getByText('Operadores')).toBeInTheDocument();
     expect(screen.getByText('Auditoría')).toBeInTheDocument();
   });
 });

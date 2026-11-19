@@ -219,12 +219,6 @@ const ROLE_STRATEGIES = {
             icon: UserCog,
             isActive: pathname.includes("/dashboard-suscriptor/operadores"),
           },
-          {
-            title: "Roles y Permisos",
-            url: "/dashboard-suscriptor/roles",
-            icon: ShieldCheck,
-            isActive: pathname.includes("/dashboard-suscriptor/roles"),
-          },
         ],
       },
       {

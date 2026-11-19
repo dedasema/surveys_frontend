@@ -81,7 +81,7 @@ export const FALLBACK_NOTIFICATIONS: Notification[] = [
   {
     id: 'system_security_check',
     titulo: 'Recomendación de Seguridad',
-    mensaje: 'Recuerda auditar los permisos asignados a tus operadores en la pestaña de Equipo > Roles y Permisos.',
+    mensaje: 'Recuerda auditar las cuentas asignadas a tus operadores en la pestaña de Equipo > Operadores.',
     tipo: 'warning',
     activo: true,
     creado_en: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
