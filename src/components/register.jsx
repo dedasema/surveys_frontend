@@ -263,7 +263,7 @@ const Register = () => {
                     <label htmlFor="terms" className="font-medium text-gray-700 cursor-pointer">
                       Acepto los{" "}
                       <Link
-                        to="/terms"
+                        to="/terminos"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-500 underline font-semibold"
@@ -293,7 +293,7 @@ const Register = () => {
                     <label htmlFor="privacy" className="font-medium text-gray-700 cursor-pointer">
                       Acepto la{" "}
                       <Link
-                        to="/privacy"
+                        to="/privacidad"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-500 underline font-semibold"
